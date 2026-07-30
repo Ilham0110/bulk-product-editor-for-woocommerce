@@ -1,0 +1,107 @@
+# =============================================================================
+# WooCommerce Bulk Product Editor
+#
+# Repo ini hanya berisi folder plugin, bukan seluruh instalasi WordPress.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Backup manual — JANGAN pernah masuk lagi
+#
+# Pola ini yang dulu menghasilkan 47 file backup di folder plugin. File seperti
+# `wc-bulk-editor.php.bak-before-refactor` tidak berekstensi .php, sehingga web
+# server menyajikannya sebagai teks biasa: siapa pun bisa membaca source code
+# lewat URL tanpa login. Gunakan branch atau commit, bukan file salinan.
+# -----------------------------------------------------------------------------
+*.bak
+*.bak-*
+*.backup
+*.old
+*.orig
+*.save
+*.pre-*
+*~
+_css-backup/
+_backup/
+_old/
+
+# -----------------------------------------------------------------------------
+# Rahasia dan konfigurasi lokal
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+auth.json
+secrets.php
+wp-config-local.php
+
+# -----------------------------------------------------------------------------
+# Dependency (kalau nanti dipakai — saat ini plugin tanpa dependency)
+# -----------------------------------------------------------------------------
+/vendor/
+/node_modules/
+composer.lock
+package-lock.json
+
+# -----------------------------------------------------------------------------
+# Hasil build & artefak rilis
+# -----------------------------------------------------------------------------
+/build/
+/dist/
+/release/
+*.zip
+*.tar.gz
+
+# -----------------------------------------------------------------------------
+# Cache tooling
+# -----------------------------------------------------------------------------
+.phpunit.result.cache
+.phpcs-cache
+.php-cs-fixer.cache
+/.cache/
+
+# -----------------------------------------------------------------------------
+# Editor & IDE
+# -----------------------------------------------------------------------------
+.vscode/
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+*.swp
+*.swo
+
+# -----------------------------------------------------------------------------
+# Sistem operasi
+# -----------------------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+._*
+
+# -----------------------------------------------------------------------------
+# Log & debug
+# -----------------------------------------------------------------------------
+*.log
+debug.log
+error_log
+/logs/
+
+# -----------------------------------------------------------------------------
+# Terjemahan
+#
+# .po dan .pot disimpan (sumber terjemahan, perlu di-review saat berubah).
+# .mo hasil kompilasi — regenerasi dari .po, tidak perlu masuk repo.
+# -----------------------------------------------------------------------------
+*.mo
+
+# -----------------------------------------------------------------------------
+# Khusus lingkungan Laragon
+# -----------------------------------------------------------------------------
+.htaccess.bak
+*.lock
+!composer.lock.example

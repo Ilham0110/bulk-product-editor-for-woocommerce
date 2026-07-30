@@ -1,0 +1,98 @@
+# WooCommerce Bulk Product Editor
+
+Editor produk WooCommerce ala spreadsheet di admin. Inline edit, bulk action,
+saved views, export CSV.
+
+- **Versi:** 3.11.0 · **PHP:** 8.3+ · **WooCommerce:** wajib aktif (plugin
+  langsung `return` kalau tidak)
+- **Text domain:** `wc-bulk-editor`
+- **Prefix:** fungsi/AJAX `wc_bulk_`, konstanta `WCBULK_`, user meta `_wcbulk_`
+- **Entry point:** `wc-bulk-editor.php` — satu class `WC_Bulk_Product_Editor`
+  (singleton, tanpa namespace)
+
+## Peta File
+
+| File | Isi |
+|---|---|
+| `wc-bulk-editor.php` | Semua PHP: bootstrap, menu, enqueue, 14 handler AJAX, CRUD produk |
+| `views/admin-page.php` | Markup halaman admin (di-include dari `render_admin_page()`) |
+| `assets/admin.js` | Seluruh UI: render tabel, edit, modal, dirty-tracking |
+| `assets/admin.css` | Styling admin |
+
+Tidak ada composer, npm, build step, atau autoloader. Edit file langsung.
+
+## Aturan Wajib
+
+### Struktur & gaya
+- `declare(strict_types=1);` di setiap file PHP. Semua method wajib punya
+  type hint parameter dan return type.
+- Ikuti gaya yang sudah ada: 4 spasi, brace class/method di baris baru,
+  array multi-baris pakai trailing comma, `private` kecuali memang dipanggil
+  WordPress sebagai callback.
+- Daftarkan handler AJAX baru di `ajax_actions()` — jangan `add_action('wp_ajax_…')`
+  terpisah.
+- Nilai konfigurasi baru masuk ke `const` di dalam class, bukan variabel global
+  atau `define()` baru.
+- Kolom baru wajib didaftarkan di `const COLUMNS` **dan** dipetakan ke salah satu
+  dari `SCALAR_SETTERS` / `BOOL_SETTERS` / `ENUM_SETTERS`, atau diberi handler
+  `set_*()` khusus di `apply_fields()`.
+
+### Keamanan — tidak bisa ditawar
+- Setiap handler AJAX **wajib** memanggil `$this->guard()` di baris pertama
+  (nonce + `manage_woocommerce`). Aksi yang lebih berbahaya perlu cek tambahan:
+  `current_user_can('delete_post', $id)`, `manage_product_terms`, dst.
+- Semua output di-escape saat dicetak: `esc_html()`, `esc_attr()`, `esc_url()`,
+  `wp_kses_post()`. Di JS, jangan pernah `innerHTML` dengan data produk mentah.
+- Semua input lewat `$this->post_string()` / `$this->post_ids()` atau
+  `sanitize_*()`. Jangan sentuh `$_POST` langsung.
+- Query DB kustom wajib `$wpdb->prepare()`. Saat ini plugin tidak punya query
+  mentah — jangan tambahkan tanpa alasan kuat.
+
+### WooCommerce
+- Produk **selalu** lewat CRUD: `wc_get_product()`, `$product->set_*()`,
+  `$product->save()`. **Dilarang** `update_post_meta()` untuk field produk.
+- Order (kalau nanti dipakai): `wc_get_order()` saja — HPOS aktif, jangan
+  `get_post_meta()` / `WP_Query`.
+- Ambil daftar produk pakai `wc_get_products()` / `WC_Product_Query`, bukan
+  `WP_Query` langsung.
+- Batas `MAX_PER_PAGE = 100` — jangan dinaikkan tanpa mengukur dampaknya.
+
+### i18n
+- Semua string yang dilihat user dibungkus `__()` dengan text domain literal
+  `'wc-bulk-editor'`.
+- String untuk JS ditaruh di `i18n_strings()`, dipakai lewat
+  `WCBulkEditor.i18n.<key>`. Jangan hardcode teks Inggris di `admin.js`.
+
+### Larangan
+- Jangan buat file `.bak-before-*` lagi. Sudah ada ~40 file backup manual di
+  repo ini dan itu masalah: `admin-page.php.bak-before-align` disajikan server
+  sebagai teks biasa → source code bocor lewat URL. Gunakan git.
+- Jangan ubah `assets/_css-backup/**` atau file `*.bak-*` mana pun.
+- Jangan tambah dependency (composer/npm) tanpa persetujuan eksplisit.
+
+## Uji Manual (belum ada test otomatis)
+
+Setelah mengubah kode, cek di `http://larisdigital.test/wp-admin/`
+→ WooCommerce → Bulk Editor:
+
+1. Tabel tampil tanpa AJAX pertama (data di-preload lewat `wp_localize_script`).
+2. Edit satu sel → indikator dirty muncul → Save → nilai persist setelah reload.
+3. Buka Console — nol error JS.
+4. Aktifkan Query Monitor: tidak ada PHP notice/deprecated, tidak ada lonjakan
+   jumlah query saat paginasi.
+5. Bulk action (trash/duplicate) dan Export CSV masih jalan.
+
+Kalau menambah field yang bisa diedit, uji juga sebagai user role `shop_manager`,
+bukan hanya administrator.
+
+## Cara Kerja Data (ringkas)
+
+Halaman dimuat → `enqueue_assets()` mengirim produk halaman pertama, kolom user,
+kategori, tax/shipping class, dan saved views sekaligus lewat
+`wp_localize_script('WCBulkEditor', …)`. Paint pertama karena itu tidak butuh
+AJAX sama sekali. Interaksi berikutnya baru memanggil `admin-ajax.php`. Setiap
+round-trip admin-ajax = satu bootstrap WordPress penuh, jadi **kalau data sudah
+bisa dikirim saat enqueue, kirim di situ.**
+
+Preferensi per-user disimpan di user meta: `_wcbulk_columns` (kolom terpilih)
+dan `_wcbulk_views` (saved views).
