@@ -111,6 +111,7 @@ Baca file berikut saat relevan — jangan dibaca semua sekaligus:
 | Handler AJAX baru, capability, escaping, sanitasi | `docs/SECURITY.md` |
 | Menyentuh produk/order, `wc_get_products()`, HPOS | `docs/WOOCOMMERCE.md` |
 | Menulis kode baru (gaya PHP/JS/CSS) | `docs/CODING-STANDARDS.md` |
+| Menu, notice, penargetan layar, form admin | `docs/ADMIN-UI.md` |
 | Aktivasi, uninstall, migrasi versi | `docs/LIFECYCLE.md` |
 | String baru, terjemahan, `i18n_strings()` | `docs/I18N.md` |
 | Menambah pengaturan tingkat-situs | `docs/SETTINGS-API.md` |
