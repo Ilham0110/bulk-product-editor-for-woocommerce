@@ -112,6 +112,7 @@ Baca file berikut saat relevan — jangan dibaca semua sekaligus:
 | Audit kerentanan: XSS, SQLi, CSRF, otorisasi, upload | `docs/THREAT-MODEL.md` |
 | Menyentuh produk/order, `wc_get_products()`, HPOS | `docs/WOOCOMMERCE.md` |
 | Menulis kode baru (gaya PHP/JS/CSS) | `docs/CODING-STANDARDS.md` |
+| Menguji perubahan, merencanakan test | `docs/TESTING.md` |
 | Query, caching, aset, cron, mengukur performa | `docs/PERFORMANCE.md` |
 | Menu, notice, penargetan layar, form admin | `docs/ADMIN-UI.md` |
 | Aktivasi, uninstall, migrasi versi | `docs/LIFECYCLE.md` |
