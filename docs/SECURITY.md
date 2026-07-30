@@ -307,10 +307,10 @@ langsung ke baris.
 
 Temuan dari pembacaan kode. Belum diperbaiki, dicatat agar tidak terlupa.
 
-### 9.1 File backup dapat diakses publik — **prioritas tertinggi**
+### 9.1 File backup dapat diakses publik — **sudah diatasi**
 
-Ada sekitar 40 file berpola `*.bak-before-*` dan folder `assets/_css-backup/`
-di dalam plugin ini. Karena tidak berekstensi `.php`, Apache dan Nginx
+Folder plugin dulu berisi 47 file berpola `*.bak-before-*` dan folder
+`assets/_css-backup/`. Karena tidak berekstensi `.php`, web server
 menyajikannya sebagai **teks biasa**:
 
 ```
@@ -321,17 +321,19 @@ Siapa pun tanpa login bisa membaca seluruh source code — termasuk nama nonce,
 daftar 14 endpoint AJAX, nama meta key, dan logika validasi. Scanner otomatis
 memang mencari pola `.bak`, `.old`, `.save`, `~`.
 
-Tindakan: hapus file-file itu, gunakan git sebagai gantinya. Sampai terhapus,
-mitigasi sementara di `.htaccess` plugin:
+**Tindakan yang diambil (2026-07-30):** seluruh 47 file dipindahkan ke
+`C:\laragon\backup-wcbulk\2026-07-30\` — di luar webroot, sehingga tidak lagi
+dapat diakses lewat URL. File tetap ada di disk kalau suatu saat dibutuhkan.
+Struktur foldernya dipertahankan.
 
-```apache
-<FilesMatch "\.(bak|old|save|orig|swp)[^/]*$">
-    Require all denied
-</FilesMatch>
-```
+**Pencegahan:** `.gitignore` memblokir pola `*.bak`, `*.bak-*`, `*.old`,
+`*.save`, `*.orig`, `*~`, dan `_css-backup/`. Gunakan git untuk menyimpan
+versi, bukan file salinan.
 
-Catatan: `.htaccess` **tidak berlaku di Nginx**. Kalau produksi memakai Nginx,
-satu-satunya solusi adalah menghapus file tersebut.
+Catatan untuk produksi: kalau deployment menyalin folder plugin apa adanya,
+pastikan file backup tidak ikut terbawa. `.htaccess` bisa dipakai sebagai
+lapisan tambahan di Apache, tapi **tidak berlaku di Nginx** — memindahkan atau
+menghapus file adalah satu-satunya solusi yang berlaku di semua server.
 
 ### 9.2 XSS pada dropdown tax class & shipping class — **sudah diperbaiki**
 

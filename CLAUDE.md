@@ -66,10 +66,10 @@ Tidak ada composer, npm, build step, atau autoloader. Edit file langsung.
 
 ### Larangan
 - Jangan buat file `.bak-before-*` lagi. Folder ini sudah punya git — pakai
-  commit atau branch. Ada 47 file backup lama yang sudah di-ignore; file seperti
+  commit atau branch. 47 file backup lama sudah dipindah ke luar webroot
+  (`C:\laragon\backup-wcbulk\`) karena file seperti
   `admin-page.php.bak-before-align` disajikan server sebagai teks biasa,
   sehingga source code bocor lewat URL.
-- Jangan ubah `assets/_css-backup/**` atau file `*.bak-*` mana pun.
 - Jangan tambah dependency (composer/npm) tanpa persetujuan eksplisit.
 - Jangan mengubah keputusan yang tercatat di `docs/adr/` tanpa membaca ADR-nya
   lebih dulu (monolit satu file, ES5 tanpa build step, preload bukan AJAX).

@@ -114,14 +114,16 @@ per-produk; pembuatan kategori memerlukan `manage_product_terms`. Semua
 perubahan produk ditulis lewat WooCommerce CRUD API, bukan `update_post_meta()`
 langsung, sehingga hook dan cache WooCommerce tetap konsisten.
 
-## Masalah yang Diketahui
+## Riwayat Pembersihan
 
-Folder ini masih menyimpan sekitar 40 file backup manual berpola
-`*.bak-before-*` dan `assets/_css-backup/`. **File-file ini sebaiknya dihapus
-sebelum plugin dipasang di server produksi.** Karena tidak berekstensi `.php`,
-web server menyajikannya sebagai teks biasa — siapa pun yang menebak URL-nya
-bisa membaca seluruh source code, termasuk nama nonce dan struktur endpoint.
-Gunakan git sebagai gantinya.
+Folder ini dulu menyimpan 47 file backup manual berpola `*.bak-before-*` dan
+`assets/_css-backup/`. Karena tidak berekstensi `.php`, web server menyajikannya
+sebagai teks biasa — siapa pun yang menebak URL-nya bisa membaca seluruh source
+code.
+
+Pada 2026-07-30 file-file itu dipindahkan ke `C:\laragon\backup-wcbulk\` (di
+luar webroot) dan plugin ini mulai memakai git. `.gitignore` kini memblokir pola
+tersebut agar tidak terulang.
 
 ## Lisensi
 
