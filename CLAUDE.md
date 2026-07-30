@@ -117,6 +117,7 @@ Baca file berikut saat relevan — jangan dibaca semua sekaligus:
 | Aktivasi, uninstall, migrasi versi | `docs/LIFECYCLE.md` |
 | String baru, terjemahan, `i18n_strings()` | `docs/I18N.md` |
 | Menambah pengaturan tingkat-situs | `docs/SETTINGS-API.md` |
+| Membuat REST route, schema, permission callback | `docs/REST-API.md` |
 | Menyiapkan rilis publik | `docs/WORDPRESS-ORG.md` |
 | Mempertimbangkan perubahan arsitektur | `docs/adr/` |
 
