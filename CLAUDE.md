@@ -109,6 +109,7 @@ Baca file berikut saat relevan — jangan dibaca semua sekaligus:
 |---|---|
 | Menambah field/kolom, mengubah alur data, menavigasi `admin.js` | `docs/ARCHITECTURE.md` |
 | Handler AJAX baru, capability, escaping, sanitasi | `docs/SECURITY.md` |
+| Audit kerentanan: XSS, SQLi, CSRF, otorisasi, upload | `docs/THREAT-MODEL.md` |
 | Menyentuh produk/order, `wc_get_products()`, HPOS | `docs/WOOCOMMERCE.md` |
 | Menulis kode baru (gaya PHP/JS/CSS) | `docs/CODING-STANDARDS.md` |
 | Query, caching, aset, cron, mengukur performa | `docs/PERFORMANCE.md` |
