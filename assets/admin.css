@@ -23,7 +23,19 @@
    ========================================================================== */
 
 /* Custom properties */
-:root{--wcb-primary:#7F54B3;--wcb-primary-hover:#6B3FA0;--wcb-primary-light:#F7F1FB;--wcb-success:#007017;--wcb-success-bg:#EDFAEF;--wcb-danger:#B32D2E;--wcb-danger-bg:#FBEAEA;--wcb-warning:#996800;--wcb-warning-bg:#FEF8EE;--wcb-changed-bg:#FFF9E6;--wcb-changed-border:#F0C33C;--wcb-modified-bg:#FFFBF0;--wcb-modified-border:#E5C452;--wcb-gray-50:#F9F9F9;--wcb-gray-100:#F0F0F1;--wcb-gray-200:#DCDCDE;--wcb-gray-300:#C3C4C7;--wcb-gray-500:#8C8F94;--wcb-gray-700:#50575E;--wcb-gray-900:#1D2327;--wcb-radius:6px;--wcb-shadow:0 1px 3px rgba(0,0,0,.06);--wcb-trans:150ms ease;}
+:root{--wcb-primary:#7F54B3;--wcb-primary-hover:#6B3FA0;--wcb-primary-light:#F7F1FB;--wcb-success:#007017;--wcb-success-bg:#EDFAEF;--wcb-danger:#B32D2E;--wcb-danger-bg:#FBEAEA;--wcb-warning:#996800;--wcb-warning-bg:#FEF8EE;--wcb-changed-bg:#FFF9E6;--wcb-changed-border:#F0C33C;--wcb-modified-bg:#FFFBF0;--wcb-modified-border:#E5C452;--wcb-gray-50:#F9F9F9;--wcb-gray-100:#F0F0F1;--wcb-gray-200:#DCDCDE;--wcb-gray-300:#C3C4C7;--wcb-gray-500:#8C8F94;--wcb-gray-700:#50575E;--wcb-gray-900:#1D2327;--wcb-radius:6px;--wcb-shadow:0 1px 3px rgba(0,0,0,.06);--wcb-trans:150ms ease;
+/* Dropdown chevron. Drawn by this stylesheet rather than the browser because
+   several selects need a background-colour of their own, and the `background`
+   shorthand silently drops the native arrow along with it. Any rule that sets
+   a select's colour must use background-color, never the shorthand. */
+--wcb-select-arrow:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2350575E'%3E%3Cpath d='M5 6l5 5 5-5 2 1-7 7-7-7 2-1z'/%3E%3C/svg%3E");}
+
+/* Every select the plugin renders, in one place. Individual rules below adjust
+   size and colour only.
+   Both roots are listed because the modals sit outside .wc-bulk-editor-wrap —
+   they are appended at the end of the template, not inside the page wrapper. */
+.wc-bulk-editor-wrap select,.wc-bulk-modal select{background-image:var(--wcb-select-arrow);background-repeat:no-repeat;background-position:right 6px center;background-size:14px 14px;-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:24px;}
+.wc-bulk-editor-wrap select::-ms-expand,.wc-bulk-modal select::-ms-expand{display:none;}
 
 /* ==========================================================================
    BASE & WORDPRESS OVERRIDES
@@ -65,7 +77,10 @@
 .wc-bulk-filter-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
 .wc-bulk-filter-item{display:flex;flex-direction:column;gap:4px;}
 .wc-bulk-filter-item label{font-size:11px;font-weight:600;color:var(--wcb-gray-700);text-transform:uppercase;letter-spacing:.3px;}
-.wc-bulk-filter-item select,.wc-bulk-filter-item input[type="text"]{width:100%;height:36px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 8px;font-size:13px;color:var(--wcb-gray-900);background:#fff;transition:border-color var(--wcb-trans),box-shadow var(--wcb-trans);}
+.wc-bulk-filter-item select,.wc-bulk-filter-item input[type="text"]{width:100%;height:36px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 8px;font-size:13px;color:var(--wcb-gray-900);background-color:#fff;transition:border-color var(--wcb-trans),box-shadow var(--wcb-trans);}
+/* Restore the room the shared select rule reserves for the chevron; the
+   shorthand padding above resets it. */
+.wc-bulk-filter-item select{padding-right:24px;}
 .wc-bulk-filter-item select:focus,.wc-bulk-filter-item input[type="text"]:focus{border-color:var(--wcb-primary);box-shadow:0 0 0 1.5px var(--wcb-primary-light);outline:none;}
 .wc-bulk-input-icon{position:relative;}
 .wc-bulk-input-icon .dashicons{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--wcb-gray-500);font-size:18px;width:18px;height:18px;}
@@ -94,7 +109,7 @@
 .wc-bulk-quick-item{display:flex;flex-direction:column;gap:4px;}
 .wc-bulk-quick-item>label{font-size:11px;font-weight:600;color:var(--wcb-gray-700);text-transform:uppercase;}
 .wc-bulk-quick-input-group{display:flex;gap:4px;}
-.wc-bulk-quick-item select{height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 6px;font-size:12px;min-width:60px;}
+.wc-bulk-quick-item select{height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 22px 0 6px;font-size:12px;min-width:60px;}
 .wc-bulk-quick-item input[type="number"]{width:80px;height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 6px;font-size:13px;}
 .wc-bulk-quick-item select:focus,.wc-bulk-quick-item input:focus{border-color:var(--wcb-primary);box-shadow:0 0 0 1.5px var(--wcb-primary-light);outline:none;}
 .wc-bulk-quick-item input:disabled{background:var(--wcb-gray-50);cursor:not-allowed;opacity:.6;}
@@ -112,7 +127,7 @@
 
 /* Bulk actions bar */
 .wc-bulk-actions-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--wcb-gray-50);border:1px solid var(--wcb-gray-200);border-radius:var(--wcb-radius);margin-bottom:12px;}
-.wc-bulk-actions-bar select{height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 8px;font-size:13px;}
+.wc-bulk-actions-bar select{height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 24px 0 8px;font-size:13px;}
 .wc-bulk-selected-count{font-size:13px;color:var(--wcb-gray-700);font-weight:500;margin-left:auto;}
 
 /* Table header bar */
@@ -120,7 +135,7 @@
 .wc-bulk-results-count{font-size:13px;color:var(--wcb-gray-700);}
 .wc-bulk-results-count:before{content:'(';}.wc-bulk-results-count:after{content:')';}
 .wc-bulk-table-header-right{display:flex;align-items:center;gap:8px;}
-.wc-bulk-per-page{height:30px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 6px;font-size:13px;}
+.wc-bulk-per-page{height:30px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 22px 0 6px;font-size:13px;}
 
 /* ==========================================================================
    TABLE
@@ -281,13 +296,9 @@
     box-shadow:0 0 0 2px var(--wcb-primary-light)!important;
 }
 
-/* Inline selects
-   The chevron is drawn here rather than left to the browser: these selects
-   need a transparent resting background, and any `background` shorthand wipes
-   out the native arrow along with the colour. Colour and image are therefore
-   kept on separate properties throughout — never combine them back into the
-   shorthand. */
-.wc-bulk-inline-select{display:inline-block;width:100%;height:34px;padding:0 22px 0 4px;border:1px solid transparent;border-radius:4px;font-size:12px;color:var(--wcb-gray-900);background-color:transparent;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2350575E'%3E%3Cpath d='M5 6l5 5 5-5 2 1-7 7-7-7 2-1z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;background-size:14px 14px;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;transition:border-color var(--wcb-trans),background-color var(--wcb-trans),box-shadow var(--wcb-trans);margin:0;vertical-align:middle;box-sizing:border-box;line-height:34px;overflow:hidden;text-overflow:ellipsis;}
+/* Inline selects. The chevron comes from the shared select rule above; only
+   the transparent resting background is specific to these. */
+.wc-bulk-inline-select{display:inline-block;width:100%;height:34px;padding:0 22px 0 4px;border:1px solid transparent;border-radius:4px;font-size:12px;color:var(--wcb-gray-900);background-color:transparent;background-position:right 4px center;cursor:pointer;transition:border-color var(--wcb-trans),background-color var(--wcb-trans),box-shadow var(--wcb-trans);margin:0;vertical-align:middle;box-sizing:border-box;line-height:34px;overflow:hidden;text-overflow:ellipsis;}
 .wc-bulk-inline-select:hover{border-color:var(--wcb-gray-300);background-color:#fff;}
 .wc-bulk-inline-select:focus{border-color:var(--wcb-primary);background-color:#fff;box-shadow:0 0 0 2px var(--wcb-primary-light);outline:none;}
 .wc-bulk-inline-select.changed{border-color:var(--wcb-changed-border)!important;background-color:var(--wcb-changed-bg)!important;}
@@ -345,6 +356,10 @@
 .wc-bulk-field-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .wc-bulk-field-row>label{width:160px;font-size:13px;font-weight:600;color:var(--wcb-gray-700);flex-shrink:0;}
 .wc-bulk-field-row select,.wc-bulk-field-row input[type="text"],.wc-bulk-field-row input[type="number"],.wc-bulk-field-row textarea{flex:1;min-width:200px;height:36px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 10px;font-size:13px;}
+.wc-bulk-field-row select{padding-right:26px;}
+/* The Categories picker is a multi-select: it scrolls its options rather than
+   opening a dropdown, so a chevron would be misleading. */
+.wc-bulk-field-row select[multiple]{background-image:none;padding-right:10px;height:auto;}
 .wc-bulk-field-row textarea{height:auto;padding:8px 10px;}
 
 /* Column manager */
