@@ -546,13 +546,21 @@
                         onbackorder: 'On Backorder',
                     });
                 },
+                // The column is keyed `post_status` (that is what the setter
+                // expects) but the row carries the value as `status`, so the
+                // server value has to be passed in explicitly.
                 post_status: function (p) {
-                    return s.renderSelectCell(p, 'post_status', {
-                        publish: 'Published',
-                        draft: 'Draft',
-                        pending: 'Pending',
-                        private: 'Private',
-                    });
+                    return s.renderSelectCell(
+                        p,
+                        'post_status',
+                        {
+                            publish: 'Published',
+                            draft: 'Draft',
+                            pending: 'Pending',
+                            private: 'Private',
+                        },
+                        p.status
+                    );
                 },
                 categories: function (p) {
                     // Single-select dropdown: a product carries one category
@@ -1132,6 +1140,10 @@
             if (field === 'tags') return (v || []).join(', ');
             if (field === 'shipping_class')
                 return o.shipping_class_id ? String(o.shipping_class_id) : '';
+            // The row calls it `status`; the column and setter call it
+            // `post_status`. Without this the original always reads as empty,
+            // so the cell is marked dirty the moment it is touched.
+            if (field === 'post_status') return String(o.status || '');
             if (typeof v === 'boolean') return v ? 'yes' : 'no';
             if (v === null || v === undefined) return '';
             return String(v);
@@ -1237,7 +1249,11 @@
                     if (r.success) {
                         $.each(s.changes, function (pid, fields) {
                             $.each(fields, function (f, v) {
-                                if (s.originals[pid]) s.originals[pid][f] = v;
+                                if (!s.originals[pid]) return;
+                                // Write back under the key the row actually
+                                // uses, or origVal() keeps reading the stale
+                                // server value.
+                                s.originals[pid][f === 'post_status' ? 'status' : f] = v;
                             });
                         });
                         s.changes = {};
