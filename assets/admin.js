@@ -176,7 +176,7 @@
                 s.saveAll();
             });
             $('#wc-bulk-reset-all').on('click', function () {
-                if (confirm('Discard all changes?')) s.discardAll();
+                if (confirm(WCB.i18n.confirm_discard)) s.discardAll();
             });
             $(document).on('keydown', function (e) {
                 if (
@@ -922,13 +922,18 @@
                 };
             var row = $('<tr>');
             $.each(cols, function (i, c) {
-                var lab = L[c] || c;
+                // L holds hardcoded labels and, for `cb`, intentional markup —
+                // so it passes through. The fallback is the raw column key
+                // from the user's saved list, which does not.
+                var lab = L[c] !== undefined ? L[c] : s.esc(c);
                 if (c === 'cb') {
                     row.append('<td class="manage-column column-cb check-column">' + lab + '</td>');
                 } else if (c === 'thumb') {
                     row.append('<th class="manage-column column-thumb">' + lab + '</th>');
                 } else {
-                    row.append('<th class="manage-column column-' + c + '">' + lab + '</th>');
+                    row.append(
+                        '<th class="manage-column column-' + s.escAttr(c) + '">' + lab + '</th>'
+                    );
                 }
             });
             thead.empty().append(row);
@@ -1146,7 +1151,7 @@
                 if (v !== '') qc[$(this).data('field')] = { op: 'set', value: v };
             });
             if ($.isEmptyObject(qc)) {
-                alert('Select a field first.');
+                alert(WCB.i18n.select_field);
                 return;
             }
             $('.wc-bulk-inline-input,.wc-bulk-inline-textarea,.wc-bulk-inline-select').each(
@@ -1194,7 +1199,7 @@
                     s.trackChange(pid, f, nv, $(this));
                 }
             );
-            s.showNotice('success', 'Applied to all loaded products.');
+            s.showNotice('success', WCB.i18n.quick_applied);
         },
 
         saveAll: function () {
@@ -1265,7 +1270,7 @@
             );
             $('.wc-bulk-table tbody tr').removeClass('row-modified');
             s.updateSaveBar();
-            s.showNotice('success', 'Changes discarded.');
+            s.showNotice('success', WCB.i18n.changes_discarded);
         },
         updateSaveBar: function () {
             var c = Object.keys(this.changes).length;
@@ -1327,11 +1332,11 @@
                     var active = $.inArray(key, activeCols) !== -1;
                     list.append(
                         '<div class="wc-bulk-column-item" data-column="' +
-                            key +
+                            B.escAttr(key) +
                             '"><span class="dashicons dashicons-menu"></span><input type="checkbox" ' +
                             (active ? 'checked' : '') +
                             ' /><span>' +
-                            col.label +
+                            B.esc(col.label) +
                             '</span>' +
                             (col.editable
                                 ? '<span class="dashicons dashicons-edit" title="Editable"></span>'
@@ -1412,10 +1417,10 @@
                 if (v !== '' && v !== null && v !== undefined) mc[f] = v;
             });
             if ($.isEmptyObject(mc)) {
-                alert('Select at least one field to change.');
+                alert(WCB.i18n.select_one_field);
                 return;
             }
-            if (!confirm('Apply changes to ' + ids.length + ' product(s)?')) return;
+            if (!confirm(WCB.i18n.confirm_bulk_edit.replace('{count}', ids.length))) return;
             $.each(ids, function (i, pid) {
                 if (!s.changes[pid]) s.changes[pid] = {};
                 var orig = s.originals[pid];
@@ -1569,7 +1574,7 @@
             var s = this,
                 name = $('#wc-bulk-add-name').val().trim();
             if (!name) {
-                alert('Product name is required.');
+                alert(WCB.i18n.product_name_req);
                 return;
             }
             $('#wc-bulk-add-confirm').prop('disabled', true).text('Creating...');
@@ -1607,7 +1612,7 @@
                     ids.push($(this).val());
                 });
             if (!ids.length) {
-                alert('No products to export.');
+                alert(WCB.i18n.no_export);
                 return;
             }
             $.post(
@@ -1684,7 +1689,7 @@
         },
         saveView: function () {
             var s = this,
-                name = prompt('View name:');
+                name = prompt(WCB.i18n.view_name_prompt);
             if (!name || !name.trim()) return;
             var filters = {
                 search: $('#wc-bulk-search').val(),
@@ -1721,7 +1726,7 @@
         },
         deleteView: function (viewId) {
             var s = this;
-            if (!confirm('Delete this view?')) return;
+            if (!confirm(WCB.i18n.confirm_delete_view)) return;
             $.post(
                 WCB.ajax_url,
                 { action: 'wc_bulk_delete_view', nonce: WCB.nonce, view_id: viewId },

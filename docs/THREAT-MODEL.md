@@ -17,8 +17,8 @@ Diaudit 2026-07-30 terhadap v3.11.0.
 | SQL injection | ✅ **tidak mungkin** | nol `$wpdb` — tidak ada query mentah |
 | File upload | ✅ **tidak mungkin** | nol `$_FILES` — tidak ada upload |
 | CSRF | ✅ terjaga | 14/14 handler memanggil `guard()` |
-| Otorisasi | ⚠️ sebagian | lihat 4.2 dan 4.3 |
-| XSS | ⚠️ sebagian | lihat 1.2 dan 1.3 |
+| Otorisasi | ✅ terjaga | edit dan hapus sama-sama dicek per objek (v3.11) |
+| XSS | ✅ terjaga | seluruh titik render di-escape (v3.11) |
 
 Dua kelas teratas aman **secara struktural**, bukan karena hati-hati. Itu
 posisi terkuat: tidak ada cara untuk salah kalau permukaan serangannya tidak
@@ -253,43 +253,31 @@ yang sah, mencoba melakukan lebih dari yang seharusnya.*
 Ini benar — capability per-objek menghormati kepemilikan post dan filter dari
 plugin lain.
 
-**Edit tidak memeriksa apa pun:**
+**Edit sebelum v3.11 tidak memeriksa apa pun** — siapa pun dengan
+`manage_woocommerce` dapat mengubah produk mana pun dengan mengirim ID
+langsung, termasuk yang di luar hasil filter yang ia lihat.
+
+Pada WordPress standar itu konsisten: `manage_woocommerce` memang menyiratkan
+kendali penuh atas katalog. Yang menjadi masalah adalah instalasi dengan plugin
+multivendor (Dokan, WCFM) atau pembatasan peran kustom, di mana vendor hanya
+boleh menyunting produknya sendiri.
+
+**Ditutup di v3.11:**
 
 ```php
-foreach ($changes as $pid => $fields) {
-    $pid     = absint($pid);
-    $product = wc_get_product($pid);
+if (!current_user_can('edit_post', $pid)) {
+    $errors[] = sprintf(
+        __('#%1$d %2$s: permission denied.', 'wc-bulk-editor'),
+        $pid,
+        $product->get_name(),
+    );
 
-    if (!$product || !is_array($fields)) {
-        continue;
-    }
-
-    $this->apply_fields($product, $fields);   // ← tanpa cek edit_post
-    $product->save();
-}
-```
-
-Siapa pun dengan `manage_woocommerce` dapat mengubah harga, stok, dan status
-**produk mana pun** — termasuk yang di luar hasil filter yang ia lihat, dengan
-mengirim ID langsung.
-
-**Apakah ini masalah?** Pada WordPress standar, `manage_woocommerce` memang
-menyiratkan kendali penuh atas katalog. Jadi pada instalasi biasa ini
-konsisten.
-
-**Menjadi masalah** kalau ada plugin multivendor (Dokan, WCFM) atau pembatasan
-peran kustom, di mana vendor hanya boleh menyunting produknya sendiri. Plugin
-ini akan melewati pembatasan itu.
-
-Perbaikan konsisten dengan pola yang sudah ada:
-
-```php
-if (!$product || !is_array($fields) || !current_user_can('edit_post', $pid)) {
     continue;
 }
 ```
 
-Satu baris, dan menyelaraskan edit dengan hapus.
+Produk yang ditolak masuk ke `$errors` dan dilaporkan ke klien — bukan
+diabaikan diam-diam. User tahu perubahannya tidak tersimpan.
 
 ### 4.3 `duplicate` tanpa cek objek
 
@@ -408,18 +396,23 @@ lewat URL. Sudah dipindah ke luar webroot
 
 ## 7. Daftar Perbaikan
 
-Berurutan menurut nilai:
+Sudah dikerjakan di v3.11.0:
 
-- [ ] **`current_user_can('edit_post', $pid)` di `wc_bulk_save_inline()`** —
-      menyelaraskan edit dengan hapus, satu baris (4.2)
-- [ ] **`s.esc(col.label)` di `admin.js:1328`** — defensif, satu baris (1.2)
+- [x] **`current_user_can('edit_post', $pid)` di `wc_bulk_save_inline()`** —
+      asimetri 4.2 ditutup. Produk yang ditolak dilaporkan ke klien sebagai
+      error per-item, bukan diabaikan diam-diam.
+- [x] **`B.esc(col.label)` dan `B.escAttr(key)` di modal Columns** (1.2)
+- [x] **Escape pada fallback label header tabel** (1.3) — `L[c]` sengaja
+      dilewatkan karena `L.cb` berisi markup checkbox yang memang harus
+      dirender; hanya fallback `c` yang di-escape.
+
+Belum dikerjakan:
+
 - [ ] `current_user_can('read_post', $id)` untuk `duplicate` (4.3)
-- [ ] Escape defensif pada label header tabel (1.3)
 - [ ] Cek capability di `render_admin_page()` (4.6)
 - [ ] Pesan khusus untuk nonce kedaluwarsa (3.3)
 
-Tidak ada yang mendesak. Nomor satu paling bernilai karena menutup asimetri
-nyata dan menyiapkan plugin untuk skenario multivendor.
+Tidak ada yang mendesak. Ketiganya lapisan tambahan, bukan lubang.
 
 ---
 

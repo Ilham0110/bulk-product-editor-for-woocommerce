@@ -3,11 +3,21 @@
 declare(strict_types=1);
 
 /**
- * Plugin Name:  WooCommerce Bulk Product Editor
- * Description:  Spreadsheet-style inline editing for WooCommerce products.
- * Version:      3.11.0
- * Requires PHP: 8.3
- * Text Domain:  wc-bulk-editor
+ * Plugin Name:          Bulk Product Editor for WooCommerce
+ * Plugin URI:           https://github.com/Ilham0110/wc-bulk-editor
+ * Description:          Spreadsheet-style inline editing for WooCommerce products.
+ * Version:              3.11.0
+ * Author:               Ilham Darmawan
+ * Author URI:           https://github.com/Ilham0110
+ * Requires at least:    6.5
+ * Requires PHP:         8.3
+ * Requires Plugins:     woocommerce
+ * License:              GPL-2.0-or-later
+ * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:          wc-bulk-editor
+ * Domain Path:          /languages
+ * WC requires at least: 9.0
+ * WC tested up to:      10.9
  */
 
 defined('ABSPATH') || exit();
@@ -240,6 +250,18 @@ final class WC_Bulk_Product_Editor
             'csv_exported'        => __('CSV exported.', 'wc-bulk-editor'),
             'product_created'     => __('Product created!', 'wc-bulk-editor'),
             'columns_saved'       => __('Columns saved.', 'wc-bulk-editor'),
+
+            // Quick Apply, Advanced Bulk Edit and saved views.
+            'confirm_discard'     => __('Discard all changes?', 'wc-bulk-editor'),
+            'changes_discarded'   => __('Changes discarded.', 'wc-bulk-editor'),
+            'select_field'        => __('Select a field first.', 'wc-bulk-editor'),
+            'quick_applied'       => __('Applied to all loaded products.', 'wc-bulk-editor'),
+            'select_one_field'    => __('Select at least one field to change.', 'wc-bulk-editor'),
+            'confirm_bulk_edit'   => __('Apply changes to {count} product(s)?', 'wc-bulk-editor'),
+            'product_name_req'    => __('Product name is required.', 'wc-bulk-editor'),
+            'no_export'           => __('No products to export.', 'wc-bulk-editor'),
+            'view_name_prompt'    => __('View name:', 'wc-bulk-editor'),
+            'confirm_delete_view' => __('Delete this view?', 'wc-bulk-editor'),
         ];
     }
 
@@ -643,6 +665,21 @@ final class WC_Bulk_Product_Editor
             $product = wc_get_product($pid);
 
             if (!$product || !is_array($fields)) {
+                continue;
+            }
+
+            // Per-object check, matching the one bulk_action() does for trash
+            // and delete. manage_woocommerce implies full catalogue control on
+            // stock WordPress, but multivendor plugins narrow edit_post per
+            // product and that restriction has to hold here too.
+            if (!current_user_can('edit_post', $pid)) {
+                $errors[] = sprintf(
+                    /* translators: 1: product id, 2: product name */
+                    __('#%1$d %2$s: permission denied.', 'wc-bulk-editor'),
+                    $pid,
+                    $product->get_name(),
+                );
+
                 continue;
             }
 
