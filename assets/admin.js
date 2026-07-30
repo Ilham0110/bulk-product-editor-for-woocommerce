@@ -339,15 +339,17 @@
             });
         },
 
+        // Scoped to the modal: an unscoped [data-field] selector also matches
+        // the table's own cells once rows are drawn.
         fillTaxClasses: function (list) {
-            var $t = $('[data-field="tax_class"]');
+            var $t = $('#wc-bulk-modal-edit [data-field="tax_class"]');
             $.each(list, function (i, c) {
                 $t.append($('<option>', { value: c.slug, text: c.name }));
             });
         },
 
         fillShippingClasses: function (list) {
-            var $t = $('[data-field="shipping_class"]');
+            var $t = $('#wc-bulk-modal-edit [data-field="shipping_class"]');
             $.each(list, function (i, c) {
                 $t.append($('<option>', { value: c.id, text: c.name }));
             });
@@ -594,48 +596,24 @@
                         none: 'None',
                     });
                 },
+                // Options come from the preloaded lists, not from scraping the
+                // bulk-edit modal's <select>: that selector also matched the
+                // table's own cells, so options multiplied on every re-render.
                 tax_class: function (p) {
-                    var o = '<option value="">Standard</option>';
-                    $('[data-field="tax_class"] option').each(function () {
-                        if ($(this).val())
-                            o +=
-                                '<option value="' +
-                                $(this).val() +
-                                '">' +
-                                $(this).text() +
-                                '</option>';
-                    });
-                    var cv = p.tax_class || '';
-                    return (
-                        '<td><select class="wc-bulk-inline-select' +
-                        (s.isChanged(p.id, 'tax_class') ? ' changed' : '') +
-                        '" data-product-id="' +
-                        p.id +
-                        '" data-field="tax_class">' +
-                        o.replace('value="' + cv + '"', 'value="' + cv + '" selected') +
-                        '</select></td>'
+                    return s.renderSelectCell(
+                        p,
+                        'tax_class',
+                        s.classOptions(WCB.tax_classes, 'slug')
                     );
                 },
+                // Edited by term id, so the fallback is shipping_class_id
+                // rather than p.shipping_class (a slug).
                 shipping_class: function (p) {
-                    var o = '<option value="">None</option>';
-                    $('[data-field="shipping_class"] option').each(function () {
-                        if ($(this).val())
-                            o +=
-                                '<option value="' +
-                                $(this).val() +
-                                '">' +
-                                $(this).text() +
-                                '</option>';
-                    });
-                    var cv = p.shipping_class_id || '';
-                    return (
-                        '<td><select class="wc-bulk-inline-select' +
-                        (s.isChanged(p.id, 'shipping_class') ? ' changed' : '') +
-                        '" data-product-id="' +
-                        p.id +
-                        '" data-field="shipping_class">' +
-                        o.replace('value="' + cv + '"', 'value="' + cv + '" selected') +
-                        '</select></td>'
+                    return s.renderSelectCell(
+                        p,
+                        'shipping_class',
+                        s.classOptions(WCB.shipping_classes, 'id'),
+                        p.shipping_class_id
                     );
                 },
                 weight: function (p) {
@@ -1014,13 +992,19 @@
             );
         },
 
-        renderSelectCell: function (p, field, options) {
+        // `serverValue` overrides the fallback for fields whose editable value
+        // is not p[field] — shipping_class edits by term id, not by slug.
+        renderSelectCell: function (p, field, options, serverValue) {
             var s = this,
                 ch = s.isChanged(p.id, field) ? ' changed' : '',
-                cv =
+                fallback = serverValue === undefined ? p[field] : serverValue,
+                cv = String(
                     s.changes[p.id] && s.changes[p.id][field] !== undefined
                         ? s.changes[p.id][field]
-                        : p[field] || '';
+                        : fallback === null || fallback === undefined
+                          ? ''
+                          : fallback
+                );
             var h =
                 '<td><select class="wc-bulk-inline-select' +
                 ch +
@@ -1029,17 +1013,28 @@
                 '" data-field="' +
                 field +
                 '">';
+            // Labels may come from user-created terms, so both halves are
+            // escaped rather than trusted.
             $.each(options, function (v, l) {
                 h +=
                     '<option value="' +
-                    v +
+                    s.escAttr(v) +
                     '"' +
-                    (cv === v ? ' selected' : '') +
+                    (cv === String(v) ? ' selected' : '') +
                     '>' +
-                    l +
+                    s.esc(l) +
                     '</option>';
             });
             return h + '</select></td>';
+        },
+
+        // Build a {value: label} map from a preloaded list, e.g. WCB.tax_classes.
+        classOptions: function (list, valueKey) {
+            var map = {};
+            $.each(list || [], function (i, item) {
+                map[item[valueKey]] = item.name;
+            });
+            return map;
         },
         renderBoolCell: function (p, field, yesIcon, noIcon) {
             var s = this,

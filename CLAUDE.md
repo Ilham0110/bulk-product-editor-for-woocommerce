@@ -5,6 +5,7 @@ saved views, export CSV.
 
 - **Versi:** 3.11.0 · **PHP:** 8.3+ · **WooCommerce:** wajib aktif (plugin
   langsung `return` kalau tidak)
+- **Terpasang saat ini:** WordPress 7.0.2, WooCommerce 10.9.4 — HPOS default
 - **Text domain:** `wc-bulk-editor`
 - **Prefix:** fungsi/AJAX `wc_bulk_`, konstanta `WCBULK_`, user meta `_wcbulk_`
 - **Entry point:** `wc-bulk-editor.php` — satu class `WC_Bulk_Product_Editor`
@@ -64,11 +65,14 @@ Tidak ada composer, npm, build step, atau autoloader. Edit file langsung.
   `WCBulkEditor.i18n.<key>`. Jangan hardcode teks Inggris di `admin.js`.
 
 ### Larangan
-- Jangan buat file `.bak-before-*` lagi. Sudah ada ~40 file backup manual di
-  repo ini dan itu masalah: `admin-page.php.bak-before-align` disajikan server
-  sebagai teks biasa → source code bocor lewat URL. Gunakan git.
+- Jangan buat file `.bak-before-*` lagi. Folder ini sudah punya git — pakai
+  commit atau branch. Ada 47 file backup lama yang sudah di-ignore; file seperti
+  `admin-page.php.bak-before-align` disajikan server sebagai teks biasa,
+  sehingga source code bocor lewat URL.
 - Jangan ubah `assets/_css-backup/**` atau file `*.bak-*` mana pun.
 - Jangan tambah dependency (composer/npm) tanpa persetujuan eksplisit.
+- Jangan mengubah keputusan yang tercatat di `docs/adr/` tanpa membaca ADR-nya
+  lebih dulu (monolit satu file, ES5 tanpa build step, preload bukan AJAX).
 
 ## Uji Manual (belum ada test otomatis)
 
@@ -96,3 +100,18 @@ bisa dikirim saat enqueue, kirim di situ.**
 
 Preferensi per-user disimpan di user meta: `_wcbulk_columns` (kolom terpilih)
 dan `_wcbulk_views` (saved views).
+
+## Detail Lanjutan
+
+Baca file berikut saat relevan — jangan dibaca semua sekaligus:
+
+| Kalau mengerjakan… | Baca |
+|---|---|
+| Menambah field/kolom, mengubah alur data, menavigasi `admin.js` | `docs/ARCHITECTURE.md` |
+| Handler AJAX baru, capability, escaping, sanitasi | `docs/SECURITY.md` |
+| Menyentuh produk/order, `wc_get_products()`, HPOS | `docs/WOOCOMMERCE.md` |
+| Menulis kode baru (gaya PHP/JS/CSS) | `docs/CODING-STANDARDS.md` |
+| Mempertimbangkan perubahan arsitektur | `docs/adr/` |
+
+`docs/SECURITY.md` bagian 9 memuat temuan yang belum diperbaiki — periksa
+sebelum menyentuh area terkait.

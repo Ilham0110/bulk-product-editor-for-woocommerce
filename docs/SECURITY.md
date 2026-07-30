@@ -333,38 +333,62 @@ mitigasi sementara di `.htaccess` plugin:
 Catatan: `.htaccess` **tidak berlaku di Nginx**. Kalau produksi memakai Nginx,
 satu-satunya solusi adalah menghapus file tersebut.
 
-### 9.2 XSS tersimpan pada dropdown tax class & shipping class
+### 9.2 XSS pada dropdown tax class & shipping class — **sudah diperbaiki**
 
-Di `admin.js:597-640`, renderer `tax_class` dan `shipping_class` membaca teks
-option dari DOM lalu menyambungnya ke HTML **tanpa escape**:
+Renderer `tax_class` dan `shipping_class` dulu membaca teks option dari DOM
+lalu menyambungnya ke HTML **tanpa escape**:
 
 ```js
+// SEBELUM — rentan
 o += '<option value="' + $(this).val() + '">' + $(this).text() + '</option>';
 ```
 
-`$(this).text()` mengembalikan teks mentah yang sudah ter-decode. Kalau ada tax
-class bernama `<img src=x onerror=alert(1)>`, skrip itu akan tereksekusi.
+Tax class bernama `<img src=x onerror=…>` akan tereksekusi. Keparahan sedang —
+membuat tax class butuh `manage_woocommerce` — tapi ini jalur eskalasi Shop
+Manager → Administrator.
 
-Tingkat keparahan sedang: pembuatan tax class memerlukan `manage_woocommerce`,
-jadi penyerang sudah harus punya akses tinggi. Tapi ini tetap jalur eskalasi
-dari Shop Manager ke Administrator — Shop Manager membuat tax class berbahaya,
-Administrator membuka Bulk Editor, skrip berjalan dengan hak Administrator.
+Diperbaiki dengan merutekan keduanya lewat `renderSelectCell()`, yang kini
+meng-escape **value maupun label**:
 
-Perbaikan: bungkus keduanya dengan `s.escAttr()` dan `s.esc()`.
+```js
+'<option value="' + s.escAttr(v) + '">' + s.esc(l) + '</option>'
+```
 
-### 9.3 Pola `.replace()` untuk menandai option terpilih
+Karena `renderSelectCell()` dipakai tujuh renderer, perbaikannya berlaku untuk
+semua — termasuk yang mungkin ditambahkan nanti.
 
-Masih di renderer yang sama:
+### 9.3 Pola `.replace()` untuk menandai option terpilih — **sudah diperbaiki**
+
+Renderer yang sama dulu memakai:
 
 ```js
 o.replace('value="' + cv + '"', 'value="' + cv + '" selected')
 ```
 
-`String.replace()` dengan argumen string hanya mengganti **kecocokan pertama**.
-Kalau `cv` bernilai `"2"` dan ada option `value="12"` yang muncul lebih dulu,
-substring `value="2"` tidak akan cocok — tapi pada kasus lain bisa salah target.
-Ini bug korektnes, bukan keamanan, tapi ada di kode yang sama dengan 9.2 jadi
-sekalian saja saat memperbaiki.
+`String.replace()` dengan argumen string hanya mengganti kecocokan **pertama**.
+Kalau `cv` bernilai `"2"`, substring `value="2"` bisa cocok lebih dulu di
+dalam `value="12"` — sehingga option yang salah tertandai terpilih.
+
+Kini `renderSelectCell()` membandingkan nilai secara eksplisit
+(`cv === String(v)`) saat membangun tiap option, jadi tidak ada manipulasi
+string sama sekali.
+
+### 9.3b Duplikasi option pada setiap render — **sudah diperbaiki**
+
+Bug paling berdampak dari ketiganya, dan bukan masalah keamanan.
+
+Selektor `$('[data-field="tax_class"] option')` **tidak berlingkup**. Ia cocok
+dengan `<select>` di modal Advanced Bulk Edit *dan* dengan setiap sel tabel
+yang baru dirender — yang juga memakai `data-field="tax_class"`.
+
+Akibatnya tiap render menyalin option dari sel yang sudah ada:
+render pertama 5 option, render kedua 5 × jumlah baris, dan seterusnya. Pada
+50 baris, render ketiga sudah menghasilkan ribuan `<option>` per sel.
+
+Diperbaiki dengan membaca langsung dari data preload
+(`WCB.tax_classes`, `WCB.shipping_classes`) alih-alih menyalin dari DOM.
+`fillTaxClasses()` dan `fillShippingClasses()` juga dipersempit lingkupnya ke
+`#wc-bulk-modal-edit`.
 
 ### 9.4 Header plugin belum lengkap
 
