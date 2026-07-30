@@ -62,6 +62,7 @@
             // Each admin-ajax round-trip costs a full WordPress bootstrap,
             // which is far more expensive than the queries themselves.
             s.fillCategoryFilter(WCB.all_cats || []);
+            s.fillModalCategories(WCB.all_cats || []);
             s.fillTaxClasses(WCB.tax_classes || []);
             s.fillShippingClasses(WCB.shipping_classes || []);
 
@@ -336,6 +337,20 @@
             $.each(cats, function (i, c) {
                 if ($filter.find('option[value="' + c.id + '"]').length) return;
                 $filter.append($('<option>', { value: c.id, text: c.name }));
+            });
+        },
+
+        // The Advanced Bulk Edit modal's category picker. Separate from the
+        // filter above: this one is a multi-select that replaces a product's
+        // categories, so it carries no "All" placeholder.
+        fillModalCategories: function (cats) {
+            var $sel = $('#wc-bulk-modal-edit [data-field="categories"]');
+
+            if (!$sel.length) return;
+
+            $.each(cats, function (i, c) {
+                if ($sel.find('option[value="' + c.id + '"]').length) return;
+                $sel.append($('<option>', { value: c.id, text: c.name }));
             });
         },
 
@@ -1414,6 +1429,15 @@
                 if (f.indexOf('_op') !== -1) return;
                 if (mc[f]) return;
                 var v = $(this).val();
+
+                // A multi-select returns an array. The table cells and the
+                // save payload both work in strings, so join here — the PHP
+                // side splits on commas again in set_categories()/set_tags().
+                if ($.isArray(v)) {
+                    if (!v.length) return;
+                    v = v.join(',');
+                }
+
                 if (v !== '' && v !== null && v !== undefined) mc[f] = v;
             });
             if ($.isEmptyObject(mc)) {
@@ -1561,6 +1585,7 @@
                 $filter.append($('<option>', { value: cat.id, text: cat.name }));
             }
 
+            this.fillModalCategories([cat]);
             this.fillCategoryParents();
         },
 
