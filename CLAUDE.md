@@ -111,6 +111,10 @@ Baca file berikut saat relevan — jangan dibaca semua sekaligus:
 | Handler AJAX baru, capability, escaping, sanitasi | `docs/SECURITY.md` |
 | Menyentuh produk/order, `wc_get_products()`, HPOS | `docs/WOOCOMMERCE.md` |
 | Menulis kode baru (gaya PHP/JS/CSS) | `docs/CODING-STANDARDS.md` |
+| Aktivasi, uninstall, migrasi versi | `docs/LIFECYCLE.md` |
+| String baru, terjemahan, `i18n_strings()` | `docs/I18N.md` |
+| Menambah pengaturan tingkat-situs | `docs/SETTINGS-API.md` |
+| Menyiapkan rilis publik | `docs/WORDPRESS-ORG.md` |
 | Mempertimbangkan perubahan arsitektur | `docs/adr/` |
 
 `docs/SECURITY.md` bagian 9 memuat temuan yang belum diperbaiki — periksa
