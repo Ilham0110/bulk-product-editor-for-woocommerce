@@ -816,17 +816,22 @@ final class WC_Bulk_Product_Editor
         }
 
         $message = sprintf(
+            /* translators: %d: number of products saved successfully. */
             _n('%d product updated.', '%d products updated.', $updated, 'wc-bulk-editor'),
             $updated,
         );
 
         if ($errors !== []) {
+            $failed = sprintf(
+                /* translators: %d: number of products that could not be saved. */
+                _n('%d failed:', '%d failed:', count($errors), 'wc-bulk-editor'),
+                count($errors)
+            );
+
             wp_send_json_error([
                 'updated' => $updated,
                 'errors'  => $errors,
-                'message' => $message . ' '
-                    . sprintf(__('%d failed:', 'wc-bulk-editor'), count($errors))
-                    . ' ' . implode(' | ', $errors),
+                'message' => $message . ' ' . $failed . ' ' . implode(' | ', $errors),
             ]);
         }
 

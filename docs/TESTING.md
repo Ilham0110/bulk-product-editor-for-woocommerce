@@ -20,19 +20,20 @@ Sebelum merencanakan, ini batasan lingkungan yang terukur:
 |---|---|
 | Node.js | ✅ v24.18.0 |
 | npm / npx | ✅ 12.0.1 |
-| Composer | ❌ **tidak terpasang** |
-| WP-CLI | ❌ tidak terpasang |
+| PHP CLI | ✅ 8.3.30 |
+| Composer | ✅ 2.9.4 (`C:\laragon\bin\composer`) |
+| WP-CLI | ✅ 2.12.0 (`C:\laragon\bin\wp-cli`) |
 
-**Composer tidak ada.** Itu berarti PHPUnit dan WordPress test suite —
-jalur standar untuk unit dan integration test PHP — tidak bisa dipasang tanpa
-menambah tooling baru lebih dulu.
+Ketiganya ada di PATH pengguna, jadi `php`, `composer`, dan `wp` dapat
+dipanggil dari terminal mana pun — bukan hanya dari terminal Laragon.
 
-Ini bukan hambatan teknis yang mustahil, tapi mengubah karakter plugin:
-dari "salin folder, selesai" menjadi "perlu langkah instalasi". Keputusan itu
-menyentuh [ADR 0001](adr/0001-monolit-satu-file.md) dan
-[ADR 0002](adr/0002-tanpa-build-step.md), jadi bukan hal sepele.
-
-**Node ada.** Playwright dan Vitest bisa dipasang tanpa Composer.
+**Tooling bukan lagi penghalang.** Yang tersisa adalah pertimbangan yang lebih
+penting: memasang PHPUnit berarti menambahkan `composer.json` dan folder
+`vendor/` ke plugin, yang mengubah karakternya dari "salin folder, selesai"
+menjadi "perlu langkah instalasi". Itu menyentuh
+[ADR 0001](adr/0001-monolit-satu-file.md) dan
+[ADR 0002](adr/0002-tanpa-build-step.md) — keputusan yang perlu dicatat
+sebagai ADR baru, bukan diambil diam-diam.
 
 ---
 
@@ -384,28 +385,38 @@ luar jangkauan test otomatis.
 
 Berurutan menurut nilai per usaha:
 
-**Tahap 1 — tanpa tooling baru** (bisa sekarang)
-- [ ] Perluas daftar uji manual di [CLAUDE.md](../CLAUDE.md) dengan skenario
-      dari bagian 3
-- [ ] Uji sebagai `shop_manager`, catat hasilnya
-- [ ] Uji dengan HPOS dinonaktifkan
+**Tahap 1 — sudah dikerjakan**
+- [x] Uji sebagai `shop_manager` — berfungsi penuh; `subscriber` ditolak di
+      seluruh 14 endpoint
+- [x] Uji produk variable — induk dapat disunting tanpa merusak variasi
+- [x] Enam skenario E2E ditulis dan dijalankan
 
-**Tahap 2 — Playwright** (npm sudah ada)
-- [ ] `npm install -D @playwright/test`
-- [ ] Enam skenario di bagian 4 lapis 1
-- [ ] Jalankan sebelum setiap perubahan besar
+**Tahap 2 — E2E Playwright, sudah berjalan**
+
+Seluruh 15 fitur diuji di browser sungguhan dengan verifikasi ke database:
+render, change tracking, save, filter, paginasi, modal Columns, Quick Apply,
+Advanced Bulk Edit, bulk action, Quick Add, New Category, export CSV, saved
+views, peran pengguna, dan produk variable.
+
+Empat bug ditemukan lewat cara ini — semuanya jenis yang tidak terlihat dari
+pembacaan kode: angka nol dirender kosong, urutan option select, halaman
+negatif, dan modal Columns kosong karena `ReferenceError` yang ditelan jQuery.
 
 **Tahap 3 — unit JS** (opsional)
 - [ ] Ekspor bersyarat di akhir `admin.js`
 - [ ] Vitest untuk enam fungsi murni
 
-**Tahap 4 — PHP** (perlu keputusan tooling)
-- [ ] Pasang Composer
-- [ ] Catat sebagai ADR — ini mengubah karakter plugin
+**Tahap 4 — PHP** (perlu keputusan, bukan tooling)
+
+Composer sudah tersedia, jadi hambatannya bukan lagi teknis. Yang tersisa
+adalah keputusan: menambahkan `composer.json` dan `vendor/` mengubah plugin
+dari "salin folder, selesai" menjadi "perlu langkah instalasi".
+
+- [ ] Catat sebagai ADR lebih dulu
 - [ ] Mulai dari `csv_cell()`, `set_enum()`, `apply_fields()`
 
-**Jangan lompat ke tahap 4.** Composer dan PHPUnit adalah investasi tooling
-terbesar dengan nilai paling rendah untuk plugin berbentuk seperti ini.
+**Nilainya tetap paling rendah.** 91 dari 97 method JS menyentuh DOM, dan di
+sanalah bug sebenarnya muncul — bukan di tujuh method PHP yang logikanya murni.
 
 ---
 
