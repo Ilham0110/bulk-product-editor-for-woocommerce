@@ -974,10 +974,15 @@
         renderEditableCell: function (p, field, type, step, placeholder, value) {
             var s = this,
                 ch = s.isChanged(p.id, field) ? ' changed' : '',
+                // `value || ''` would blank a legitimate 0 — menu_order and the
+                // dimension fields are routinely zero — and origVal() would then
+                // compare '' against '0' and mark the cell dirty on every render.
                 cv =
                     s.changes[p.id] && s.changes[p.id][field] !== undefined
                         ? s.changes[p.id][field]
-                        : value || '';
+                        : value === null || value === undefined || value === ''
+                          ? ''
+                          : value;
             return (
                 '<td><input type="' +
                 type +
@@ -1041,28 +1046,41 @@
                 '" data-field="' +
                 field +
                 '">';
+            // `options` is either a {value: label} object for fixed lists, or
+            // an array of [value, label] pairs where source order matters —
+            // see classOptions().
+            var pairs = $.isArray(options)
+                ? options
+                : $.map(options, function (l, v) {
+                      return [[v, l]];
+                  });
+
             // Labels may come from user-created terms, so both halves are
             // escaped rather than trusted.
-            $.each(options, function (v, l) {
+            $.each(pairs, function (i, pair) {
                 h +=
                     '<option value="' +
-                    s.escAttr(v) +
+                    s.escAttr(pair[0]) +
                     '"' +
-                    (cv === String(v) ? ' selected' : '') +
+                    (cv === String(pair[0]) ? ' selected' : '') +
                     '>' +
-                    s.esc(l) +
+                    s.esc(pair[1]) +
                     '</option>';
             });
             return h + '</select></td>';
         },
 
         // Build a {value: label} map from a preloaded list, e.g. WCB.tax_classes.
+        // Returns [[value, label], ...] rather than an object: JavaScript
+        // reorders integer-like object keys ahead of string ones, which would
+        // push the empty "none" option to the end of the list and leave a
+        // product with no shipping class showing the first real class instead.
         classOptions: function (list, valueKey) {
-            var map = {};
+            var pairs = [];
             $.each(list || [], function (i, item) {
-                map[item[valueKey]] = item.name;
+                pairs.push([String(item[valueKey]), item.name]);
             });
-            return map;
+            return pairs;
         },
         renderBoolCell: function (p, field, yesIcon, noIcon) {
             var s = this,
@@ -1138,8 +1156,11 @@
             var v = o[field];
             if (field === 'categories') return String((o.category_ids || [])[0] || '');
             if (field === 'tags') return (v || []).join(', ');
+            // 0 means "no shipping class" and must normalise to '' so it
+            // matches the placeholder option's value.
             if (field === 'shipping_class')
                 return o.shipping_class_id ? String(o.shipping_class_id) : '';
+            if (field === 'tax_class') return String(o.tax_class || '');
             // The row calls it `status`; the column and setter call it
             // `post_status`. Without this the original always reads as empty,
             // so the cell is marked dirty the moment it is touched.
