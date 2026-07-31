@@ -745,7 +745,10 @@
            VIEWPORT WIDTH
            ------------------------------------------------------------------ */
 
-        // Fixed columns: a checkbox and a 40px thumbnail, neither driven by text.
+        // Fixed columns. cb and thumb hold a checkbox and a 40px image; name
+        // is free text with no upper bound, so 220px is a working width rather
+        // than a measurement — wide enough to read a typical product title
+        // while leaving room for the id and link beside it.
         COL_WIDTHS: { cb: 42, thumb: 60, name: 220 },
 
         // Free-text columns have no bounded content to measure against, so they
@@ -755,14 +758,22 @@
         WIDE_COLUMNS: ['tags', 'description', 'short_description', 'purchase_note'],
         VISIBLE_DATA_COLUMNS: 9,
 
-        // Chrome around the text inside a cell: input padding, the select's
-        // chevron, the cell's own padding and border. Measured once rather
-        // than guessed per column.
-        COL_CHROME: { select: 46, input: 30 },
-        COL_MIN_WIDTH: 60,
+        // Chrome around the text inside a cell, measured from the rendered
+        // controls rather than guessed:
+        //   select — 12px left padding + 24px for the chevron + 2px border
+        //   input  — 12px padding either side + 2px border
+        //   both   — 8px cell padding either side
+        // A couple of pixels of slack keeps a descender or a wide glyph from
+        // touching the edge.
+        COL_CHROME: { select: 58, input: 46 },
+        // Floor low enough that a glyph-only column (★, ✓) is sized by its
+        // header rather than by an arbitrary minimum, but not so low that a
+        // column becomes hard to click.
+        COL_MIN_WIDTH: 48,
         COL_MAX_WIDTH: 240,
 
         _measuredWidths: null,
+        _measuredFromRows: null,
 
         /**
          * Width of a column, sized to its own widest content.
@@ -776,7 +787,16 @@
         measureColumnWidths: function () {
             var s = this;
 
-            if (s._measuredWidths) return s._measuredWidths;
+            // Cached per render pass, keyed on whether real rows exist: the
+            // first call happens before any cell is drawn and has to fall back
+            // to the hardcoded labels, so its result must not stick.
+            var hasRows = $('#wc-bulk-table tbody select[data-field]').length > 0;
+
+            if (s._measuredWidths && s._measuredFromRows === hasRows) {
+                return s._measuredWidths;
+            }
+
+            s._measuredFromRows = hasRows;
 
             var $probe = $('<span>')
                 .css({
@@ -840,20 +860,36 @@
          * is what tells measureColumnWidths() to use the narrower chrome.
          */
         columnOptionLabels: function (col) {
-            var i18n = WCB.i18n || {},
-                fixed = {
-                    stock_status: ['In Stock', 'Out of Stock', 'On Backorder'],
-                    post_status: ['Published', 'Draft', 'Pending', 'Private'],
-                    tax_status: ['Taxable', 'Shipping', 'None'],
-                    catalog_visibility: ['Visible', 'Catalog', 'Search', 'Hidden'],
-                    backorders: ['No', 'Notify', 'Yes'],
-                    featured: ['Yes', 'No'],
-                    virtual: ['Yes', 'No'],
-                    downloadable: ['Yes', 'No'],
-                    manage_stock: ['Yes', 'No'],
-                    sold_individually: ['Yes', 'No'],
-                    reviews_allowed: ['Yes', 'No'],
-                };
+            var i18n = WCB.i18n || {};
+
+            // Read the labels back off a rendered cell wherever possible: a
+            // second hardcoded list drifts from the renderers, and it did —
+            // "Shipping" here against "Shipping Only" in R.tax_status left the
+            // column 13px too narrow.
+            var $rendered = $('#wc-bulk-table tbody select[data-field="' + col + '"]').first();
+
+            if ($rendered.length) {
+                return $.map($rendered.find('option'), function (o) {
+                    return $(o).text();
+                });
+            }
+
+            // Fallbacks for the first paint, before any row exists.
+            var fixed = {
+                stock_status: ['In Stock', 'Out of Stock', 'On Backorder'],
+                post_status: ['Published', 'Draft', 'Pending', 'Private'],
+                tax_status: ['Taxable', 'Shipping Only', 'None'],
+                catalog_visibility: ['Visible', 'Catalog', 'Search', 'Hidden'],
+                backorders: ['No', 'Notify', 'Yes'],
+                // Glyphs, not words — sizing these for "Yes"/"No" would make
+                // the column wider than anything it ever shows.
+                featured: ['★', '☆'],
+                virtual: ['✓', '—'],
+                downloadable: ['✓', '—'],
+                manage_stock: ['✓', '—'],
+                sold_individually: ['✓', '—'],
+                reviews_allowed: ['✓', '—'],
+            };
 
             if (fixed[col]) return fixed[col];
 
@@ -977,16 +1013,13 @@
             s.clearColumnWidths();
 
             if (dataCols.length <= s.VISIBLE_DATA_COLUMNS) {
-                // Everything fits. The measured widths still have to be
-                // written — the stylesheet's blanket 120px rule would
-                // otherwise make an "On Backorder" select the same width as a
-                // "Yes/No" one — and the leftover space is shared out so the
-                // table still spans its container instead of leaving a gap.
-                var scale = s.fillScale(dataCols, $scroll, $table);
-                s.writeColumnWidths(dataCols, scale);
-                // The cap kicked in, so the columns no longer span the
-                // container on their own and a spacer has to take the rest.
-                s.syncFillerColumn(scale >= s.FILL_SCALE_MAX - 0.001);
+                // Everything fits, so each column keeps exactly the width its
+                // own content needs. Stretching them to span the container
+                // would undo the measurement — a Yes/No select does not become
+                // more readable at 240px. The leftover space goes to a spacer
+                // column instead.
+                s.writeColumnWidths(dataCols, 1);
+                s.syncFillerColumn(true);
                 return;
             }
 
@@ -1033,45 +1066,12 @@
         },
 
         /**
-         * How much to widen columns so the table spans its container.
-         *
-         * Capped: with only two or three columns on screen, stretching to fill
-         * a 1400px table would leave a "Yes/No" select absurdly wide. Past the
-         * cap the table simply stops short of the right edge.
-         */
-        FILL_SCALE_MAX: 1.6,
-
-        fillScale: function (dataCols, $scroll, $table) {
-            var s = this,
-                fixed = 0;
-
-            $table.find('thead th, thead td').each(function () {
-                var $cell = $(this);
-                if ($cell.hasClass('check-column') || $cell.hasClass('column-thumb')) {
-                    fixed += $cell.outerWidth() || 0;
-                }
-            });
-
-            var available = ($scroll.innerWidth() || 0) - fixed;
-            if (available <= 0) return 1;
-
-            var natural = 0;
-            $.each(dataCols, function (i, c) {
-                natural += s.columnWidth(c);
-            });
-            if (!natural) return 1;
-
-            return Math.max(1, Math.min(s.FILL_SCALE_MAX, available / natural));
-        },
-
-        /**
          * Absorb leftover width in a spacer column.
          *
          * The stylesheet pins the table to min-width:100% so it never leaves a
          * gap on the right. Under table-layout:fixed the browser hands any
-         * surplus to the real columns proportionally, which overrides
-         * FILL_SCALE_MAX. A trailing filler cell soaks it up instead, so the
-         * measured widths survive.
+         * surplus to the real columns proportionally, which would undo the
+         * measured widths. A trailing spacer soaks it up instead.
          */
         syncFillerColumn: function (needed) {
             var $table = $('#wc-bulk-table'),
