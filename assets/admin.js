@@ -636,7 +636,11 @@
                 },
                 // STANDARD FIELDS
                 type: function (p) {
-                    return '<td><span class="wc-bulk-ro">' + p.type + '</span></td>';
+                    return (
+                        '<td class="column-type"><span class="wc-bulk-ro">' +
+                        s.esc(p.type) +
+                        '</span></td>'
+                    );
                 },
                 tax_status: function (p) {
                     return s.renderSelectCell(p, 'tax_status', {
@@ -723,7 +727,7 @@
                     .toggleClass('row-selected', !!s.selectedRows[p.id]);
                 $.each(cols, function (j, col) {
                     if (R[col]) row.append(R[col](p));
-                    else row.append('<td>—</td>');
+                    else row.append('<td class="column-' + s.escAttr(col) + '">—</td>');
                 });
                 tbody.append(row);
             });
@@ -741,45 +745,148 @@
            VIEWPORT WIDTH
            ------------------------------------------------------------------ */
 
-        // Column widths, mirroring the rules in admin.css. Keep the two in sync.
+        // Fixed columns: a checkbox and a 40px thumbnail, neither driven by text.
         COL_WIDTHS: { cb: 42, thumb: 60, name: 220 },
 
-        // Per-column widths, sized to the widest header label or control.
-        // Keep in sync with the matching block in admin.css.
-        COL_SPECIFIC_WIDTHS: {
-            sku: 140,
-            regular_price: 110,
-            sale_price: 110,
-            stock_quantity: 90,
-            stock_status: 130,
-            post_status: 110,
-            type: 80,
-            tax_status: 110,
-            tax_class: 120,
-            shipping_class: 130,
-            catalog_visibility: 110,
-            backorders: 100,
-            weight: 90,
-            length: 90,
-            width: 90,
-            height: 90,
-            menu_order: 80,
-            featured: 60,
-            virtual: 60,
-            downloadable: 60,
-            manage_stock: 70,
-            sold_individually: 90,
-            reviews_allowed: 90,
-        },
+        // Free-text columns have no bounded content to measure against, so they
+        // keep a fixed generous width rather than growing without limit.
         COL_WIDTH_WIDE: 200,
         COL_WIDTH_DEFAULT: 120,
         WIDE_COLUMNS: ['tags', 'description', 'short_description', 'purchase_note'],
         VISIBLE_DATA_COLUMNS: 9,
 
+        // Chrome around the text inside a cell: input padding, the select's
+        // chevron, the cell's own padding and border. Measured once rather
+        // than guessed per column.
+        COL_CHROME: { select: 46, input: 30 },
+        COL_MIN_WIDTH: 60,
+        COL_MAX_WIDTH: 240,
+
+        _measuredWidths: null,
+
+        /**
+         * Width of a column, sized to its own widest content.
+         *
+         * Selects are bounded — "On Backorder" is as wide as Stock Status ever
+         * gets — so their column can be measured exactly. The same applies to
+         * the header label, which is often the widest thing in a numeric
+         * column. Everything is measured in a hidden span using the table's
+         * real font, so a theme that changes the admin font still lines up.
+         */
+        measureColumnWidths: function () {
+            var s = this;
+
+            if (s._measuredWidths) return s._measuredWidths;
+
+            var $probe = $('<span>')
+                .css({
+                    position: 'absolute',
+                    visibility: 'hidden',
+                    whiteSpace: 'pre',
+                    top: '-9999px',
+                    left: '-9999px',
+                })
+                .appendTo(document.body);
+
+            // Match the rendered cell font; falling back to the admin default
+            // keeps this working if the table is not on screen yet.
+            var $sample = $('#wc-bulk-table tbody td').first();
+            var font = $sample.length ? $sample.css('font') : '';
+            if (font) $probe.css('font', font);
+            $probe.css('font-size', '13px');
+
+            var textWidth = function (str) {
+                return $probe.text(str == null ? '' : String(str)).outerWidth() || 0;
+            };
+
+            var widths = {},
+                headers = WCB.col_headers || {},
+                columns = WCB.all_columns || {};
+
+            $.each(columns, function (key) {
+                if (key === 'cb' || key === 'thumb' || key === 'name') return;
+                if ($.inArray(key, s.WIDE_COLUMNS) !== -1) return;
+
+                // Header labels are bold, so they measure wider than body text.
+                $probe.css('font-weight', '600');
+                var widest = textWidth(headers[key] || key);
+                $probe.css('font-weight', '400');
+
+                var options = s.columnOptionLabels(key),
+                    isSelect = options.length > 0;
+
+                $.each(options, function (i, label) {
+                    var w = textWidth(label);
+                    if (w > widest) widest = w;
+                });
+
+                var chrome = isSelect ? s.COL_CHROME.select : s.COL_CHROME.input;
+                widths[key] = Math.min(
+                    s.COL_MAX_WIDTH,
+                    Math.max(s.COL_MIN_WIDTH, Math.ceil(widest) + chrome)
+                );
+            });
+
+            $probe.remove();
+            s._measuredWidths = widths;
+
+            return widths;
+        },
+
+        /**
+         * Every option label a column's select can show.
+         *
+         * Returns an empty array for columns rendered as a plain input, which
+         * is what tells measureColumnWidths() to use the narrower chrome.
+         */
+        columnOptionLabels: function (col) {
+            var i18n = WCB.i18n || {},
+                fixed = {
+                    stock_status: ['In Stock', 'Out of Stock', 'On Backorder'],
+                    post_status: ['Published', 'Draft', 'Pending', 'Private'],
+                    tax_status: ['Taxable', 'Shipping', 'None'],
+                    catalog_visibility: ['Visible', 'Catalog', 'Search', 'Hidden'],
+                    backorders: ['No', 'Notify', 'Yes'],
+                    featured: ['Yes', 'No'],
+                    virtual: ['Yes', 'No'],
+                    downloadable: ['Yes', 'No'],
+                    manage_stock: ['Yes', 'No'],
+                    sold_individually: ['Yes', 'No'],
+                    reviews_allowed: ['Yes', 'No'],
+                };
+
+            if (fixed[col]) return fixed[col];
+
+            // These are populated from the store's own data, so the widest
+            // label depends on what the shop actually has.
+            if (col === 'tax_class') {
+                return $.map(WCB.tax_classes || [], function (c) {
+                    return c.name;
+                });
+            }
+            if (col === 'shipping_class') {
+                return $.map(WCB.shipping_classes || [], function (c) {
+                    return c.name;
+                });
+            }
+            if (col === 'categories') {
+                var labels = $.map(WCB.all_cats || [], function (c) {
+                    return c.name;
+                });
+                labels.push(i18n.no_category || '');
+                return labels;
+            }
+
+            return [];
+        },
+
         columnWidth: function (col) {
             if (this.COL_WIDTHS[col]) return this.COL_WIDTHS[col];
-            if (this.COL_SPECIFIC_WIDTHS[col]) return this.COL_SPECIFIC_WIDTHS[col];
             if ($.inArray(col, this.WIDE_COLUMNS) !== -1) return this.COL_WIDTH_WIDE;
+
+            var measured = this.measureColumnWidths();
+            if (measured[col]) return measured[col];
+
             return this.COL_WIDTH_DEFAULT;
         },
 
@@ -870,9 +977,22 @@
             s.clearColumnWidths();
 
             if (dataCols.length <= s.VISIBLE_DATA_COLUMNS) {
-                // Everything fits: let the stylesheet's widths apply.
+                // Everything fits. The measured widths still have to be
+                // written — the stylesheet's blanket 120px rule would
+                // otherwise make an "On Backorder" select the same width as a
+                // "Yes/No" one — and the leftover space is shared out so the
+                // table still spans its container instead of leaving a gap.
+                var scale = s.fillScale(dataCols, $scroll, $table);
+                s.writeColumnWidths(dataCols, scale);
+                // The cap kicked in, so the columns no longer span the
+                // container on their own and a spacer has to take the rest.
+                s.syncFillerColumn(scale >= s.FILL_SCALE_MAX - 0.001);
                 return;
             }
+
+            // More columns than fit: they stretch to span the container, so no
+            // spacer is needed.
+            s.syncFillerColumn(false);
 
             // Measure the fixed columns as actually rendered: padding and
             // borders make the painted width larger than the CSS width, and
@@ -904,17 +1024,82 @@
                 natural += s.columnWidth(c);
             });
 
-            // Only stretch — never shrink below the stylesheet widths, or the
+            // Only stretch — never shrink below the measured widths, or the
             // columns would be cramped on a narrow screen.
             var scale = available / natural;
             if (scale < 1) scale = 1;
 
-            var css = [];
+            s.writeColumnWidths(dataCols, scale);
+        },
+
+        /**
+         * How much to widen columns so the table spans its container.
+         *
+         * Capped: with only two or three columns on screen, stretching to fill
+         * a 1400px table would leave a "Yes/No" select absurdly wide. Past the
+         * cap the table simply stops short of the right edge.
+         */
+        FILL_SCALE_MAX: 1.6,
+
+        fillScale: function (dataCols, $scroll, $table) {
+            var s = this,
+                fixed = 0;
+
+            $table.find('thead th, thead td').each(function () {
+                var $cell = $(this);
+                if ($cell.hasClass('check-column') || $cell.hasClass('column-thumb')) {
+                    fixed += $cell.outerWidth() || 0;
+                }
+            });
+
+            var available = ($scroll.innerWidth() || 0) - fixed;
+            if (available <= 0) return 1;
+
+            var natural = 0;
+            $.each(dataCols, function (i, c) {
+                natural += s.columnWidth(c);
+            });
+            if (!natural) return 1;
+
+            return Math.max(1, Math.min(s.FILL_SCALE_MAX, available / natural));
+        },
+
+        /**
+         * Absorb leftover width in a spacer column.
+         *
+         * The stylesheet pins the table to min-width:100% so it never leaves a
+         * gap on the right. Under table-layout:fixed the browser hands any
+         * surplus to the real columns proportionally, which overrides
+         * FILL_SCALE_MAX. A trailing filler cell soaks it up instead, so the
+         * measured widths survive.
+         */
+        syncFillerColumn: function (needed) {
+            var $table = $('#wc-bulk-table'),
+                $head = $table.find('thead tr');
+
+            $table.find('.wc-bulk-col-filler').remove();
+
+            if (!needed || !$head.length) return;
+
+            $head.append('<th class="wc-bulk-col-filler" aria-hidden="true"></th>');
+            $table.find('tbody tr').each(function () {
+                $(this).append('<td class="wc-bulk-col-filler" aria-hidden="true"></td>');
+            });
+        },
+
+        /**
+         * Pin each column to its measured width, optionally scaled up.
+         *
+         * The stylesheet's generic width rule is highly specific
+         * (.wc-bulk-table thead th:not()...:not()), so these selectors must
+         * out-specify it or the widths never take effect.
+         */
+        writeColumnWidths: function (dataCols, scale) {
+            var s = this,
+                css = [];
+
             $.each(dataCols, function (i, c) {
                 var w = Math.floor(s.columnWidth(c) * scale);
-                // The stylesheet's generic width rule is highly specific
-                // (.wc-bulk-table thead th:not()...:not()), so these selectors
-                // must out-specify it or the widths never take effect.
                 var sel = '#wc-bulk-table thead th.column-' + c +
                     ',#wc-bulk-table thead td.column-' + c +
                     ',#wc-bulk-table tbody td.column-' + c;
@@ -989,8 +1174,12 @@
                         : value === null || value === undefined || value === ''
                           ? ''
                           : value;
+            // The column-<field> class is what per-column widths hook onto;
+            // without it every generic cell falls back to the blanket rule.
             return (
-                '<td><input type="' +
+                '<td class="column-' +
+                s.escAttr(field) +
+                '"><input type="' +
                 type +
                 '" class="wc-bulk-inline-input' +
                 ch +
@@ -1017,7 +1206,9 @@
                         ? s.changes[p.id][field]
                         : value || '';
             return (
-                '<td><textarea class="wc-bulk-inline-textarea' +
+                '<td class="column-' +
+                s.escAttr(field) +
+                '"><textarea class="wc-bulk-inline-textarea' +
                 ch +
                 '" data-product-id="' +
                 p.id +
@@ -1045,7 +1236,9 @@
                           : fallback
                 );
             var h =
-                '<td><select class="wc-bulk-inline-select' +
+                '<td class="column-' +
+                s.escAttr(field) +
+                '"><select class="wc-bulk-inline-select' +
                 ch +
                 '" data-product-id="' +
                 p.id +
@@ -1098,7 +1291,9 @@
                           : 'no';
             var ch = s.isChanged(p.id, field) ? ' changed' : '';
             return (
-                '<td><select class="wc-bulk-inline-select' +
+                '<td class="column-' +
+                s.escAttr(field) +
+                '"><select class="wc-bulk-inline-select' +
                 ch +
                 '" data-product-id="' +
                 p.id +
@@ -1628,6 +1823,10 @@
         // preserving each row's current selection.
         syncCategoryOptions: function (cat) {
             if (!cat) return;
+
+            // A longer category name can widen the Categories column, so the
+            // measured widths are no longer valid.
+            this._measuredWidths = null;
 
             $('.wcbx-cats').each(function () {
                 var $sel = $(this);

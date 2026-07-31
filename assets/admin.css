@@ -159,32 +159,14 @@
 .wc-bulk-table thead th:not(.check-column):not(.column-thumb):not(.column-name),
 .wc-bulk-table thead td:not(.check-column):not(.column-thumb):not(.column-name){width:120px!important;min-width:120px!important;}
 
-/* Per-column widths, sized to the widest header label or control.
-   Keep in sync with COL_SPECIFIC_WIDTHS in admin.js — the scroll
-   calculation reads the same numbers. */
-#wc-bulk-table thead th.column-sku,#wc-bulk-table thead td.column-sku,#wc-bulk-table tbody td.column-sku{box-sizing:border-box;width:140px!important;min-width:140px!important;}
-#wc-bulk-table thead th.column-regular_price,#wc-bulk-table thead td.column-regular_price,#wc-bulk-table tbody td.column-regular_price{box-sizing:border-box;width:110px!important;min-width:110px!important;}
-#wc-bulk-table thead th.column-sale_price,#wc-bulk-table thead td.column-sale_price,#wc-bulk-table tbody td.column-sale_price{box-sizing:border-box;width:110px!important;min-width:110px!important;}
-#wc-bulk-table thead th.column-stock_quantity,#wc-bulk-table thead td.column-stock_quantity,#wc-bulk-table tbody td.column-stock_quantity{box-sizing:border-box;width:90px!important;min-width:90px!important;}
-#wc-bulk-table thead th.column-stock_status,#wc-bulk-table thead td.column-stock_status,#wc-bulk-table tbody td.column-stock_status{box-sizing:border-box;width:130px!important;min-width:130px!important;}
-#wc-bulk-table thead th.column-post_status,#wc-bulk-table thead td.column-post_status,#wc-bulk-table tbody td.column-post_status{box-sizing:border-box;width:110px!important;min-width:110px!important;}
-#wc-bulk-table thead th.column-type,#wc-bulk-table thead td.column-type,#wc-bulk-table tbody td.column-type{box-sizing:border-box;width:80px!important;min-width:80px!important;}
-#wc-bulk-table thead th.column-tax_status,#wc-bulk-table thead td.column-tax_status,#wc-bulk-table tbody td.column-tax_status{box-sizing:border-box;width:110px!important;min-width:110px!important;}
-#wc-bulk-table thead th.column-tax_class,#wc-bulk-table thead td.column-tax_class,#wc-bulk-table tbody td.column-tax_class{box-sizing:border-box;width:120px!important;min-width:120px!important;}
-#wc-bulk-table thead th.column-shipping_class,#wc-bulk-table thead td.column-shipping_class,#wc-bulk-table tbody td.column-shipping_class{box-sizing:border-box;width:130px!important;min-width:130px!important;}
-#wc-bulk-table thead th.column-catalog_visibility,#wc-bulk-table thead td.column-catalog_visibility,#wc-bulk-table tbody td.column-catalog_visibility{box-sizing:border-box;width:110px!important;min-width:110px!important;}
-#wc-bulk-table thead th.column-backorders,#wc-bulk-table thead td.column-backorders,#wc-bulk-table tbody td.column-backorders{box-sizing:border-box;width:100px!important;min-width:100px!important;}
-#wc-bulk-table thead th.column-weight,#wc-bulk-table thead td.column-weight,#wc-bulk-table tbody td.column-weight{box-sizing:border-box;width:90px!important;min-width:90px!important;}
-#wc-bulk-table thead th.column-length,#wc-bulk-table thead td.column-length,#wc-bulk-table tbody td.column-length{box-sizing:border-box;width:90px!important;min-width:90px!important;}
-#wc-bulk-table thead th.column-width,#wc-bulk-table thead td.column-width,#wc-bulk-table tbody td.column-width{box-sizing:border-box;width:90px!important;min-width:90px!important;}
-#wc-bulk-table thead th.column-height,#wc-bulk-table thead td.column-height,#wc-bulk-table tbody td.column-height{box-sizing:border-box;width:90px!important;min-width:90px!important;}
-#wc-bulk-table thead th.column-menu_order,#wc-bulk-table thead td.column-menu_order,#wc-bulk-table tbody td.column-menu_order{box-sizing:border-box;width:80px!important;min-width:80px!important;}
-#wc-bulk-table thead th.column-featured,#wc-bulk-table thead td.column-featured,#wc-bulk-table tbody td.column-featured{box-sizing:border-box;width:60px!important;min-width:60px!important;}
-#wc-bulk-table thead th.column-virtual,#wc-bulk-table thead td.column-virtual,#wc-bulk-table tbody td.column-virtual{box-sizing:border-box;width:60px!important;min-width:60px!important;}
-#wc-bulk-table thead th.column-downloadable,#wc-bulk-table thead td.column-downloadable,#wc-bulk-table tbody td.column-downloadable{box-sizing:border-box;width:60px!important;min-width:60px!important;}
-#wc-bulk-table thead th.column-manage_stock,#wc-bulk-table thead td.column-manage_stock,#wc-bulk-table tbody td.column-manage_stock{box-sizing:border-box;width:70px!important;min-width:70px!important;}
-#wc-bulk-table thead th.column-sold_individually,#wc-bulk-table thead td.column-sold_individually,#wc-bulk-table tbody td.column-sold_individually{box-sizing:border-box;width:90px!important;min-width:90px!important;}
-#wc-bulk-table thead th.column-reviews_allowed,#wc-bulk-table thead td.column-reviews_allowed,#wc-bulk-table tbody td.column-reviews_allowed{box-sizing:border-box;width:90px!important;min-width:90px!important;}
+/* Per-column widths are measured at runtime by measureColumnWidths() in
+   admin.js and injected as #wc-bulk-col-widths: a select is sized to its
+   longest option, an input to its header. Hardcoding them here would fight
+   that, and could not account for category or tax-class names that differ
+   per store.
+
+   The generic rule below is only a floor for columns rendered before the
+   measurement runs. */
 
 /* Expandable text columns get wider */
 .wc-bulk-table thead th.column-tags,
@@ -467,3 +449,8 @@
 /* Hide spinners */
 .wc-bulk-inline-input[type="number"]::-webkit-inner-spin-button,.wc-bulk-inline-input[type="number"]::-webkit-outer-spin-button{opacity:0;transition:opacity var(--wcb-trans);}
 .wc-bulk-inline-input[type="number"]:hover::-webkit-inner-spin-button,.wc-bulk-inline-input[type="number"]:focus::-webkit-inner-spin-button{opacity:1;}
+
+/* Spacer column: absorbs the width left over when few columns are shown, so
+   min-width:100% on the table cannot inflate the real ones. Purely visual —
+   carries no content and is hidden from assistive tech. */
+#wc-bulk-table .wc-bulk-col-filler{width:auto!important;min-width:0!important;max-width:none!important;padding:0!important;border-left:0!important;background:transparent;}
