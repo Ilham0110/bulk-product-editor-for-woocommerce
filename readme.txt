@@ -4,7 +4,7 @@ Tags: woocommerce, bulk edit, products, inline edit, spreadsheet
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.3
-Stable tag: 3.11.0
+Stable tag: 3.12.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,9 +20,11 @@ Plugin ini menampilkan semua produk dalam satu tabel yang bisa diketik langsung,
 
 Klik sel mana pun, ketik, lanjut ke sel berikutnya. Sel yang berubah ditandai warna sampai disimpan. Tekan Ctrl+S (atau Cmd+S) untuk menyimpan semua perubahan sekaligus.
 
-**29 kolom yang bisa dipilih**
+**30 kolom yang bisa dipilih, 28 dapat disunting**
 
-Dari harga, stok, dan SKU sampai dimensi, tax class, shipping class, visibility, purchase note, dan menu order. Pilihan kolom disimpan per-user, jadi tiap admin punya layout sendiri.
+Dari nama produk, harga, stok, dan SKU sampai dimensi, tax class, shipping class, visibility, purchase note, dan menu order. Pilihan kolom disimpan per-user, jadi tiap admin punya layout sendiri.
+
+Kolom Product Name menyertakan tautan ke halaman produk lengkap dan ID-nya, sehingga baris tetap mudah dikenali meski namanya sedang diubah.
 
 **Filter dan Saved Views**
 
@@ -81,6 +83,16 @@ Hanya preferensi plugin ini (pilihan kolom dan saved views). Produk, kategori, d
 
 == Changelog ==
 
+= 3.12.0 =
+* Baru: nama produk kini dapat disunting langsung dari tabel. Kolom Product Name tetap menampilkan tautan ke halaman produk lengkap dan ID-nya agar baris mudah dikenali.
+* Nama produk tidak boleh dikosongkan — ditolak di sisi browser maupun server, sehingga produk tanpa judul tidak pernah tersimpan.
+* Perbaikan: pesan "%d failed:" kini memakai bentuk jamak yang benar.
+* Ditambahkan `languages/wc-bulk-editor.pot` sehingga plugin siap diterjemahkan.
+* Keamanan: menggandakan produk kini memeriksa capability `read_post` per produk, menyamai pemeriksaan pada trash dan delete.
+* Keamanan: halaman editor menolak akses langsung lewat URL bagi pengguna tanpa hak `manage_woocommerce`.
+* Sesi yang kedaluwarsa kini dilaporkan sebagai "sesi kedaluwarsa, muat ulang halaman" alih-alih pesan galat umum.
+* Seluruh label kolom kini dapat diterjemahkan.
+
 = 3.11.0 =
 * Keamanan: label option tax class dan shipping class kini di-escape. Sebelumnya nama tax class yang mengandung HTML dapat dieksekusi di browser.
 * Keamanan: penyuntingan produk kini memeriksa capability `edit_post` per produk, menyamai pemeriksaan yang sudah ada pada trash dan delete.
@@ -94,6 +106,9 @@ Hanya preferensi plugin ini (pilihan kolom dan saved views). Produk, kategori, d
 * Data halaman pertama dimuat bersama halaman, sehingga tabel tampil tanpa menunggu AJAX.
 
 == Upgrade Notice ==
+
+= 3.12.0 =
+Menambahkan penyuntingan nama produk, plus dua pemeriksaan izin tambahan. Disarankan memperbarui.
 
 = 3.11.0 =
 Berisi perbaikan keamanan (escaping dan pemeriksaan izin). Disarankan memperbarui.

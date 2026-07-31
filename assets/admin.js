@@ -1,7 +1,7 @@
 /*!
  * WooCommerce Bulk Product Editor — admin UI
  *
- * Version: 3.11.0
+ * Version: 3.12.0
  *
  * Spreadsheet-style inline editing for the product list. Everything hangs off
  * a single controller object (B) that is booted on DOM ready.
@@ -474,19 +474,38 @@
                         '" class="wc-bulk-thumb" width="40" height="40" loading="lazy" /></td>'
                     );
                 },
+                // Editable, but the link to the full product screen and the id
+                // are what make a row identifiable — so the input sits beside
+                // them rather than replacing them.
                 name: function (p) {
+                    var ch = s.isChanged(p.id, 'name') ? ' changed' : '',
+                        cv =
+                            s.changes[p.id] && s.changes[p.id].name !== undefined
+                                ? s.changes[p.id].name
+                                : p.name || '';
+
                     return (
-                        '<td class="column-name"><strong><a href="' +
+                        '<td class="column-name"><div class="wc-bulk-name-cell">' +
+                        '<input type="text" class="wc-bulk-inline-input wcbx-name' +
+                        ch +
+                        '" data-product-id="' +
+                        p.id +
+                        '" data-field="name" value="' +
+                        s.escAttr(cv) +
+                        '" />' +
+                        '<span class="wc-bulk-name-meta">' +
+                        '<a href="' +
                         s.esc(p.edit_url) +
-                        '" class="wc-bulk-product-name" target="_blank">' +
-                        s.esc(p.name) +
-                        '</a></strong><span class="wc-bulk-product-id"> #' +
+                        '" class="wc-bulk-name-link" target="_blank" rel="noopener" title="' +
+                        s.escAttr(WCB.i18n.open_product) +
+                        '"><span class="dashicons dashicons-external"></span></a>' +
+                        '<span class="wc-bulk-product-id">#' +
                         p.id +
                         '</span>' +
                         (p.type !== 'simple'
-                            ? ' <small style="color:#999">— ' + p.type + '</small>'
+                            ? '<span class="wc-bulk-type-badge">' + s.esc(p.type) + '</span>'
                             : '') +
-                        '</td>'
+                        '</span></div></td>'
                     );
                 },
                 sku: function (p) {
@@ -1235,6 +1254,23 @@
                 ids = Object.keys(s.changes);
             if (!ids.length) {
                 alert(WCB.i18n.no_changes);
+                return;
+            }
+            // The server rejects a blank name too, but catching it here spares
+            // the round trip and points at the offending row.
+            var blank = null;
+            $.each(s.changes, function (pid, fields) {
+                if (fields.name !== undefined && $.trim(fields.name) === '') {
+                    blank = pid;
+                    return false;
+                }
+            });
+            if (blank !== null) {
+                alert(WCB.i18n.name_required);
+                $('input[data-field="name"][data-product-id="' + blank + '"]')
+                    .focus()
+                    .closest('tr')[0]
+                    .scrollIntoView({ block: 'center' });
                 return;
             }
             if (!confirm(WCB.i18n.confirm_save.replace('{count}', ids.length))) return;

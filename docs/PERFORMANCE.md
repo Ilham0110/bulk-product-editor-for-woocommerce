@@ -468,7 +468,7 @@ Yang diperiksa saat membuka Bulk Editor:
 **Uji paginasi:** buka halaman 1, lalu halaman 2. Jumlah query harus **hampir
 sama**. Kalau naik seiring nomor halaman, ada query yang tidak dibatasi.
 
-**Uji dengan kolom banyak:** aktifkan semua 29 kolom lalu muat ulang. Jumlah
+**Uji dengan kolom banyak:** aktifkan semua 30 kolom lalu muat ulang. Jumlah
 query seharusnya tidak berubah — semua data sudah diambil `product_to_row()`.
 Kalau naik, ada kolom yang query sendiri.
 

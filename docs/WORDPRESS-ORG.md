@@ -68,7 +68,7 @@ Deskripsi panjang di sini. Paragraf biasa, tanpa HTML.
 
 Fitur:
 
-* Inline editing 29 kolom
+* Inline editing 30 kolom, 28 di antaranya dapat disunting
 * Quick Apply untuk perubahan harga massal
 * Saved views
 * Export CSV

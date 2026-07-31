@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Plugin Name:          Bulk Product Editor for WooCommerce
  * Plugin URI:           https://github.com/Ilham0110/wc-bulk-editor
  * Description:          Spreadsheet-style inline editing for WooCommerce products.
- * Version:              3.11.0
+ * Version:              3.12.0
  * Author:               Ilham Darmawan
  * Author URI:           https://github.com/Ilham0110
  * Requires at least:    6.5
@@ -26,7 +26,7 @@ if (!in_array('woocommerce/woocommerce.php', (array) apply_filters('active_plugi
     return;
 }
 
-define('WCBULK_VERSION', '3.11.0');
+define('WCBULK_VERSION', '3.12.0');
 define('WCBULK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WCBULK_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -57,7 +57,7 @@ final class WC_Bulk_Product_Editor
      */
     private const COLUMNS = [
         'thumb'              => ['label' => 'Image',             'default' => true],
-        'name'               => ['label' => 'Product Name',      'default' => true],
+        'name'               => ['label' => 'Product Name',      'default' => true,  'editable' => true],
         'sku'                => ['label' => 'SKU',               'default' => true,  'editable' => true],
         'regular_price'      => ['label' => 'Regular Price',     'default' => true,  'editable' => true],
         'sale_price'         => ['label' => 'Sale Price',        'default' => true,  'editable' => true],
@@ -382,6 +382,8 @@ final class WC_Bulk_Product_Editor
             'creating'            => __('Creating...', 'wc-bulk-editor'),
             'create_product'      => __('Create Product', 'wc-bulk-editor'),
             'session_expired'     => __('Your session expired. Reload the page and try again.', 'wc-bulk-editor'),
+            'open_product'        => __('Open product editor', 'wc-bulk-editor'),
+            'name_required'       => __('Product name cannot be empty.', 'wc-bulk-editor'),
         ];
     }
 
@@ -865,6 +867,7 @@ final class WC_Bulk_Product_Editor
                 isset(self::SCALAR_SETTERS[$field]) => $this->set_scalar($product, $field, $value),
                 isset(self::BOOL_SETTERS[$field])   => $this->set_bool($product, $field, $value),
                 isset(self::ENUM_SETTERS[$field])   => $this->set_enum($product, $field, $value),
+                $field === 'name'                   => $this->set_name($product, $value),
                 $field === 'post_status'            => $this->set_post_status($product, $value),
                 $field === 'tax_class'              => $product->set_tax_class((string) $value),
                 $field === 'shipping_class'         => $product->set_shipping_class_id(absint($value)),
@@ -886,6 +889,28 @@ final class WC_Bulk_Product_Editor
             'purchase_note'                    => sanitize_textarea_field($value),
             default                            => $value === '' ? '' : sanitize_text_field($value),
         });
+    }
+
+    /**
+     * Rename a product.
+     *
+     * Kept out of SCALAR_SETTERS because a blank name is not a valid state:
+     * WordPress would show "(no title)" everywhere and the row would become
+     * hard to identify. An empty submission is therefore ignored rather than
+     * written, and the row keeps its previous name.
+     */
+    private function set_name(WC_Product $product, mixed $value): void
+    {
+        $name = sanitize_text_field((string) $value);
+
+        if ($name === '') {
+            throw new WC_Data_Exception(
+                'wcbulk_empty_name',
+                __('Product name cannot be empty.', 'wc-bulk-editor')
+            );
+        }
+
+        $product->set_name($name);
     }
 
     private function set_bool(WC_Product $product, string $field, mixed $value): void

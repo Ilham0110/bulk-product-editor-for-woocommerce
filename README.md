@@ -3,7 +3,7 @@
 Edit ratusan produk WooCommerce langsung dari satu tabel ala spreadsheet —
 tanpa membuka halaman edit produk satu per satu.
 
-**Versi 3.11.0**
+**Versi 3.12.0**
 
 ---
 
@@ -21,11 +21,15 @@ Klik sel mana pun, ketik, lanjut ke sel berikutnya. Sel yang berubah ditandai
 warna sampai disimpan. Tekan **Ctrl+S** (atau ⌘+S) untuk menyimpan semua
 perubahan sekaligus. Tombol *Discard* mengembalikan semuanya ke nilai server.
 
-**29 kolom yang bisa dipilih**
-Dari harga, stok, dan SKU sampai dimensi, tax class, shipping class, visibility,
-purchase note, dan menu order. Pilih kolom yang kamu butuhkan lewat tombol
-**Columns** — bisa di-drag untuk mengatur urutan. Pilihan kolom disimpan
-per-user, jadi tiap admin punya layout sendiri.
+**30 kolom yang bisa dipilih, 28 dapat disunting**
+Dari nama produk, harga, stok, dan SKU sampai dimensi, tax class, shipping
+class, visibility, purchase note, dan menu order. Pilih kolom yang kamu
+butuhkan lewat tombol **Columns** — bisa di-drag untuk mengatur urutan.
+Pilihan kolom disimpan per-user, jadi tiap admin punya layout sendiri.
+
+Kolom **Product Name** menyertakan tautan ke halaman produk lengkap dan ID-nya,
+sehingga baris tetap mudah dikenali meski namanya sedang diubah. Nama tidak
+boleh dikosongkan.
 
 **Filter & Saved Views**
 Saring produk berdasarkan kata kunci (nama/SKU), kategori, tipe, status, status

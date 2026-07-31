@@ -183,7 +183,7 @@ Titik masuk tunggal untuk semua penulisan produk. Field dirutekan lewat
 | `SCALAR_SETTERS` | `sku`, `weight`, `menu_order` | cast string, panggil setter |
 | `BOOL_SETTERS` | `featured`, `virtual` | `'yes'` → `true` |
 | `ENUM_SETTERS` | `stock_status`, `backorders` | **divalidasi terhadap daftar nilai sah** |
-| kasus khusus | `post_status`, `categories`, `tags`, `tax_class`, `shipping_class` | method `set_*()` sendiri |
+| kasus khusus | `name`, `post_status`, `categories`, `tags`, `tax_class`, `shipping_class` | method `set_*()` sendiri |
 
 Nilai non-skalar ditolak kecuali `categories` dan `tags` (yang memang array).
 
@@ -194,9 +194,37 @@ Nilai non-skalar ditolak kecuali `categories` dan `tags` (yang memang array).
    `set_*()` sendiri dan daftarkan di `match` pada `apply_fields()`.
 3. Tambahkan ke `product_to_row()` supaya nilainya sampai ke browser.
 4. Kalau tipenya tidak biasa, tambahkan cabang di `origVal()` (JS).
-5. Kalau butuh renderer khusus, tambahkan di objek `R` (`admin.js:443`).
+5. Kalau butuh renderer khusus, tambahkan di objek `R`.
+6. Tambahkan label di `column_labels()` dan `column_headers()`, atau kolom itu
+   akan memakai teks Inggris dari konstanta.
 
 Lewatkan salah satu langkah dan field itu akan gagal secara diam-diam.
+
+### Menolak nilai, bukan mengabaikannya
+
+Sebagian besar setter mengabaikan input tak sah tanpa suara — `set_enum()`
+membuang nilai di luar daftar, `set_bool()` hanya menerima `'yes'`/`'no'`. Itu
+tepat untuk field yang punya nilai default yang masuk akal.
+
+`set_name()` berbeda: ia **melempar `WC_Data_Exception`** saat nama kosong.
+
+```php
+if ($name === '') {
+    throw new WC_Data_Exception(
+        'wcbulk_empty_name',
+        __('Product name cannot be empty.', 'wc-bulk-editor')
+    );
+}
+```
+
+Alasannya, mengabaikan diam-diam akan menyesatkan: user mengosongkan nama,
+menekan Save, melihat "1 product updated", lalu menemukan namanya tidak
+berubah. Exception ditangkap `try/catch` per produk di `wc_bulk_save_inline()`
+dan dilaporkan sebagai kegagalan per-item — produk lain dalam batch yang sama
+tetap tersimpan.
+
+Pakai pola ini kalau nilai kosong berarti **keadaan rusak**, bukan sekadar
+"tidak diubah".
 
 ### Kejutan yang sengaja: stock quantity
 

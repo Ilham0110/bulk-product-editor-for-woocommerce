@@ -432,7 +432,7 @@ Diurutkan menurut kemungkinan menemukan kerusakan:
 4. **Console bersih** — nol error setelah membuka semua modal
 5. **Query Monitor** — nol PHP notice, jumlah query tidak melonjak saat
    paginasi
-6. **Aktifkan semua 29 kolom** — jumlah query tidak berubah
+6. **Aktifkan semua 30 kolom** — jumlah query tidak berubah
 7. **Sebagai `shop_manager`** — bukan hanya administrator
 8. **Bulk action** — trash dan duplicate masih bekerja
 9. **Export CSV** — buka di spreadsheet, pastikan formula tidak dieksekusi
