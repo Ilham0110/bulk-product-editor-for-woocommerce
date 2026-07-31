@@ -358,8 +358,10 @@ final class WC_Bulk_Product_Editor
     {
         $this->guard();
 
-        $page     = max(1, absint($_POST['page'] ?? 1));
-        $per_page = min(absint($_POST['per_page'] ?? 50) ?: 50, self::MAX_PER_PAGE);
+        // absint() takes the absolute value, so a negative page would silently
+        // become a positive one — cast first, then clamp.
+        $page     = max(1, (int) ($_POST['page'] ?? 1));
+        $per_page = min(max(1, (int) ($_POST['per_page'] ?? 50) ?: 50), self::MAX_PER_PAGE);
         $status   = $this->post_string('status');
 
         $args = [
