@@ -1384,11 +1384,11 @@
                     var active = $.inArray(key, activeCols) !== -1;
                     list.append(
                         '<div class="wc-bulk-column-item" data-column="' +
-                            B.escAttr(key) +
+                            s.escAttr(key) +
                             '"><span class="dashicons dashicons-menu"></span><input type="checkbox" ' +
                             (active ? 'checked' : '') +
                             ' /><span>' +
-                            B.esc(col.label) +
+                            s.esc(col.label) +
                             '</span>' +
                             (col.editable
                                 ? '<span class="dashicons dashicons-edit" title="Editable"></span>'
