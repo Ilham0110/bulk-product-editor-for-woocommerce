@@ -155,7 +155,7 @@
 /* Column widths */
 .wc-bulk-table .check-column{width:42px!important;min-width:42px!important;}
 .wc-bulk-table .column-thumb{width:60px!important;min-width:60px!important;max-width:60px!important;}
-.wc-bulk-table .column-name{width:200px!important;min-width:200px!important;}
+.wc-bulk-table .column-name{width:220px!important;min-width:220px!important;}
 .wc-bulk-table thead th:not(.check-column):not(.column-thumb):not(.column-name),
 .wc-bulk-table thead td:not(.check-column):not(.column-thumb):not(.column-name){width:120px!important;min-width:120px!important;}
 
@@ -229,13 +229,19 @@
    The cell stacks an editable input over a meta line holding the link to the
    full product screen, the id, and the type badge — the input alone would
    leave a row hard to identify. */
-.wc-bulk-name-cell{display:flex;flex-direction:column;gap:1px;min-width:0;}
-.wc-bulk-name-cell .wcbx-name{font-weight:600;font-size:13px;}
-.wc-bulk-name-meta{display:flex;align-items:center;gap:6px;padding-left:5px;line-height:1;}
+/* Laid out on one line, not stacked: a meta row underneath would make this
+   cell taller than every other one, and the inputs across the row would stop
+   lining up with it. */
+.wc-bulk-name-cell{display:flex;align-items:center;gap:3px;min-width:0;height:40px;}
+.wc-bulk-name-cell .wcbx-name{flex:1 1 auto;min-width:0;font-weight:600;font-size:13px;}
+.wc-bulk-name-meta{display:flex;align-items:center;gap:3px;flex:0 0 auto;line-height:1;white-space:nowrap;}
 .wc-bulk-name-link{display:inline-flex;align-items:center;color:var(--wcb-gray-500);text-decoration:none;}
 .wc-bulk-name-link:hover{color:var(--wcb-primary);}
-.wc-bulk-name-link .dashicons{font-size:14px;width:14px;height:14px;}
-.wc-bulk-type-badge{color:var(--wcb-gray-500);font-size:11px;font-style:italic;}
+.wc-bulk-name-link .dashicons{font-size:15px;width:15px;height:15px;}
+/* Variable, grouped and external products carry an icon instead of a word —
+   the tooltip names the type. */
+.wc-bulk-type-badge{display:inline-flex;align-items:center;color:var(--wcb-gray-500);cursor:help;}
+.wc-bulk-type-badge .dashicons{font-size:14px;width:14px;height:14px;}
 .wc-bulk-product-name{font-weight:600;color:var(--wcb-gray-900);text-decoration:none;font-size:13px;}
 .wc-bulk-product-name:hover{color:var(--wcb-primary);}
 .wc-bulk-product-id{color:var(--wcb-gray-500);font-size:11px;font-weight:400;}

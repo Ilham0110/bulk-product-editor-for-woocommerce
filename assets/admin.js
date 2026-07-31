@@ -475,8 +475,11 @@
                     );
                 },
                 // Editable, but the link to the full product screen and the id
-                // are what make a row identifiable — so the input sits beside
-                // them rather than replacing them.
+                // are what make a row identifiable — so they sit beside the
+                // input on the same line, keeping this cell the same height as
+                // every other one. The type is shown as an icon with a tooltip
+                // rather than a word, to leave the input as much room as
+                // possible in a 220px column.
                 name: function (p) {
                     var ch = s.isChanged(p.id, 'name') ? ' changed' : '',
                         cv =
@@ -494,17 +497,21 @@
                         s.escAttr(cv) +
                         '" />' +
                         '<span class="wc-bulk-name-meta">' +
+                        (p.type !== 'simple'
+                            ? '<span class="wc-bulk-type-badge" title="' +
+                              s.escAttr(p.type) +
+                              '"><span class="dashicons dashicons-networking"></span></span>'
+                            : '') +
+                        '<span class="wc-bulk-product-id" title="' +
+                        s.escAttr(WCB.i18n.product_id_title.replace('{id}', p.id)) +
+                        '">#' +
+                        p.id +
+                        '</span>' +
                         '<a href="' +
                         s.esc(p.edit_url) +
                         '" class="wc-bulk-name-link" target="_blank" rel="noopener" title="' +
                         s.escAttr(WCB.i18n.open_product) +
                         '"><span class="dashicons dashicons-external"></span></a>' +
-                        '<span class="wc-bulk-product-id">#' +
-                        p.id +
-                        '</span>' +
-                        (p.type !== 'simple'
-                            ? '<span class="wc-bulk-type-badge">' + s.esc(p.type) + '</span>'
-                            : '') +
                         '</span></div></td>'
                     );
                 },
@@ -735,7 +742,7 @@
            ------------------------------------------------------------------ */
 
         // Column widths, mirroring the rules in admin.css. Keep the two in sync.
-        COL_WIDTHS: { cb: 42, thumb: 60, name: 200 },
+        COL_WIDTHS: { cb: 42, thumb: 60, name: 220 },
 
         // Per-column widths, sized to the widest header label or control.
         // Keep in sync with the matching block in admin.css.

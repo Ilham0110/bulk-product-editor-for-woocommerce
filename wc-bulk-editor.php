@@ -384,6 +384,8 @@ final class WC_Bulk_Product_Editor
             'session_expired'     => __('Your session expired. Reload the page and try again.', 'wc-bulk-editor'),
             'open_product'        => __('Open product editor', 'wc-bulk-editor'),
             'name_required'       => __('Product name cannot be empty.', 'wc-bulk-editor'),
+            /* translators: {id} is replaced with the numeric product id. */
+            'product_id_title'    => __('Product ID {id}', 'wc-bulk-editor'),
         ];
     }
 
