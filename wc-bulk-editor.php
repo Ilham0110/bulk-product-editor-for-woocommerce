@@ -207,9 +207,10 @@ final class WC_Bulk_Product_Editor
             'decimals'    => wc_get_price_decimals(),
             'thousands'   => wc_get_price_thousand_separator(),
             'decimal'     => wc_get_price_decimal_separator(),
-            'columns'     => $this->get_user_columns(get_current_user_id()),
-            'all_columns' => self::COLUMNS,
-            'all_cats'    => $this->get_all_categories(),
+            'columns'      => $this->get_user_columns(get_current_user_id()),
+            'all_columns'  => $this->translated_columns(),
+            'col_headers'  => $this->column_headers(),
+            'all_cats'     => $this->get_all_categories(),
             // Preloaded so the first paint needs no AJAX at all. Each
             // admin-ajax round-trip costs a full WordPress bootstrap, which
             // dwarfs the queries themselves.
@@ -219,6 +220,117 @@ final class WC_Bulk_Product_Editor
             'views'       => $this->get_saved_views(get_current_user_id()),
             'i18n'        => $this->i18n_strings(),
         ]);
+    }
+
+    /**
+     * Column labels, translated.
+     *
+     * const COLUMNS cannot hold __() calls, so the labels live here and are
+     * merged in on the way out. Runs during admin_enqueue_scripts — well after
+     * init, so translations are loaded.
+     *
+     * @return array<string, string>
+     */
+    private function column_labels(): array
+    {
+        return [
+            'thumb'              => __('Image', 'wc-bulk-editor'),
+            'name'               => __('Product Name', 'wc-bulk-editor'),
+            'sku'                => __('SKU', 'wc-bulk-editor'),
+            'regular_price'      => __('Regular Price', 'wc-bulk-editor'),
+            'sale_price'         => __('Sale Price', 'wc-bulk-editor'),
+            'stock_quantity'     => __('Stock Qty', 'wc-bulk-editor'),
+            'stock_status'       => __('Stock Status', 'wc-bulk-editor'),
+            'post_status'        => __('Status', 'wc-bulk-editor'),
+            'categories'         => __('Categories', 'wc-bulk-editor'),
+            'tags'               => __('Tags', 'wc-bulk-editor'),
+            'type'               => __('Type', 'wc-bulk-editor'),
+            'tax_status'         => __('Tax Status', 'wc-bulk-editor'),
+            'tax_class'          => __('Tax Class', 'wc-bulk-editor'),
+            'shipping_class'     => __('Shipping Class', 'wc-bulk-editor'),
+            'weight'             => __('Weight', 'wc-bulk-editor'),
+            'length'             => __('Length', 'wc-bulk-editor'),
+            'width'              => __('Width', 'wc-bulk-editor'),
+            'height'             => __('Height', 'wc-bulk-editor'),
+            'featured'           => __('Featured', 'wc-bulk-editor'),
+            'catalog_visibility' => __('Visibility', 'wc-bulk-editor'),
+            'description'        => __('Description', 'wc-bulk-editor'),
+            'short_description'  => __('Short Desc', 'wc-bulk-editor'),
+            'virtual'            => __('Virtual', 'wc-bulk-editor'),
+            'downloadable'       => __('Downloadable', 'wc-bulk-editor'),
+            'manage_stock'       => __('Manage Stock', 'wc-bulk-editor'),
+            'backorders'         => __('Backorders', 'wc-bulk-editor'),
+            'sold_individually'  => __('Sold Individually', 'wc-bulk-editor'),
+            'reviews_allowed'    => __('Reviews', 'wc-bulk-editor'),
+            'purchase_note'      => __('Purchase Note', 'wc-bulk-editor'),
+            'menu_order'         => __('Menu Order', 'wc-bulk-editor'),
+        ];
+    }
+
+    /**
+     * Short labels for the table header.
+     *
+     * Deliberately terser than column_labels(): a header has to fit a narrow
+     * column, while the Columns modal has room for the full name. Keys absent
+     * here fall back to the JS-side defaults.
+     *
+     * @return array<string, string>
+     */
+    private function column_headers(): array
+    {
+        return [
+            'name'               => __('Product', 'wc-bulk-editor'),
+            'sku'                => __('SKU', 'wc-bulk-editor'),
+            'regular_price'      => __('Price', 'wc-bulk-editor'),
+            'sale_price'         => __('Sale', 'wc-bulk-editor'),
+            'stock_quantity'     => __('Stock', 'wc-bulk-editor'),
+            'stock_status'       => __('Stock Status', 'wc-bulk-editor'),
+            'post_status'        => __('Status', 'wc-bulk-editor'),
+            'categories'         => __('Categories', 'wc-bulk-editor'),
+            'tags'               => __('Tags', 'wc-bulk-editor'),
+            'type'               => __('Type', 'wc-bulk-editor'),
+            'tax_status'         => __('Tax', 'wc-bulk-editor'),
+            'tax_class'          => __('Tax Class', 'wc-bulk-editor'),
+            'shipping_class'     => __('Shipping', 'wc-bulk-editor'),
+            'weight'             => __('Weight', 'wc-bulk-editor'),
+            'length'             => __('Length', 'wc-bulk-editor'),
+            'width'              => __('Width', 'wc-bulk-editor'),
+            'height'             => __('Height', 'wc-bulk-editor'),
+            'catalog_visibility' => __('Visibility', 'wc-bulk-editor'),
+            /* translators: abbreviated column header for "Virtual". */
+            'virtual'            => __('Virt', 'wc-bulk-editor'),
+            /* translators: abbreviated column header for "Downloadable". */
+            'downloadable'       => __('DL', 'wc-bulk-editor'),
+            /* translators: abbreviated column header for "Manage Stock". */
+            'manage_stock'       => __('Mgmt', 'wc-bulk-editor'),
+            /* translators: abbreviated column header for "Backorders". */
+            'backorders'         => __('Backord', 'wc-bulk-editor'),
+            'sold_individually'  => __('Sold Ind.', 'wc-bulk-editor'),
+            'reviews_allowed'    => __('Reviews', 'wc-bulk-editor'),
+            'description'        => __('Description', 'wc-bulk-editor'),
+            'short_description'  => __('Short Desc', 'wc-bulk-editor'),
+            'purchase_note'      => __('Purch. Note', 'wc-bulk-editor'),
+            'menu_order'         => __('Order', 'wc-bulk-editor'),
+        ];
+    }
+
+    /**
+     * The column catalogue with translated labels, ready for the browser.
+     *
+     * @return array<string, array{label: string, default: bool, editable?: bool}>
+     */
+    private function translated_columns(): array
+    {
+        $labels  = $this->column_labels();
+        $columns = [];
+
+        foreach (self::COLUMNS as $key => $meta) {
+            // Fall back to the English constant if a key is ever added to
+            // COLUMNS without a matching label, so nothing renders blank.
+            $columns[$key] = ['label' => $labels[$key] ?? $meta['label']] + $meta;
+        }
+
+        return $columns;
     }
 
     /** @return array<string, string> */
@@ -262,6 +374,14 @@ final class WC_Bulk_Product_Editor
             'no_export'           => __('No products to export.', 'wc-bulk-editor'),
             'view_name_prompt'    => __('View name:', 'wc-bulk-editor'),
             'confirm_delete_view' => __('Delete this view?', 'wc-bulk-editor'),
+
+            // Bulk edit modal, Quick Add button states and session handling.
+            'selected_count'      => __('{count} selected', 'wc-bulk-editor'),
+            'no_selection'        => __('No selection (applies to all loaded)', 'wc-bulk-editor'),
+            'changes_staged'      => __('Changes staged for {count} product(s). Click Save All to commit.', 'wc-bulk-editor'),
+            'creating'            => __('Creating...', 'wc-bulk-editor'),
+            'create_product'      => __('Create Product', 'wc-bulk-editor'),
+            'session_expired'     => __('Your session expired. Reload the page and try again.', 'wc-bulk-editor'),
         ];
     }
 
@@ -861,8 +981,13 @@ final class WC_Bulk_Product_Editor
                 continue;
             }
 
+            // Every branch checks a per-object capability. Duplicating creates
+            // a new product rather than altering this one, so reading it is
+            // enough — but a vendor plugin that hides other sellers' products
+            // should still stop the copy being made.
             $done = match ($action) {
-                'duplicate' => (bool) (new WC_Admin_Duplicate_Product())->product_duplicate($product),
+                'duplicate' => current_user_can('read_post', $id)
+                    && (bool) (new WC_Admin_Duplicate_Product())->product_duplicate($product),
                 'trash'     => current_user_can('delete_post', $id) && (bool) wp_trash_post($id),
                 'delete'    => current_user_can('delete_post', $id) && (bool) wp_delete_post($id, true),
             };
@@ -892,7 +1017,7 @@ final class WC_Bulk_Product_Editor
         $this->guard();
 
         wp_send_json_success([
-            'columns' => self::COLUMNS,
+            'columns' => $this->translated_columns(),
             'active'  => $this->get_user_columns(get_current_user_id()),
         ]);
     }
@@ -1041,6 +1166,12 @@ final class WC_Bulk_Product_Editor
      */
     public function render_admin_page(): void
     {
+        // add_submenu_page()'s capability argument only hides the menu item —
+        // the page is still reachable by URL, so it has to be checked here too.
+        if (!current_user_can(self::CAPABILITY)) {
+            wp_die(esc_html__('You are not allowed to access this page.', 'wc-bulk-editor'));
+        }
+
         $template = WCBULK_PLUGIN_DIR . 'views/admin-page.php';
 
         if (!is_readable($template)) {

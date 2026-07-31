@@ -223,9 +223,9 @@ dipecah.
 Nonce WordPress berlaku **12–24 jam**. Halaman Bulk Editor yang dibiarkan
 terbuka semalaman akan menghasilkan kegagalan simpan keesokan harinya.
 
-Saat ini kegagalan itu muncul sebagai error umum. Perbaikan yang mungkin:
-deteksi respons `-1` / 403 dan tampilkan pesan "Sesi kedaluwarsa, muat ulang
-halaman."
+Kegagalan itu dulu muncul sebagai error generik. `failMessage()` kini
+mengenali respons `403` dan `-1`, lalu menampilkan pesan sesi kedaluwarsa
+dengan saran memuat ulang halaman. Kedua handler `.fail()` memakainya.
 
 Bukan masalah keamanan — masalah pengalaman pakai.
 
@@ -279,17 +279,19 @@ if (!current_user_can('edit_post', $pid)) {
 Produk yang ditolak masuk ke `$errors` dan dilaporkan ke klien — bukan
 diabaikan diam-diam. User tahu perubahannya tidak tersimpan.
 
-### 4.3 `duplicate` tanpa cek objek
+### 4.3 `duplicate` — sudah dicek per objek
+
+Sebelumnya cabang ini satu-satunya di `bulk_action()` tanpa pemeriksaan per
+objek. Risikonya rendah — menggandakan membuat objek baru dan tidak merusak
+yang lama — tapi vendor tetap tidak seharusnya menyalin produk vendor lain.
 
 ```php
-'duplicate' => (bool) (new WC_Admin_Duplicate_Product())->product_duplicate($product),
+'duplicate' => current_user_can('read_post', $id)
+    && (bool) (new WC_Admin_Duplicate_Product())->product_duplicate($product),
 ```
 
-Berbeda dari trash dan delete, tidak ada pemeriksaan per objek. Duplikasi
-membuat objek baru dan tidak merusak yang lama, jadi risikonya rendah.
-
-Tetap layak ditambah `current_user_can('read_post', $id)` kalau nanti ada
-pembatasan peran — vendor tidak seharusnya menggandakan produk vendor lain.
+Ketiga cabang kini simetris: `read_post` untuk menyalin, `delete_post` untuk
+trash dan delete.
 
 ### 4.4 `quick_add` — capability yang salah
 
@@ -319,12 +321,23 @@ if (!current_user_can('manage_product_terms')) {
 
 Ini pola yang benar: `guard()` dulu, lalu capability khusus.
 
-### 4.6 `render_admin_page()` tanpa cek
+### 4.6 `render_admin_page()` — sudah dicek
 
-Dibahas di [ADMIN-UI.md §1](ADMIN-UI.md#capability-bukan-pengaman). Ringkasnya:
-halaman dapat diakses lewat URL langsung, tapi hanya berisi markup kosong —
-semua data lewat AJAX yang dijaga. Lapisan kedua yang layak ditambahkan, bukan
-lubang.
+Capability di `add_submenu_page()` hanya menyembunyikan item menu; halaman tetap
+dapat dibuka lewat `?page=wc-bulk-editor`. Dulu itu tidak membocorkan apa pun —
+halaman hanya markup kosong dan semua data lewat AJAX yang dijaga — tapi
+lapisan kedua tetap benar:
+
+```php
+if (!current_user_can(self::CAPABILITY)) {
+    wp_die(esc_html__('You are not allowed to access this page.', 'wc-bulk-editor'));
+}
+```
+
+Terverifikasi lewat pengujian peran: subscriber menerima HTTP 403 dan
+`window.WCBulkEditor` tidak pernah dimuat.
+
+Lihat [ADMIN-UI.md §1](ADMIN-UI.md#capability-bukan-pengaman).
 
 ---
 
@@ -406,13 +419,17 @@ Sudah dikerjakan di v3.11.0:
       dilewatkan karena `L.cb` berisi markup checkbox yang memang harus
       dirender; hanya fallback `c` yang di-escape.
 
-Belum dikerjakan:
+- [x] **`current_user_can('read_post', $id)` untuk `duplicate`** (4.3) —
+      menyamakan ketiga cabang `bulk_action` sehingga semuanya memeriksa
+      capability per objek.
+- [x] **Cek capability di `render_admin_page()`** (4.6) — halaman kini
+      `wp_die()` untuk siapa pun tanpa `manage_woocommerce`, bukan hanya
+      menyembunyikan item menu.
+- [x] **Pesan khusus untuk nonce kedaluwarsa** (3.3) — `failMessage()`
+      mengenali 403 dan `-1`, lalu menampilkan "sesi kedaluwarsa, muat ulang
+      halaman" alih-alih error generik.
 
-- [ ] `current_user_can('read_post', $id)` untuk `duplicate` (4.3)
-- [ ] Cek capability di `render_admin_page()` (4.6)
-- [ ] Pesan khusus untuk nonce kedaluwarsa (3.3)
-
-Tidak ada yang mendesak. Ketiganya lapisan tambahan, bukan lubang.
+Tidak ada item terbuka yang tersisa di daftar ini.
 
 ---
 

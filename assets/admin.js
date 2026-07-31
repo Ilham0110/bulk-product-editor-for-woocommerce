@@ -432,8 +432,8 @@
                     s.renderPagination(r.data.total);
                     s.updateResults(r.data.total);
                 } else s.showNotice('error', r.data.message || WCB.i18n.error);
-            }).fail(function () {
-                s.showNotice('error', WCB.i18n.error);
+            }).fail(function (jq) {
+                s.showNotice('error', s.failMessage(jq));
             });
         },
 
@@ -910,45 +910,25 @@
             var s = this,
                 cols = s.getActiveColumns(),
                 thead = $('#wc-bulk-table-head'),
-                L = {
+                // Only the two columns that carry markup or no text at all are
+                // defined here; every other header label is translated
+                // server-side and arrives in WCB.col_headers.
+                MARKUP = {
                     cb: '<input type="checkbox" id="wc-bulk-select-all-top" />',
                     thumb: '',
-                    name: 'Product',
-                    sku: 'SKU',
-                    regular_price: 'Price',
-                    sale_price: 'Sale',
-                    stock_quantity: 'Stock',
-                    stock_status: 'Stock Status',
-                    post_status: 'Status',
-                    categories: 'Categories',
-                    tags: 'Tags',
-                    type: 'Type',
-                    tax_status: 'Tax',
-                    tax_class: 'Tax Class',
-                    shipping_class: 'Shipping',
-                    weight: 'Weight',
-                    length: 'Length',
-                    width: 'Width',
-                    height: 'Height',
                     featured: '★',
-                    catalog_visibility: 'Visibility',
-                    virtual: 'Virt',
-                    downloadable: 'DL',
-                    manage_stock: 'Mgmt',
-                    backorders: 'Backord',
-                    sold_individually: 'Sold Ind.',
-                    reviews_allowed: 'Reviews',
-                    description: 'Description',
-                    short_description: 'Short Desc',
-                    purchase_note: 'Purch. Note',
-                    menu_order: 'Order',
-                };
+                },
+                L = WCB.col_headers || {};
             var row = $('<tr>');
             $.each(cols, function (i, c) {
-                // L holds hardcoded labels and, for `cb`, intentional markup —
-                // so it passes through. The fallback is the raw column key
-                // from the user's saved list, which does not.
-                var lab = L[c] !== undefined ? L[c] : s.esc(c);
+                // MARKUP entries are trusted (ours, and cb is deliberate HTML).
+                // Server labels and the raw-key fallback are both escaped.
+                var lab =
+                    MARKUP[c] !== undefined
+                        ? MARKUP[c]
+                        : L[c] !== undefined
+                          ? s.esc(L[c])
+                          : s.esc(c);
                 if (c === 'cb') {
                     row.append('<td class="manage-column column-cb check-column">' + lab + '</td>');
                 } else if (c === 'thumb') {
@@ -1296,11 +1276,7 @@
                     s.saving = false;
                 }
             ).fail(function (jq) {
-                s.showNotice(
-                    'error',
-                    (jq.responseJSON && jq.responseJSON.data && jq.responseJSON.data.message) ||
-                        WCB.i18n.error
-                );
+                s.showNotice('error', s.failMessage(jq));
                 s.saving = false;
                 $('#wc-bulk-save-all').prop('disabled', false);
             });
@@ -1436,7 +1412,9 @@
         openBulkEditModal: function () {
             var ids = Object.keys(this.selectedRows);
             $('.wc-bulk-modal-selected').text(
-                ids.length > 0 ? ids.length + ' selected' : 'No selection (applies to all loaded)'
+                ids.length > 0
+                    ? WCB.i18n.selected_count.replace('{count}', ids.length)
+                    : WCB.i18n.no_selection
             );
             $('#wc-bulk-modal-edit').show();
             $('.wc-bulk-tab').first().trigger('click');
@@ -1529,10 +1507,7 @@
             });
             $('#wc-bulk-modal-edit').hide();
             s.loadProducts();
-            s.showNotice(
-                'success',
-                'Changes staged for ' + ids.length + ' product(s). Click Save All to commit.'
-            );
+            s.showNotice('success', WCB.i18n.changes_staged.replace('{count}', ids.length));
         },
 
         /* ------------------------------------------------------------------
@@ -1639,7 +1614,7 @@
                 alert(WCB.i18n.product_name_req);
                 return;
             }
-            $('#wc-bulk-add-confirm').prop('disabled', true).text('Creating...');
+            $('#wc-bulk-add-confirm').prop('disabled', true).text(WCB.i18n.creating);
             $.post(
                 WCB.ajax_url,
                 {
@@ -1657,7 +1632,7 @@
                         s.page = 1;
                         s.loadProducts();
                     } else s.showNotice('error', r.data.message || WCB.i18n.error);
-                    $('#wc-bulk-add-confirm').prop('disabled', false).text('Create Product');
+                    $('#wc-bulk-add-confirm').prop('disabled', false).text(WCB.i18n.create_product);
                 }
             );
         },
@@ -1864,6 +1839,18 @@
         fmtPrice: function (p) {
             if (!p || isNaN(p)) return '';
             return String(p);
+        },
+        // WordPress nonces expire after 12–24 hours, so a tab left open
+        // overnight fails on the next save. That reads as a generic error
+        // unless it is called out.
+        failMessage: function (jq) {
+            if (jq && (jq.status === 403 || jq.responseText === '-1')) {
+                return WCB.i18n.session_expired;
+            }
+            return (
+                (jq && jq.responseJSON && jq.responseJSON.data && jq.responseJSON.data.message) ||
+                WCB.i18n.error
+            );
         },
         esc: function (t) {
             if (!t) return '';

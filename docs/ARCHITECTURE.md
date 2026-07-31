@@ -248,21 +248,21 @@ Handler baru wajib mengikuti pola yang sama: `guard()` dulu, lalu cek khusus.
 | 19 | *(state)* | `page`, `changes`, `originals`, `selectedRows` |
 | 29 | COLUMN STATE | `getActiveColumns()` — cache di `_activeColumns`, selalu menyisipkan `cb` di depan |
 | 53 | BOOTSTRAP & EVENT WIRING | `init()`, semua `.on()`, Ctrl+S |
-| 388 | PRODUCT LOADING | `loadProducts()` — satu-satunya pemanggil `wc_bulk_fetch_products` |
-| 424 | TABLE RENDERING | `renderTable()`, objek `R` = renderer per kolom |
-| 714 | VIEWPORT WIDTH | penskalaan lebar kolom terhadap lebar tersedia |
-| 772 | VERTICAL FIT | tinggi area scroll dihitung dari tinggi window |
-| 966 | CELL RENDERERS | helper input/select/textarea |
-| 1084 | CHANGE TRACKING | `trackChange()`, `origVal()`, `baseVal()`, `isChanged()` |
-| 1136 | BULK OPERATIONS | `quickApply()`, `saveAll()`, `doBulkAction()` |
-| 1321 | COLUMNS MODAL | pemilihan & pengurutan kolom (jquery-ui-sortable) |
-| 1382 | BULK EDIT MODAL | Advanced Bulk Edit |
-| 1478 | QUICK ADD PRODUCT | |
-| 1481 | NEW CATEGORY | |
-| 1604 | CSV EXPORT | menerima CSV dari server, memicu unduhan di browser |
-| 1641 | SAVED VIEWS | |
-| 1744 | PAGINATION & NOTICES | |
-| 1800 | HELPERS | |
+| 405 | PRODUCT LOADING | `loadProducts()` — satu-satunya pemanggil `wc_bulk_fetch_products` |
+| 441 | TABLE RENDERING | `renderTable()`, objek `R` = renderer per kolom, `renderTableHead()` |
+| 715 | VIEWPORT WIDTH | penskalaan lebar kolom terhadap lebar tersedia |
+| 773 | VERTICAL FIT | tinggi area scroll dihitung dari tinggi window |
+| 952 | CELL RENDERERS | `renderEditableCell()`, `renderSelectCell()`, `classOptions()` |
+| 1105 | CHANGE TRACKING | `trackChange()`, `origVal()`, `baseVal()`, `isChanged()` |
+| 1164 | BULK OPERATIONS | `quickApply()`, `saveAll()`, `doBulkAction()` |
+| 1349 | COLUMNS MODAL | pemilihan & pengurutan kolom (jquery-ui-sortable) |
+| 1410 | BULK EDIT MODAL | Advanced Bulk Edit |
+| 1514 | QUICK ADD PRODUCT |  |
+| 1517 | NEW CATEGORY |  |
+| 1641 | CSV EXPORT | menerima CSV dari server, memicu unduhan di browser |
+| 1678 | SAVED VIEWS |  |
+| 1781 | PAGINATION & NOTICES |  |
+| 1837 | HELPERS | `esc()`, `escAttr()`, `fmtPrice()`, `failMessage()` |
 
 **Gaya kode JS:** ES5 — `var`, `function`, jQuery. Tidak ada build step, jadi
 tidak ada transpiling. Jangan campurkan `const`/`let`/arrow function; ikuti
@@ -286,6 +286,26 @@ untuk mempertahankan konteks di dalam callback. Ikuti.
 - **State panel collapse** disimpan di `localStorage` (`wcbFilters`,
   `wcbQuickApply`), dibungkus `try/catch` karena localStorage bisa diblokir.
   Default: Filters terbuka, Quick Apply tertutup.
+- **Tiap field Quick Apply punya set operasi sendiri**, jadi `switch` di
+  `quickApply()` tidak punya cabang mati:
+
+  | Field | Operasi |
+  |---|---|
+  | `regular_price` | `set`, `increase_percent`, `decrease_percent`, `increase_fixed`, `decrease_fixed` |
+  | `sale_price` | `set`, `reduce_percent`, `clear` |
+  | `stock_quantity` | `set`, `increase`, `decrease` |
+
+  `increase`/`decrease` hanya muncul di stok; `reduce_percent` hanya di sale
+  price. Memeriksa satu dropdown saja akan menyesatkan.
+- **`classOptions()` mengembalikan array pasangan `[value, label]`, bukan
+  objek.** JavaScript mengurutkan key integer-like ke depan, yang akan
+  mendorong opsi kosong "No shipping class" ke akhir daftar — dan produk tanpa
+  shipping class akan tampak punya kelas pertama. `renderSelectCell()`
+  menerima kedua bentuk: objek untuk daftar tetap, array pasangan bila urutan
+  penting.
+- **`renderEditableCell()` tidak memakai `value || ''`.** Angka `0` adalah
+  nilai sah untuk `menu_order` dan dimensi; memakai `||` akan mengosongkan sel
+  sehingga `origVal()` selalu melihat perbedaan dan menandainya berubah.
 
 ---
 
