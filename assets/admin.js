@@ -757,7 +757,6 @@
         COL_WIDTH_WIDE: 200,
         COL_WIDTH_DEFAULT: 120,
         WIDE_COLUMNS: ['tags', 'description', 'short_description', 'purchase_note'],
-        VISIBLE_DATA_COLUMNS: 9,
 
         // Chrome around the text inside a cell, matching the tightened padding
         // the stylesheet applies inside #wc-bulk-table:
@@ -974,18 +973,6 @@
             return this.COL_WIDTH_DEFAULT;
         },
 
-        /**
-         * Size the table so exactly VISIBLE_DATA_COLUMNS data columns fill the
-         * available width; anything beyond that goes behind a horizontal scroll.
-         *
-         * The scroll container always stays full width. What changes is the
-         * table: when there are more columns than fit, each column is widened
-         * proportionally so the first nine span the full container, which
-         * pushes the tenth off the visible area and triggers the scrollbar.
-         *
-         * cb and thumb are fixed-width and are not counted, matching the
-         * Columns modal which also hides them from its list.
-         */
         /* ------------------------------------------------------------------
            VERTICAL FIT
            ------------------------------------------------------------------ */
@@ -1060,57 +1047,14 @@
             // Clear any previous sizing before measuring.
             s.clearColumnWidths();
 
-            if (dataCols.length <= s.VISIBLE_DATA_COLUMNS) {
-                // Everything fits, so each column keeps exactly the width its
-                // own content needs. Stretching them to span the container
-                // would undo the measurement — a Yes/No select does not become
-                // more readable at 240px. The leftover space goes to a spacer
-                // column instead.
-                s.writeColumnWidths(dataCols, 1);
-                s.syncFillerColumn(true);
-                return;
-            }
-
-            // More columns than fit: they stretch to span the container, so no
-            // spacer is needed.
-            s.syncFillerColumn(false);
-
-            // Measure the fixed columns as actually rendered: padding and
-            // borders make the painted width larger than the CSS width, and
-            // guessing here pushes the ninth column off screen.
-            var fixed = 0;
-            $table
-                .find('thead th, thead td')
-                .each(function () {
-                    var $cell = $(this);
-                    if ($cell.hasClass('check-column') || $cell.hasClass('column-thumb')) {
-                        fixed += $cell.outerWidth() || 0;
-                    }
-                });
-
-            // Fall back to the stylesheet values if the head is not rendered yet.
-            if (!fixed) {
-                $.each(cols, function (i, c) {
-                    if (c === 'cb' || c === 'thumb') fixed += s.columnWidth(c);
-                });
-            }
-
-            var available = $scroll.innerWidth() - fixed;
-            if (available <= 0) return;
-
-            // Natural width of the first nine data columns.
-            var visible = dataCols.slice(0, s.VISIBLE_DATA_COLUMNS),
-                natural = 0;
-            $.each(visible, function (i, c) {
-                natural += s.columnWidth(c);
-            });
-
-            // Only stretch — never shrink below the measured widths, or the
-            // columns would be cramped on a narrow screen.
-            var scale = available / natural;
-            if (scale < 1) scale = 1;
-
-            s.writeColumnWidths(dataCols, scale);
+            // Columns always take the width their own content needs, whatever
+            // the screen. Scaling them up to span a 27" monitor would undo the
+            // measurement — a Yes/No select is no more readable at 180px than
+            // at 90px, and the same table would look different on every
+            // machine. A trailing spacer takes the leftover width instead, so
+            // the table still reaches the right edge.
+            s.writeColumnWidths(dataCols);
+            s.syncFillerColumn();
         },
 
         /**
@@ -1120,14 +1064,17 @@
          * gap on the right. Under table-layout:fixed the browser hands any
          * surplus to the real columns proportionally, which would undo the
          * measured widths. A trailing spacer soaks it up instead.
+         *
+         * Harmless when the columns already overflow: the spacer collapses to
+         * nothing and the horizontal scrollbar behaves as before.
          */
-        syncFillerColumn: function (needed) {
+        syncFillerColumn: function () {
             var $table = $('#wc-bulk-table'),
                 $head = $table.find('thead tr');
 
             $table.find('.wc-bulk-col-filler').remove();
 
-            if (!needed || !$head.length) return;
+            if (!$head.length) return;
 
             $head.append('<th class="wc-bulk-col-filler" aria-hidden="true"></th>');
             $table.find('tbody tr').each(function () {
@@ -1136,18 +1083,18 @@
         },
 
         /**
-         * Pin each column to its measured width, optionally scaled up.
+         * Pin each column to its measured width.
          *
          * The stylesheet's generic width rule is highly specific
          * (.wc-bulk-table thead th:not()...:not()), so these selectors must
          * out-specify it or the widths never take effect.
          */
-        writeColumnWidths: function (dataCols, scale) {
+        writeColumnWidths: function (dataCols) {
             var s = this,
                 css = [];
 
             $.each(dataCols, function (i, c) {
-                var w = Math.floor(s.columnWidth(c) * scale);
+                var w = s.columnWidth(c);
                 var sel = '#wc-bulk-table thead th.column-' + c +
                     ',#wc-bulk-table thead td.column-' + c +
                     ',#wc-bulk-table tbody td.column-' + c;
