@@ -1576,12 +1576,26 @@
                         f = $(this).data('field'),
                         orig = s.originals[pid];
                     if (orig) {
+                        // Set the value without firing `input`. The textarea
+                        // auto-resize listens for that event, and triggering it
+                        // on every cell would grow all sixty textareas to fit
+                        // their full description — rows jumped from 101px to
+                        // 170px on discard.
                         $(this).val(s.origVal(pid, f));
-                        $(this).trigger('input');
                     }
                     $(this).removeClass('changed');
                 }
             );
+            // Textareas the user actually dragged or typed into keep whatever
+            // height they had; the rest are put back to the resting height so
+            // the table looks the way it did before editing started.
+            $('#wc-bulk-table .wc-bulk-inline-textarea').each(function () {
+                // userHeight is set by the resize observer when the user drags
+                // a textarea taller; that choice is theirs to keep.
+                if ($(this).data('userHeight')) return;
+                this.style.height = '';
+                delete this.dataset.wcbAutoResize;
+            });
             $('.wc-bulk-table tbody tr').removeClass('row-modified');
             s.updateSaveBar();
             s.showNotice('success', WCB.i18n.changes_discarded);
