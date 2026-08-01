@@ -92,6 +92,11 @@ Hanya preferensi plugin ini (pilihan kolom dan saved views). Produk, kategori, d
 * Keamanan: halaman editor menolak akses langsung lewat URL bagi pengguna tanpa hak `manage_woocommerce`.
 * Sesi yang kedaluwarsa kini dilaporkan sebagai "sesi kedaluwarsa, muat ulang halaman" alih-alih pesan galat umum.
 * Seluruh label kolom kini dapat diterjemahkan.
+* Lebar kolom kini diukur dari isinya, bukan dari angka tetap: sebuah select disesuaikan dengan pilihannya yang terpanjang, dan kolom yang isinya bergantung data toko (kategori, tax class) menyesuaikan dengan nama yang benar-benar ada.
+* Kolom harga diberi ruang untuk angka besar, sehingga nilai seperti 100.000.000 tidak terpotong saat diketik.
+* Lebar kolom kini sama di semua ukuran layar. Sebelumnya kolom melar hampir dua kali lipat di monitor lebar.
+* Perbaikan: menekan Discard tidak lagi mengubah tinggi baris.
+* Perbaikan: sel nama kini sejajar dengan kolom lainnya.
 
 = 3.11.0 =
 * Keamanan: label option tax class dan shipping class kini di-escape. Sebelumnya nama tax class yang mengandung HTML dapat dieksekusi di browser.
