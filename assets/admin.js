@@ -746,10 +746,11 @@
            ------------------------------------------------------------------ */
 
         // Fixed columns. cb and thumb hold a checkbox and a 40px image; name
-        // is free text with no upper bound, so 220px is a working width rather
-        // than a measurement — wide enough to read a typical product title
-        // while leaving room for the id and link beside it.
-        COL_WIDTHS: { cb: 42, thumb: 60, name: 220 },
+        // is free text with no upper bound, so 240px is a working width rather
+        // than a measurement — enough for a typical product title alongside
+        // the id and link, without letting one unusually long name stretch the
+        // column past what the rest of the table can spare.
+        COL_WIDTHS: { cb: 42, thumb: 60, name: 240 },
 
         // Free-text columns have no bounded content to measure against, so they
         // keep a fixed generous width rather than growing without limit.
@@ -773,7 +774,7 @@
         COL_MAX_WIDTH: 240,
 
         _measuredWidths: null,
-        _measuredFromRows: null,
+        _measuredFrom: null,
 
         /**
          * Width of a column, sized to its own widest content.
@@ -787,16 +788,22 @@
         measureColumnWidths: function () {
             var s = this;
 
-            // Cached per render pass, keyed on whether real rows exist: the
-            // first call happens before any cell is drawn and has to fall back
-            // to the hardcoded labels, so its result must not stick.
-            var hasRows = $('#wc-bulk-table tbody select[data-field]').length > 0;
+            // The measurement samples the rows on screen, so it is only valid
+            // for those rows. Key the cache on which products are rendered:
+            // the first call happens before any cell exists and falls back to
+            // the hardcoded labels, and paging brings different values.
+            var fingerprint = $.map(
+                $('#wc-bulk-table tbody .wc-bulk-row-check'),
+                function (el) {
+                    return el.value;
+                }
+            ).join(',');
 
-            if (s._measuredWidths && s._measuredFromRows === hasRows) {
+            if (s._measuredWidths && s._measuredFrom === fingerprint) {
                 return s._measuredWidths;
             }
 
-            s._measuredFromRows = hasRows;
+            s._measuredFrom = fingerprint;
 
             var $probe = $('<span>')
                 .css({
@@ -839,6 +846,16 @@
                     var w = textWidth(label);
                     if (w > widest) widest = w;
                 });
+
+                // An input's own values matter more than its header: "SKU" is
+                // three characters but holds "NRB-BDY-010". Only the loaded
+                // page is sampled, which is the data the user is looking at.
+                if (!isSelect) {
+                    $('#wc-bulk-table tbody [data-field="' + key + '"]').each(function () {
+                        var w = textWidth(this.value);
+                        if (w > widest) widest = w;
+                    });
+                }
 
                 var chrome = isSelect ? s.COL_CHROME.select : s.COL_CHROME.input;
                 widths[key] = Math.min(

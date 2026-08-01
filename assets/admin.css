@@ -155,7 +155,7 @@
 /* Column widths */
 .wc-bulk-table .check-column{width:42px!important;min-width:42px!important;}
 .wc-bulk-table .column-thumb{width:60px!important;min-width:60px!important;max-width:60px!important;}
-.wc-bulk-table .column-name{width:220px!important;min-width:220px!important;}
+.wc-bulk-table .column-name{width:240px!important;min-width:240px!important;}
 .wc-bulk-table thead th:not(.check-column):not(.column-thumb):not(.column-name),
 .wc-bulk-table thead td:not(.check-column):not(.column-thumb):not(.column-name){width:120px!important;min-width:120px!important;}
 
