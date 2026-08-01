@@ -1094,6 +1094,12 @@
                 css = [];
 
             $.each(dataCols, function (i, c) {
+                // The server already rejects unknown column keys, but this
+                // string ends up inside a <style> block: anything other than a
+                // plain identifier could close the selector and inject rules,
+                // so it is checked again here rather than trusted.
+                if (!/^[a-z_]+$/.test(c)) return;
+
                 var w = s.columnWidth(c);
                 var sel = '#wc-bulk-table thead th.column-' + c +
                     ',#wc-bulk-table thead td.column-' + c +
