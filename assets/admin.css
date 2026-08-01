@@ -155,7 +155,7 @@
 /* Column widths */
 .wc-bulk-table .check-column{width:42px!important;min-width:42px!important;}
 .wc-bulk-table .column-thumb{width:60px!important;min-width:60px!important;max-width:60px!important;}
-.wc-bulk-table .column-name{width:240px!important;min-width:240px!important;}
+.wc-bulk-table .column-name{width:200px!important;min-width:200px!important;}
 .wc-bulk-table thead th:not(.check-column):not(.column-thumb):not(.column-name),
 .wc-bulk-table thead td:not(.check-column):not(.column-thumb):not(.column-name){width:120px!important;min-width:120px!important;}
 
@@ -454,3 +454,9 @@
    min-width:100% on the table cannot inflate the real ones. Purely visual —
    carries no content and is hidden from assistive tech. */
 #wc-bulk-table .wc-bulk-col-filler{width:auto!important;min-width:0!important;max-width:none!important;padding:0!important;border-left:0!important;background:transparent;}
+
+/* Inside the table the chevron sits closer in and the left padding is tighter
+   than on a standalone select: 30 columns compete for width, and every pixel
+   of chrome is a pixel the value cannot use. */
+#wc-bulk-table .wc-bulk-inline-select{padding-left:6px!important;padding-right:20px!important;background-position:right 3px center!important;}
+#wc-bulk-table .wc-bulk-inline-input{padding-left:6px!important;padding-right:6px!important;}

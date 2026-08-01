@@ -746,11 +746,11 @@
            ------------------------------------------------------------------ */
 
         // Fixed columns. cb and thumb hold a checkbox and a 40px image; name
-        // is free text with no upper bound, so 240px is a working width rather
+        // is free text with no upper bound, so 200px is a working width rather
         // than a measurement — enough for a typical product title alongside
         // the id and link, without letting one unusually long name stretch the
         // column past what the rest of the table can spare.
-        COL_WIDTHS: { cb: 42, thumb: 60, name: 240 },
+        COL_WIDTHS: { cb: 42, thumb: 60, name: 200 },
 
         // Free-text columns have no bounded content to measure against, so they
         // keep a fixed generous width rather than growing without limit.
@@ -759,19 +759,44 @@
         WIDE_COLUMNS: ['tags', 'description', 'short_description', 'purchase_note'],
         VISIBLE_DATA_COLUMNS: 9,
 
-        // Chrome around the text inside a cell, measured from the rendered
-        // controls rather than guessed:
-        //   select — 12px left padding + 24px for the chevron + 2px border
-        //   input  — 12px padding either side + 2px border
+        // Chrome around the text inside a cell, matching the tightened padding
+        // the stylesheet applies inside #wc-bulk-table:
+        //   select — 6px left padding + 20px for the chevron + 2px border
+        //   input  — 6px padding either side + 2px border
         //   both   — 8px cell padding either side
-        // A couple of pixels of slack keeps a descender or a wide glyph from
-        // touching the edge.
-        COL_CHROME: { select: 58, input: 46 },
+        // Plus a few pixels so a descender never touches the edge.
+        COL_CHROME: { select: 48, input: 34 },
         // Floor low enough that a glyph-only column (★, ✓) is sized by its
         // header rather than by an arbitrary minimum, but not so low that a
         // column becomes hard to click.
         COL_MIN_WIDTH: 48,
         COL_MAX_WIDTH: 240,
+
+        // Columns holding an amount are sized for a headroom figure, not just
+        // for today's values: a shop whose priciest item is 265000 would
+        // otherwise get a field that clips as soon as a larger number is
+        // typed. The figure is built from the store's own currency settings,
+        // so a zero-decimal currency does not pay for decimals it never shows.
+        MONEY_COLUMNS: ['regular_price', 'sale_price'],
+        MONEY_HEADROOM_DIGITS: 9,
+
+        moneySample: function () {
+            var decimals = parseInt(WCB.decimals, 10),
+                thousands = WCB.thousands || '',
+                decimalSep = WCB.decimal || '.',
+                digits = this.MONEY_HEADROOM_DIGITS,
+                whole = '';
+
+            if (isNaN(decimals)) decimals = 2;
+
+            // 100,000,000 — grouped the way the store groups it.
+            for (var i = 0; i < digits; i++) {
+                if (i > 0 && (digits - i) % 3 === 0) whole += thousands;
+                whole += i === 0 ? '1' : '0';
+            }
+
+            return decimals > 0 ? whole + decimalSep + new Array(decimals + 1).join('0') : whole;
+        },
 
         _measuredWidths: null,
         _measuredFrom: null,
@@ -855,6 +880,12 @@
                         var w = textWidth(this.value);
                         if (w > widest) widest = w;
                     });
+                }
+
+                // Amounts get room to grow — see MONEY_COLUMNS.
+                if ($.inArray(key, s.MONEY_COLUMNS) !== -1) {
+                    var headroom = textWidth(s.moneySample());
+                    if (headroom > widest) widest = headroom;
                 }
 
                 var chrome = isSelect ? s.COL_CHROME.select : s.COL_CHROME.input;
