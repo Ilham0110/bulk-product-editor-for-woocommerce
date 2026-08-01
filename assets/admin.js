@@ -370,6 +370,11 @@
             });
         },
 
+        // The three loaders below are not called during a normal boot: every
+        // list they fetch arrives with the page via wp_localize_script (see
+        // ADR 0003). They are kept as the refresh path for their endpoints,
+        // which the server still exposes — deleting them would leave those
+        // endpoints with no client at all.
         loadCategories: function () {
             var s = this;
             return $.post(
@@ -1311,18 +1316,6 @@
                 '</option></select></td>'
             );
         },
-        renderCats: function (cats) {
-            if (!cats || !cats.length) return '<span class="wc-bulk-ro muted">—</span>';
-            var h = '<div class="wc-bulk-categories">',
-                max = 3;
-            $.each(cats.slice(0, max), function (i, c) {
-                h += '<span class="wc-bulk-cat-tag">' + B.esc(c) + '</span>';
-            });
-            if (cats.length > max)
-                h += '<span class="wc-bulk-cat-tag">+' + (cats.length - max) + '</span>';
-            return h + '</div>';
-        },
-
         /* ------------------------------------------------------------------
            CHANGE TRACKING
            ------------------------------------------------------------------ */

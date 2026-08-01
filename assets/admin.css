@@ -201,19 +201,12 @@
 .wc-bulk-table tbody tr.row-modified:hover{background:#fff8e0!important;}
 .wc-bulk-table tbody tr.row-selected{background:#e8f0fe!important;}
 
-/* Categories & Tags — allow wrap */
-.wc-bulk-table td:has(.wc-bulk-categories){white-space:normal!important;}
-
 /* Thumb */
 .wc-bulk-thumb{width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--wcb-gray-200);display:block;margin:0 auto;}
 
-/* Product name
-   The cell stacks an editable input over a meta line holding the link to the
-   full product screen, the id, and the type badge — the input alone would
-   leave a row hard to identify. */
-/* Laid out on one line, not stacked: a meta row underneath would make this
-   cell taller than every other one, and the inputs across the row would stop
-   lining up with it. */
+/* Product name — the input, the id and the link to the full product screen sit
+   on one line. Stacking the meta underneath would make this cell taller than
+   every other one and the row would stop lining up. */
 .wc-bulk-name-cell{display:flex;align-items:center;gap:3px;min-width:0;height:40px;}
 .wc-bulk-name-cell .wcbx-name{flex:1 1 auto;min-width:0;font-weight:600;font-size:13px;}
 .wc-bulk-name-meta{display:flex;align-items:center;gap:3px;flex:0 0 auto;line-height:1;white-space:nowrap;}
@@ -224,14 +217,9 @@
    the tooltip names the type. */
 .wc-bulk-type-badge{display:inline-flex;align-items:center;color:var(--wcb-gray-500);cursor:help;}
 .wc-bulk-type-badge .dashicons{font-size:14px;width:14px;height:14px;}
-.wc-bulk-product-name{font-weight:600;color:var(--wcb-gray-900);text-decoration:none;font-size:13px;}
-.wc-bulk-product-name:hover{color:var(--wcb-primary);}
 .wc-bulk-product-id{color:var(--wcb-gray-500);font-size:11px;font-weight:400;}
-.wc-bulk-sku-text{font-family:monospace;font-size:12px;color:var(--wcb-gray-700);}
 .wc-bulk-ro{color:var(--wcb-gray-700);}
 .wc-bulk-ro.muted{color:var(--wcb-gray-500);}
-.wc-bulk-categories{display:flex;flex-wrap:wrap;gap:2px;}
-.wc-bulk-cat-tag{padding:2px 7px;background:var(--wcb-gray-100);border:1px solid var(--wcb-gray-200);border-radius:3px;font-size:11px;color:var(--wcb-gray-700);white-space:nowrap;}
 
 /* ==========================================================================
    INLINE EDITING

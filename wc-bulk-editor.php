@@ -339,24 +339,23 @@ final class WC_Bulk_Product_Editor
         return [
             'confirm_save'         => __('Save changes for {count} product(s)?', 'wc-bulk-editor'),
             'no_changes'          => __('No changes detected.', 'wc-bulk-editor'),
-            'saving'              => __('Saving...', 'wc-bulk-editor'),
-            'saved'               => __('All changes saved!', 'wc-bulk-editor'),
+            // Saving shows a progress bar rather than a status line, and the
+            // success message comes back from wc_bulk_save_inline().
             'error'               => __('An error occurred.', 'wc-bulk-editor'),
             'loading'             => __('Loading...', 'wc-bulk-editor'),
             'no_results'          => __('No products found.', 'wc-bulk-editor'),
             'confirm_delete'      => __('Delete {count} product(s)?', 'wc-bulk-editor'),
             'confirm_trash'       => __('Move {count} product(s) to trash?', 'wc-bulk-editor'),
             'confirm_duplicate'   => __('Duplicate {count} product(s)?', 'wc-bulk-editor'),
-            'bulk_deleted'        => __('{count} product(s) deleted.', 'wc-bulk-editor'),
-            'bulk_trashed'        => __('{count} product(s) moved to trash.', 'wc-bulk-editor'),
-            'bulk_duplicated'     => __('{count} product(s) duplicated.', 'wc-bulk-editor'),
+            // The result of a bulk action is worded by wc_bulk_bulk_action()
+            // and sent back with the response, so no client-side copy is kept
+            // here — two versions of the same sentence would drift.
             'no_products_selected'=> __('Select products first.', 'wc-bulk-editor'),
             'view_saved'          => __('View saved.', 'wc-bulk-editor'),
             'no_views'            => __('No saved views yet — set your filters, then click Save View.', 'wc-bulk-editor'),
             'cat_name_required'   => __('Category name is required.', 'wc-bulk-editor'),
             'cat_created'         => __('Category created.', 'wc-bulk-editor'),
             'cat_exists'          => __('That category already exists.', 'wc-bulk-editor'),
-            'new_category'        => __('New Category', 'wc-bulk-editor'),
             'no_category'         => __('— None —', 'wc-bulk-editor'),
             'view_deleted'        => __('View deleted.', 'wc-bulk-editor'),
             'csv_exported'        => __('CSV exported.', 'wc-bulk-editor'),
