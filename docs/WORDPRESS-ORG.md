@@ -279,7 +279,7 @@ Tersisa:
 14. [ ] Kecualikan `.git/`, `.gitignore`, `docs/`, dan `CLAUDE.md` dari paket
         rilis
 
-Nomor 13 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1295 baris PHP
+Nomor 13 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1323 baris PHP
 dan 2182 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
 penyimpangan gaya kalau kodenya jelas aman, tapi tidak ada jaminan.
 

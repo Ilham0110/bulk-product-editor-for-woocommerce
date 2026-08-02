@@ -76,7 +76,7 @@ Tidak ada composer, npm, build step, atau autoloader. Edit file langsung.
 
 ## Uji Setelah Mengubah Kode
 
-Ada 21 suite E2E Playwright yang menutupi seluruh 15 fitur, tapi **tidak
+Ada 24 suite E2E Playwright yang menutupi seluruh 15 fitur, tapi **tidak
 disimpan di dalam repo ini** — dijalankan manual dari luar terhadap instalasi
 lokal. Lihat [docs/TESTING.md](docs/TESTING.md).
 

@@ -234,6 +234,52 @@ Panduan singkat:
 di post. Itu memang yang diinginkan untuk deskripsi produk. Jangan pakai untuk
 field yang seharusnya polos.
 
+### Setelah disanitasi, slash-nya harus dipasang kembali
+
+Sanitasi bukan langkah terakhir. Tiga field produk — `name`, `description`,
+`short_description` — tidak disimpan di postmeta melainkan di tabel
+`wp_posts`, dan WooCommerce menulisnya lewat `wp_insert_post()`. Fungsi itu
+menjalankan `wp_unslash()` pada semua yang diterimanya, dengan asumsi datanya
+datang dari `$_POST` yang sudah di-slash oleh `wp_magic_quotes()`.
+
+Data kita tidak begitu. Setelah `sanitize_text_field()` ia berupa string
+bersih tanpa slash, sehingga `wp_unslash()` memakan karakter yang sah:
+
+```
+dikirim  : C:\Users\Publik
+tersimpan: C:UsersPublik
+```
+
+Karena itu ketiganya dibungkus `for_post_table()`, yang tidak lain adalah
+`wp_slash()`:
+
+```php
+'description', 'short_description' => $this->for_post_table(wp_kses_post($value)),
+```
+
+Ini kontrak resmi untuk memanggil `wp_insert_post()` di luar handler form.
+Penting: **jangan** menerapkannya pada field postmeta. `update_post_meta()`
+melakukan slashing sendiri, jadi menambahkan `wp_slash()` di sana justru
+menyimpan backslash ekstra. Karena itu pembungkusnya dipasang per field, bukan
+menyeluruh.
+
+Bukan keanehan khas plugin ini — REST API WooCommerce sendiri kehilangan
+karakter yang sama, diverifikasi terhadap `wc/v3` di instalasi ini:
+
+| Jalur tulis | `C:\Users\Publik` tersimpan sebagai |
+|---|---|
+| Editor produk bawaan WordPress | `C:\Users\Publik` ✅ |
+| REST API WooCommerce (`wc/v3`) | `C:UsersPublik` ❌ |
+| Plugin ini, sebelum perbaikan | `C:UsersPublik` ❌ |
+| Plugin ini, sesudah perbaikan | `C:\Users\Publik` ✅ |
+
+Editor bawaan lolos karena nilainya langsung dari `$_POST` dan masih ber-slash.
+
+Yang **bukan** bug meski terlihat mirip: `&` tersimpan sebagai `&amp;` untuk
+pengguna tanpa kapabilitas `unfiltered_html` (mis. shop_manager), dan apa
+adanya untuk administrator. Itu perilaku kses standar, dan ter-decode kembali
+saat dicetak. Suite `t24-slash` menjaga pembedaan ini.
+
 ---
 
 ## 7. Output: Escape di Titik Cetak

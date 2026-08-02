@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Plugin Name:          Bulk Product Editor for WooCommerce
  * Plugin URI:           https://github.com/Ilham0110/bulk-product-editor-for-woocommerce
  * Description:          Spreadsheet-style inline editing for WooCommerce products.
- * Version:              3.12.0
+ * Version:              3.12.1
  * Author:               Ilham Darmawan
  * Author URI:           https://github.com/Ilham0110
  * Requires at least:    6.5
@@ -931,10 +931,36 @@ final class WC_Bulk_Product_Editor
         $product->{$setter}(match ($field) {
             'regular_price', 'sale_price'      => $value === '' ? '' : (string) max(0, (float) $value),
             'stock_quantity', 'menu_order'     => $value === '' ? null : max(0, (int) $value),
-            'description', 'short_description' => wp_kses_post($value),
+            'description', 'short_description' => $this->for_post_table(wp_kses_post($value)),
             'purchase_note'                    => sanitize_textarea_field($value),
             default                            => $value === '' ? '' : sanitize_text_field($value),
         });
+    }
+
+    /**
+     * Re-add the slashes wp_insert_post() is going to strip.
+     *
+     * Only three product fields live in wp_posts rather than postmeta — name,
+     * description and short_description — and those three take a detour
+     * through wp_insert_post(), which calls wp_unslash() on everything it is
+     * given. Text that never passed through $_POST has no slashes to remove,
+     * so a literal backslash is eaten: "C:\dir" is stored as "C:dir".
+     *
+     * The core product editor does not hit this because its values arrive
+     * straight from $_POST, still slashed by wp_magic_quotes(). Ours arrive as
+     * clean strings from sanitize_text_field(), so the slashes have to be put
+     * back on. This is the documented contract for calling wp_insert_post()
+     * outside a form handler.
+     *
+     * Not a plugin-specific quirk: WooCommerce's own REST API loses the same
+     * character, verified against wc/v3 on this install.
+     *
+     * Postmeta fields need none of this — update_post_meta() slashes for
+     * itself — which is why this is applied per field rather than globally.
+     */
+    private function for_post_table(string $value): string
+    {
+        return wp_slash($value);
     }
 
     /**
@@ -958,7 +984,8 @@ final class WC_Bulk_Product_Editor
             );
         }
 
-        $product->set_name($name);
+        // post_title, so it needs the slashes wp_insert_post() will strip.
+        $product->set_name($this->for_post_table($name));
     }
 
     private function set_bool(WC_Product $product, string $field, mixed $value): void
@@ -1019,7 +1046,8 @@ final class WC_Bulk_Product_Editor
 
         try {
             $product = new WC_Product_Simple();
-            $product->set_name($name);
+            // post_title — see for_post_table().
+            $product->set_name($this->for_post_table($name));
 
             if (($sku = $this->post_string('sku')) !== '') {
                 $product->set_sku($sku);

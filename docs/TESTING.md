@@ -3,7 +3,7 @@
 Strategi pengujian untuk plugin ini: apa yang layak diuji, apa yang tidak, dan
 apa yang tidak bisa ditangkap alat apa pun.
 
-**Keadaan sekarang:** 21 suite E2E Playwright menutupi seluruh 15 fitur, dengan
+**Keadaan sekarang:** 24 suite E2E Playwright menutupi seluruh 15 fitur, dengan
 verifikasi ke database. Tidak ada test PHP — tidak ada `tests/`, `phpunit.xml`,
 maupun `composer.json` di dalam repo plugin.
 
@@ -331,15 +331,22 @@ WordPress test suite berjalan pada **satu** konfigurasi. Yang tidak diuji:
 |---|---|
 | Peran `shop_manager` | ✅ diuji — berfungsi penuh; `subscriber` ditolak di 14 endpoint |
 | Produk variable | ✅ diuji — induk dapat disunting tanpa merusak variasi |
+| Chromium / Firefox / WebKit | ✅ diuji — `t22-crossbrowser`, hasil identik |
 | HPOS aktif vs nonaktif | ❌ hanya diuji dengan HPOS aktif |
 | Multisite | ❌ `switch_to_blog()` tidak pernah dilalui |
 | WooCommerce versi lain | ❌ dikembangkan pada 10.9.4 saja |
 | PHP 8.4+ | ❌ header menyatakan 8.3 |
 
-Dua gap terbesar sudah tertutup. Yang tersisa memerlukan lingkungan lain, bukan
-sekadar test tambahan: mematikan HPOS mengubah tempat penyimpanan order,
-multisite mengubah cara `uninstall.php` harus bekerja, dan versi WooCommerce
-lain bisa memindahkan API yang dipakai.
+Soal lintas-browser: seluruh lebar kolom diukur saat runtime, jadi mesin
+render yang berbeda adalah risiko nyata, bukan teoretis. Hasilnya ternyata
+nyaris identik — selisih terbesar **1px** pada kolom SKU di Firefox. Panah
+dropdown (SVG inline), `position: sticky`, custom property CSS, `ResizeObserver`,
+dan `Blob`/`URL.createObjectURL` untuk ekspor CSV semuanya didukung ketiganya.
+
+Yang tersisa memerlukan lingkungan lain, bukan sekadar test tambahan:
+mematikan HPOS mengubah tempat penyimpanan order, multisite mengubah cara
+`uninstall.php` harus bekerja, dan versi WooCommerce lain bisa memindahkan API
+yang dipakai.
 
 **Untuk rilis publik, HPOS nonaktif yang paling layak diuji.** Plugin
 mendeklarasikan kompatibilitas `custom_order_tables`, dan sebagian toko masih
@@ -348,16 +355,27 @@ memakai penyimpanan lama.
 ### b. Data ekstrem
 
 Instalasi ini punya **15 produk dan 10 kategori**
-([PERFORMANCE.md](PERFORMANCE.md#1-ukuran-toko-saat-ini)). Yang tidak
-tersentuh:
+([PERFORMANCE.md](PERFORMANCE.md#1-ukuran-toko-saat-ini)). Sebagian gap di
+bagian ini sudah ditutup, dan menutupnya langsung membuahkan dua bug:
 
-- 5.000 produk — apakah paginasi tetap responsif?
+| Yang diuji | Cara | Hasil |
+|---|---|---|
+| 200 produk tambahan | dibuat lalu dihapus | menemukan pembekuan 12 detik ([PERFORMANCE.md §1b](PERFORMANCE.md)) |
+| Emoji, RTL, 4-byte, kutip, `&`, `<>` | `t23-edgecase` | aman |
+| Backslash literal | `t23`, `t24-slash` | menemukan karakter hilang ([SECURITY.md §6](SECURITY.md)) |
+| Produk tanpa isi apa pun | `t23-edgecase` | aman — `menu_order` 0 tidak jadi kosong |
+| Harga 0, desimal, 999999999, negatif, non-numerik | `t23-edgecase` | dijepit, tidak error |
+| Deskripsi sangat panjang | `t23-edgecase` | aman |
+
+Yang masih belum tersentuh:
+
+- 5.000 produk — 214 sudah cukup untuk menemukan bug performa, tapi bukan
+  batas atasnya
 - 500 kategori — dropdown tanpa limit
-- Produk variable — plugin ini hanya menyentuh induk
-- Nama produk dengan emoji, RTL, atau karakter 4-byte
-- Deskripsi produk sangat panjang di payload preload
 
-E2E terhadap 15 produk tidak akan menemukan masalah skala.
+Pelajaran dari tahap ini: **15 produk menyembunyikan bug.** Dua cacat terparah
+yang ditemukan sepanjang audit hanya muncul setelah datanya dinaikkan atau
+karakternya diperluas — tidak satu pun terlihat dari membaca kode.
 
 ### c. Interaksi dengan plugin lain
 
@@ -402,13 +420,13 @@ Berurutan menurut nilai per usaha:
 
 **Tahap 2 — E2E Playwright, sudah berjalan**
 
-21 suite menutupi seluruh 15 fitur di browser sungguhan, dengan verifikasi ke
+24 suite menutupi seluruh 15 fitur di browser sungguhan, dengan verifikasi ke
 database: render, change tracking, save, 6 filter, paginasi, modal Columns,
 Quick Apply, Advanced Bulk Edit, bulk action, Quick Add, New Category, export
 CSV + proteksi formula, saved views, peran pengguna, produk variable, edit
 nama, perataan sel, lebar kolom, dan Discard.
 
-Delapan bug ditemukan lewat cara ini — semuanya jenis yang tidak terlihat dari
+Sepuluh bug ditemukan lewat cara ini — semuanya jenis yang tidak terlihat dari
 pembacaan kode:
 
 | Bug | Kenapa tidak terlihat |
@@ -421,6 +439,12 @@ pembacaan kode:
 | Categories di modal tidak bisa diklik | select tidak pernah diisi |
 | Panah dropdown hilang | shorthand `background` menghapus gambar |
 | Discard mengubah tinggi baris | efek samping event `input` |
+| UI membeku 12 detik pada 100 baris | butuh 200 produk untuk muncul; profil CPU yang menunjuknya |
+| Backslash hilang dari nama/deskripsi | `wp_insert_post()` meng-unslash; REST API WC pun begitu |
+
+Dua yang terakhir layak dicatat khusus: keduanya baru muncul setelah **data
+ujinya diperluas**, bukan setelah kodenya dibaca ulang. Yang satu butuh 200
+produk, yang lain butuh satu karakter yang sebelumnya tidak pernah dicoba.
 
 **Suite ini tidak disimpan di dalam repo plugin.** Ia berjalan dari luar
 terhadap instalasi lokal, memakai kredensial dari variabel lingkungan.
