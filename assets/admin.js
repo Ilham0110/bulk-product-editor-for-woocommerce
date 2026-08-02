@@ -283,18 +283,57 @@
             // to is recorded and treated as a floor, so typing never undoes it.
             // The drag grip resizes the element without firing any input event,
             // and mouseup often lands outside it, so the box is observed directly.
+            //
+            // Two things here are about cost, not correctness, and both were
+            // measured rather than guessed. A ResizeObserver delivers one entry
+            // per element the moment it starts observing — 400 textareas on a
+            // 100-row page means 400 entries in a single callback. Probing a
+            // dragged height needs style.height='auto' followed by a
+            // scrollHeight read, which is a write between two reads and forces
+            // the browser to re-lay-out the whole table every time. Doing that
+            // 400 times in one callback cost 14 seconds of frozen UI.
+            //
+            // So: entry.contentRect carries the height the observer already
+            // computed, and reading it forces nothing. The expensive probe only
+            // runs when that height differs from the last one we recorded —
+            // that is, on a real drag, one element at a time.
             if (window.ResizeObserver) {
                 var textareaObserver = new ResizeObserver(function (entries) {
                     entries.forEach(function (entry) {
-                        var el = entry.target;
+                        var el = entry.target,
+                            height = Math.round(
+                                entry.contentRect ? entry.contentRect.height : el.clientHeight
+                            );
 
                         // Ignore the resize we cause ourselves while typing.
                         if (el.dataset.wcbAutoResize === '1') {
                             el.dataset.wcbAutoResize = '';
+                            el.dataset.wcbHeight = String(height);
                             return;
                         }
 
-                        var current = Math.round(el.getBoundingClientRect().height),
+                        // The first delivery is the observer reporting the
+                        // element's starting size, not a drag. Record it and
+                        // wait for an actual change.
+                        if (el.dataset.wcbHeight === undefined || el.dataset.wcbHeight === '') {
+                            el.dataset.wcbHeight = String(height);
+                            return;
+                        }
+
+                        if (String(height) === el.dataset.wcbHeight) {
+                            return;
+                        }
+
+                        el.dataset.wcbHeight = String(height);
+
+                        // From here the layout-forcing probe is worth it, and
+                        // the box model matters. contentRect above excludes
+                        // padding and border; scrollHeight below includes
+                        // padding. Comparing the two directly makes a dragged
+                        // box look shorter than its own content and the drag is
+                        // never recorded — so the comparison uses offsetHeight,
+                        // which is measured the same way scrollHeight is.
+                        var current = el.offsetHeight,
                             saved = el.style.height;
 
                         // scrollHeight follows the box once it has been dragged,
@@ -311,8 +350,15 @@
                 });
 
                 s.observeTextareas = function () {
+                    // Every render replaces the rows, but the observer keeps a
+                    // strong reference to the old textareas — they stay
+                    // observed, and detached, forever. Left alone the entry
+                    // count grows with every page change (80 → 280 → 600 on a
+                    // 20/50/100 walk). Dropping them all first keeps the
+                    // observer's working set equal to what is on screen.
+                    textareaObserver.disconnect();
+
                     $('.wc-bulk-inline-textarea').each(function () {
-                        if (this.dataset.wcbObserved === '1') return;
                         this.dataset.wcbObserved = '1';
                         textareaObserver.observe(this);
                     });

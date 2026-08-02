@@ -11,7 +11,7 @@ anjuran teoretis.
 > (WPCS) resmi. WPCS mewajibkan indentasi tab dan `snake_case` untuk semua nama.
 > Plugin ini memakai 4 spasi dan PHP modern. Itu keputusan yang sudah diambil
 > dan konsisten di seluruh file — **ikuti yang ada, jangan campur**. Mengubahnya
-> berarti menyentuh 1224 baris sekaligus, dan itu bukan pekerjaan sambilan.
+> berarti menyentuh 1295 baris sekaligus, dan itu bukan pekerjaan sambilan.
 
 ---
 
@@ -244,7 +244,7 @@ var total = 0;
 ```
 
 Ini bukan soal browser lama — semua browser modern mendukung ES6. Ini soal
-konsistensi: 2136 baris memakai satu gaya, dan campuran dua gaya membuat file
+konsistensi: 2182 baris memakai satu gaya, dan campuran dua gaya membuat file
 lebih sulit dibaca daripada gaya lama yang konsisten.
 
 ### Idiom `var s = this`

@@ -25,6 +25,82 @@ Angka itu penting untuk konteks: bagian 3 membahas hal-hal yang **akan** jadi
 masalah pada ribuan produk, tapi belum menjadi masalah di sini. Jangan
 mengoptimalkan sesuatu yang belum terukur lambat.
 
+Peringatan yang menyertainya: 15 produk juga menyembunyikan masalah. Bagian
+1b adalah bug yang tidak pernah muncul di toko ini dan langsung terlihat
+begitu datanya dinaikkan ke 214 produk.
+
+---
+
+## 1b. Yang Baru Terlihat pada 200 Produk
+
+Semua pengukuran di bawah dilakukan dengan 214 produk (200 di antaranya
+dibuat khusus untuk pengujian, lalu dihapus), memakai profil sampling
+Chrome DevTools lewat CDP — bukan `console.time()`.
+
+**Gejalanya:** pada `per_page=100`, baris masuk ke DOM dengan cepat tapi
+antarmuka membeku sekitar 12 detik sesudahnya. Profil CPU menunjuk satu baris:
+
+```
+   4747ms  (idle)
+   1721ms  (program)
+    371ms  getBoundingClientRect
+    354ms  (anonymous)  assets/admin.js:288      ← callback ResizeObserver
+```
+
+**Penyebab 1 — badai layout dari observasi awal.** `ResizeObserver`
+mengirim satu entri untuk *setiap* elemen begitu mulai diamati. Tabel
+100 baris punya 400 textarea, jadi satu callback menerima 400 entri. Tiap
+entri menjalankan:
+
+```js
+el.style.height = 'auto';        // tulis
+var content = el.scrollHeight;   // baca → memaksa layout ulang seluruh tabel
+el.style.height = saved;         // tulis
+```
+
+Tulis-di-antara-dua-baca adalah *forced synchronous layout*. Empat ratus kali
+berturut-turut: **13.985 ms terkunci di dalam callback.**
+
+Perbaikannya bukan membuang probe itu, karena ia memang dibutuhkan saat
+pengguna men-drag pegangan resize. Yang berubah: `entry.contentRect` sudah
+membawa tinggi yang dihitung observer, dan membacanya tidak memaksa apa pun.
+Probe mahal hanya jalan kalau tinggi itu **berubah** — yaitu saat drag
+sungguhan, satu elemen saja.
+
+**Penyebab 2 — observer menumpuk elemen mati.** Tiap render mengganti seluruh
+baris, tapi observer tetap memegang textarea lama. Jumlah entri tumbuh di
+setiap perpindahan halaman:
+
+| Langkah | Textarea di layar | Entri diterima observer |
+|---|---|---|
+| muat awal | 60 | 200 |
+| → per_page=20 | 80 | 280 |
+| → per_page=50 | 200 | 280 |
+| → per_page=100 | 400 | **600** |
+
+`observeTextareas()` sekarang memanggil `disconnect()` lebih dulu, sehingga
+himpunan yang diamati selalu sama dengan yang ada di layar.
+
+**Hasil:**
+
+| | Sebelum | Sesudah |
+|---|---|---|
+| Waktu di callback (100 baris) | 13.985 ms | 2 ms |
+| Paint setelah baris masuk DOM | +12.000 ms | +200 ms |
+
+**Jebakan yang menyertai perbaikan ini.** Percobaan pertama membandingkan
+`entry.contentRect.height` dengan `el.scrollHeight`. Keduanya model kotak yang
+berbeda — `contentRect` tidak menghitung padding, `scrollHeight` menghitung.
+Untuk textarea dengan padding 9px, kotak yang di-drag ke 130px melaporkan
+`contentRect` 110 sementara `scrollHeight` 128, jadi syarat "lebih tinggi dari
+isinya" tidak pernah terpenuhi dan tinggi hasil drag tidak pernah tersimpan.
+Perbandingannya sekarang memakai `offsetHeight`, yang diukur dengan cara yang
+sama seperti `scrollHeight`. Suite `t21-textarea-drag` menjaga perilaku ini.
+
+**Pelajaran umum:** optimasi yang memperbaiki angka tapi mengubah perilaku
+adalah bug. Kalau sebuah jalur kode dipangkas, jalur itu butuh tesnya sendiri
+sebelum dipangkas — bukan sesudahnya.
+
 ---
 
 ## 2. Biaya Sebenarnya: Bootstrap, Bukan Query
@@ -36,15 +112,39 @@ tema, seluruh rantai hook. Pada instalasi ini itu berarti WooCommerce 10.9.4,
 Elementor Pro, Sejoli, dan lainnya — untuk kemudian menjalankan satu query
 yang mungkin memakan 2 ms.
 
-Perbandingan kasarnya:
+Ini bukan dugaan. Baseline diukur dengan membandingkan endpoint kami terhadap
+`action` yang tidak terdaftar sama sekali — request yang tidak menjalankan kode
+apa pun selain bootstrap:
 
-| Operasi | Biaya |
+| Yang dipanggil | Waktu (3 kali jalan) |
 |---|---|
-| Bootstrap WordPress + 7 plugin | ~150–300 ms |
-| `get_terms()` untuk 10 kategori | ~1–3 ms |
-| `wc_get_products()` 50 produk | ~20–50 ms |
+| `action=zz_tidak_ada` — bootstrap saja | 3233, 3512, 2953 ms |
+| `heartbeat` bawaan WordPress | 2884, 3032, 3020 ms |
+| `wc_bulk_fetch_products` per_page=20 | 3031, 3142, 3071 ms |
+| `wc_bulk_fetch_products` per_page=100 | 4185, 3115, 3193 ms |
 
-**Bootstrap 10× lebih mahal daripada query yang dijalankannya.**
+Endpoint kami praktis tidak berbeda dari request kosong. Sisi PHP-nya sendiri,
+diukur langsung tanpa HTTP:
+
+| Operasi | Query | Waktu |
+|---|---|---|
+| Bootstrap WordPress + 8 plugin | — | ~1100 ms |
+| `wc_get_products()` 20 produk + terms | 27 | 50 ms |
+| `wc_get_products()` 50 produk + terms | 13 | 44 ms |
+| `wc_get_products()` 100 produk + terms | 13 | 65 ms |
+
+Dua hal yang dikonfirmasi angka ini:
+
+1. **Bootstrap puluhan kali lebih mahal daripada query yang dijalankannya.**
+   (Angka 3 detik itu khas lingkungan Windows/Laragon tanpa OPcache yang
+   dihangatkan; di server produksi jauh lebih rendah. Yang penting bukan
+   angka absolutnya, tapi bahwa bagian kami mendekati nol.)
+2. **Tidak ada N+1.** Jumlah query tetap 13 baik untuk 50 maupun 100 produk.
+   Angka 27 pada baris pertama adalah cache yang belum panas, bukan
+   penskalaan — `collect_terms()` mengambil seluruh term dalam satu query.
+
+Jejak plugin ini saat bootstrap juga kecil: **1 berkas dari 1968** yang dimuat,
+dan **18 hook** terdaftar.
 
 Konsekuensinya, aturan utama plugin ini:
 
@@ -318,7 +418,7 @@ public function enqueue_assets(string $hook): void
 Aset plugin ini **tidak pernah** dimuat di halaman admin lain. Ini yang
 membedakan plugin yang sopan dari plugin yang membuat admin lambat.
 
-Ukurannya: `admin.js` 77 KB, `admin.css` 34 KB. Tidak diminifikasi (lihat
+Ukurannya: `admin.js` 90 KB, `admin.css` 32 KB. Tidak diminifikasi (lihat
 [ADR 0002](adr/0002-tanpa-build-step.md)). Untuk satu halaman yang dibuka
 sesekali, ini tidak bermasalah — tapi akan bermasalah kalau dimuat di setiap
 halaman admin.
@@ -373,7 +473,9 @@ jquery-ui-sortable sudah tersedia di admin WordPress.
 
 ### Ukuran payload preload
 
-50 produk × ~35 field ≈ **100–150 KB JSON** tertanam di HTML halaman.
+Payload preload terukur **53 KB** untuk 15 produk; pada 50 produk yang dikirim
+endpoint, respons AJAX-nya 48 KB, dan pada 100 produk 96 KB — kira-kira 1 KB
+per produk.
 
 Ini pertukaran yang disengaja: halaman lebih besar, tapi nol AJAX untuk render
 pertama. Pada 15 produk di instalasi ini, payloadnya jauh lebih kecil.

@@ -269,7 +269,7 @@ Handler baru wajib mengikuti pola yang sama: `guard()` dulu, lalu cek khusus.
 
 ## Peta `admin.js`
 
-2136 baris, satu objek `B`, tanpa modul. Navigasi lewat header seksi:
+2182 baris, satu objek `B`, tanpa modul. Navigasi lewat header seksi:
 
 | Baris | Seksi | Isi |
 |---|---|---|
