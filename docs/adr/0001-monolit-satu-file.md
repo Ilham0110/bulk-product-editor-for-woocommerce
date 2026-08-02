@@ -6,7 +6,7 @@
 ## Konteks
 
 Seluruh logika PHP plugin ini ada dalam satu file 852 baris
-(`wc-bulk-editor.php`), berisi satu class `WC_Bulk_Product_Editor` tanpa
+(`bulk-product-editor-for-woocommerce.php`), berisi satu class `WC_Bulk_Product_Editor` tanpa
 namespace: bootstrap, menu admin, enqueue aset, 14 handler AJAX, dan semua
 logika penulisan produk.
 

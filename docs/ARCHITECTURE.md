@@ -12,7 +12,7 @@ Baca ini sebelum mengubah apa pun yang menyentuh lebih dari satu file.
 Empat file, tanpa autoloader, tanpa build step:
 
 ```
-wc-bulk-editor.php     →  Semua PHP. Satu class, singleton.
+bulk-product-editor-for-woocommerce.php     →  Semua PHP. Satu class, singleton.
 views/admin-page.php   →  Markup statis. Semua isi tabel dirender JS.
 assets/admin.js        →  Satu controller object `B`, di-boot saat DOM ready.
 assets/admin.css       →  Styling.
@@ -47,7 +47,7 @@ Sebelum itu, di level file (baris 15–27):
 > WooCommerce bawaan, bukan menyelip di tengah.
 
 `enqueue_assets()` keluar lebih awal kalau `$hook !== self::SCREEN_ID`
-(`woocommerce_page_wc-bulk-editor`). Aset plugin ini tidak pernah dimuat di
+(`woocommerce_page_bulk-product-editor-for-woocommerce`). Aset plugin ini tidak pernah dimuat di
 halaman admin lain.
 
 ---
@@ -212,7 +212,7 @@ tepat untuk field yang punya nilai default yang masuk akal.
 if ($name === '') {
     throw new WC_Data_Exception(
         'wcbulk_empty_name',
-        __('Product name cannot be empty.', 'wc-bulk-editor')
+        __('Product name cannot be empty.', 'bulk-product-editor-for-woocommerce')
     );
 }
 ```

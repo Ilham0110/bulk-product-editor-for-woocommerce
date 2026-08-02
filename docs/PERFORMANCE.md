@@ -440,7 +440,7 @@ WooCommerce membawa **Action Scheduler** — sudah tersedia tanpa dependency
 tambahan, dan lebih baik daripada WP-Cron untuk pekerjaan massal:
 
 ```php
-as_enqueue_async_action('wcbulk_process_batch', [$batch_id], 'wc-bulk-editor');
+as_enqueue_async_action('wcbulk_process_batch', [$batch_id], 'bulk-product-editor-for-woocommerce');
 ```
 
 Kelebihannya: antrean tersimpan di tabel sendiri, ada UI pemantauan di

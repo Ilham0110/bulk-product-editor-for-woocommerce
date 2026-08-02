@@ -3,13 +3,16 @@
 Apa yang dibutuhkan untuk mengirim plugin ini ke direktori resmi
 WordPress.org — dan apakah itu sepadan.
 
-**Kesimpulan di depan:** dalam keadaan sekarang plugin ini **akan ditolak**.
-Ada satu masalah yang tidak bisa dinegosiasikan (nama), dan sekitar sembilan
-lainnya yang bisa dikerjakan. Bacalah bagian 1 dulu sebelum memutuskan.
+**Kesimpulan di depan:** dokumen ini awalnya ditulis ketika plugin masih
+bernama `WooCommerce Bulk Product Editor` dengan slug `wc-bulk-editor` — dua
+hal yang membuatnya pasti ditolak. Keduanya sudah diperbaiki. Yang tersisa
+hanya urusan rilis (screenshot, paket ZIP); lihat checklist di bagian akhir.
 
 ---
 
 ## 1. Penghalang yang Tidak Bisa Dinegosiasikan: Nama
+
+Nama lama plugin ini:
 
 ```
 Plugin Name: WooCommerce Bulk Product Editor
@@ -27,10 +30,27 @@ Yang diizinkan adalah menyebut kompatibilitas, bukan mengklaim nama:
 | `WooCommerce Quick Edit` | `Quick Edit — WooCommerce Add-on` |
 
 Pola `"… for WooCommerce"` diterima karena tidak dimulai dengan merek dagang.
-Slug direktori (`wc-bulk-editor`) sudah aman — prefix `wc-` tidak masalah.
+Nama plugin sekarang `Bulk Product Editor for WooCommerce`.
 
-Perubahan ini menyentuh header plugin, `readme.txt`, dan judul halaman admin.
-Text domain **tidak** perlu diubah.
+### Slug: aturannya lebih ketat, dan kami sempat salah duga
+
+Dokumen ini semula menyatakan slug `wc-bulk-editor` aman karena `wc-` bukan
+kata "woocommerce" utuh. Plugin Check membantahnya:
+
+```
+The plugin slug "wc-bulk-editor" contains the restricted term "wc"
+which cannot be used at all in your plugin slug.
+```
+
+`wc` ada di daftar istilah yang dilarang mutlak — bukan hanya sebagai awalan,
+tapi di posisi mana pun. Slug sekarang `bulk-product-editor-for-woocommerce`,
+mengikuti nama plugin.
+
+Pelajarannya: jangan menebak soal slug, jalankan `wp plugin check` sebelum
+menulis kode yang mengandungnya. Mengganti slug bukan penggantian satu baris —
+ia menyentuh nama folder, nama file utama, text domain di setiap pemanggilan
+fungsi terjemahan (197 tempat di plugin ini), `PAGE_SLUG`, `SCREEN_ID`, handle
+aset, dan nama file POT. Semakin lambat ditemukan, semakin mahal.
 
 ---
 
@@ -141,7 +161,7 @@ Sudah lengkap — sepuluh field wajib terisi:
 
 ```php
  * Plugin Name:          Bulk Product Editor for WooCommerce
- * Plugin URI:           https://github.com/Ilham0110/wc-bulk-editor
+ * Plugin URI:           https://github.com/Ilham0110/bulk-product-editor-for-woocommerce
  * Description:          Spreadsheet-style inline editing for WooCommerce products.
  * Version:              3.12.0
  * Author:               Ilham Darmawan
@@ -151,7 +171,7 @@ Sudah lengkap — sepuluh field wajib terisi:
  * Requires Plugins:     woocommerce
  * License:              GPL-2.0-or-later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:          wc-bulk-editor
+ * Text Domain:          bulk-product-editor-for-woocommerce
  * Domain Path:          /languages
  * WC requires at least: 9.0
  * WC tested up to:      10.9
@@ -183,36 +203,51 @@ Hasil audit — tidak ada masalah di area ini:
 | Text domain literal | ✅ 211 pemanggilan, nol pelanggaran |
 | Prefix konsisten (`wcbulk_`, `wc_bulk_`, `_wcbulk_`) | ✅ |
 | Ukuran plugin | ✅ 340 KB |
-| Slug cocok dengan text domain | ✅ `wc-bulk-editor` |
+| Slug cocok dengan text domain | ✅ `bulk-product-editor-for-woocommerce` |
 
 Ini bagian yang paling sering menggagalkan plugin lain, dan di sini sudah
 beres.
 
 ---
 
-## 5. Yang Akan Ditandai Plugin Check (PCP)
+## 5. Hasil Plugin Check (PCP)
 
 Plugin Check adalah alat resmi yang menjalankan sebagian pemeriksaan reviewer.
-Pasang dari direktori dan jalankan sebelum submit.
+Sudah dijalankan (PCP 2.0.0) lewat WP-CLI:
 
-Yang hampir pasti muncul:
+```bash
+wp plugin check bulk-product-editor-for-woocommerce
+```
 
-**a. Indentasi spasi, bukan tab.** WPCS mewajibkan tab. Ini akan ditandai di
-seluruh 1224 baris PHP. Lihat
-[ADR 0005](adr/0005-menyimpang-dari-wpcs.md) — keputusan ini disengaja, dan
-inilah biayanya.
+**Hasil akhir: nol temuan di dalam kode.** Yang tersisa hanya dua peringatan
+tentang berkas pengembangan yang memang tidak boleh ikut dikirim:
 
-**b. `$_POST` diakses langsung.** Kode memakai pola aman
-(`absint($_POST['page'] ?? 1)`), tapi sniff PHPCS tidak selalu mengenalinya
-sebagai tersanitasi. Kemungkinan perlu komentar
-`// phpcs:ignore WordPress.Security.ValidatedSanitizedInput`.
+| Peringatan | Berkas | Tindakan |
+|---|---|---|
+| `hidden_files` | `.gitignore` | dikecualikan dari paket rilis |
+| `unexpected_markdown_file` | `CLAUDE.md` | dikecualikan dari paket rilis |
 
-Keduanya soal gaya, bukan korektnes. `uninstall.php` dan `readme.txt` — dua
-temuan yang dulu pasti muncul — kini sudah ada.
+Temuan yang **dulu** muncul dan sudah diselesaikan:
 
-Yang **tidak** akan ditandai: penggunaan PHP 8.3 modern (`match`, `??=`,
-first-class callable) — PCP tidak melarangnya, hanya WPCS style sniff yang
-berkomentar.
+**a. Slug memakai istilah terlarang.** `wc-bulk-editor` → lihat bagian 1. Ini
+temuan paling mahal, karena baru muncul setelah kodenya jadi.
+
+**b. `readme.txt` berbahasa Indonesia.** Sejak Juli 2025 WordPress.org
+mewajibkan `readme.txt` dalam bahasa Inggris — terjemahan lewat
+translate.wordpress.org, bukan di berkas itu sendiri. Ditulis ulang penuh;
+`wp plugin check --checks=plugin_readme` sekarang bersih.
+
+**c. `$_POST` diakses langsung.** Kode memakai pola aman, tapi sniff PHPCS
+tidak mengenali `(int)` sebagai sanitasi. Diselesaikan dengan
+`// phpcs:ignore` yang menyebut alasannya (semua endpoint lewat `guard()`, dan
+tiap daun `changes` disanitasi di `apply_fields()`) — bukan ignore telanjang.
+
+**d. Indentasi spasi, bukan tab.** WPCS mewajibkan tab. PCP dengan konfigurasi
+standar tidak menandai ini, tapi reviewer manusia mungkin berkomentar. Lihat
+[ADR 0005](adr/0005-menyimpang-dari-wpcs.md) — keputusan ini disengaja.
+
+Yang **tidak** ditandai: penggunaan PHP 8.3 modern (`match`, `??=`,
+first-class callable). PCP tidak melarangnya.
 
 ---
 
@@ -226,22 +261,25 @@ Sudah selesai:
        termasuk penanganan multisite
 4. [x] **`LICENSE`** — GPL v2 lengkap
 5. [x] **Header plugin** — 10 field wajib lengkap
-6. [x] **`languages/wc-bulk-editor.pot`** — 156 string
+6. [x] **`languages/bulk-product-editor-for-woocommerce.pot`** — 156 string
 7. [x] **Nol string hardcoded** di `admin.js`
 8. [x] **30 label kolom** diterjemahkan lewat `column_labels()` dan
        `column_headers()`
+9. [x] **Slug** → `bulk-product-editor-for-woocommerce` (folder, berkas utama,
+       text domain 197 tempat, `PAGE_SLUG`, `SCREEN_ID`, handle aset, POT)
+10. [x] **`readme.txt` bahasa Inggris** — syarat WordPress.org sejak Juli 2025
+11. [x] **Jalankan Plugin Check** — nol temuan di kode
 
 Tersisa:
 
-9. [ ] **Siapkan screenshot** minimal 2, ditaruh di folder `assets/` repo SVN
-       (bukan di dalam folder plugin)
-10. [ ] **Jalankan Plugin Check**, selesaikan temuan
-11. [ ] **Putuskan soal WPCS** — konversi penuh, atau siapkan alasan untuk
+12. [ ] **Siapkan screenshot** minimal 2, ditaruh di folder `assets/` repo SVN
+        (bukan di dalam folder plugin)
+13. [ ] **Putuskan soal WPCS** — konversi penuh, atau siapkan alasan untuk
         reviewer
-12. [ ] Kecualikan `.git/`, `.gitignore`, `docs/`, dan `CLAUDE.md` dari paket
+14. [ ] Kecualikan `.git/`, `.gitignore`, `docs/`, dan `CLAUDE.md` dari paket
         rilis
 
-Nomor 11 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1224 baris PHP
+Nomor 13 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1224 baris PHP
 dan 2136 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
 penyimpangan gaya kalau kodenya jelas aman, tapi tidak ada jaminan.
 

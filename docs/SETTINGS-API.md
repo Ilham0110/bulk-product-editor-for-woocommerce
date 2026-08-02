@@ -86,14 +86,14 @@ add_action('admin_init', static function (): void {
 
     add_settings_section(
         'wcbulk_main',
-        __('Pengaturan Editor', 'wc-bulk-editor'),
+        __('Pengaturan Editor', 'bulk-product-editor-for-woocommerce'),
         '__return_false',               // tanpa deskripsi section
         'wcbulk_settings_page'
     );
 
     add_settings_field(
         'wcbulk_per_page',
-        __('Produk per halaman', 'wc-bulk-editor'),
+        __('Produk per halaman', 'bulk-product-editor-for-woocommerce'),
         'wcbulk_render_per_page_field',
         'wcbulk_settings_page',
         'wcbulk_main'
@@ -152,7 +152,7 @@ function wcbulk_render_settings_page(): void
 {
     // Settings API tidak mengecek capability untuk kita.
     if (!current_user_can('manage_woocommerce')) {
-        wp_die(esc_html__('Akses ditolak.', 'wc-bulk-editor'));
+        wp_die(esc_html__('Akses ditolak.', 'bulk-product-editor-for-woocommerce'));
     }
 
     ?>
@@ -223,8 +223,8 @@ Plugin ini memakai submenu di bawah WooCommerce:
 ```php
 add_submenu_page(
     'woocommerce',                  // parent
-    __('Bulk Product Editor', 'wc-bulk-editor'),
-    __('Bulk Editor', 'wc-bulk-editor'),
+    __('Bulk Product Editor', 'bulk-product-editor-for-woocommerce'),
+    __('Bulk Editor', 'bulk-product-editor-for-woocommerce'),
     self::CAPABILITY,
     self::PAGE_SLUG,
     $this->render_admin_page(...),
@@ -236,10 +236,10 @@ Kalau nanti ada halaman pengaturan, taruh di tempat yang sama:
 ```php
 add_submenu_page(
     'woocommerce',
-    __('Pengaturan Bulk Editor', 'wc-bulk-editor'),
-    __('Pengaturan Bulk Editor', 'wc-bulk-editor'),
+    __('Pengaturan Bulk Editor', 'bulk-product-editor-for-woocommerce'),
+    __('Pengaturan Bulk Editor', 'bulk-product-editor-for-woocommerce'),
     'manage_woocommerce',
-    'wc-bulk-editor-settings',
+    'bulk-product-editor-for-woocommerce-settings',
     'wcbulk_render_settings_page'
 );
 ```
@@ -260,7 +260,7 @@ sendiri:
 
 ```php
 if (!current_user_can('manage_woocommerce')) {
-    wp_die(esc_html__('Akses ditolak.', 'wc-bulk-editor'));
+    wp_die(esc_html__('Akses ditolak.', 'bulk-product-editor-for-woocommerce'));
 }
 ```
 
@@ -286,7 +286,7 @@ Atau lebih sederhana — tambahkan section ke tab Products yang sudah ada:
 
 ```php
 add_filter('woocommerce_get_sections_products', function (array $sections): array {
-    $sections['wcbulk'] = __('Bulk Editor', 'wc-bulk-editor');
+    $sections['wcbulk'] = __('Bulk Editor', 'bulk-product-editor-for-woocommerce');
     return $sections;
 });
 
@@ -297,12 +297,12 @@ add_filter('woocommerce_get_settings_products', function (array $settings, strin
 
     return [
         [
-            'title' => __('Bulk Editor', 'wc-bulk-editor'),
+            'title' => __('Bulk Editor', 'bulk-product-editor-for-woocommerce'),
             'type'  => 'title',
             'id'    => 'wcbulk_options',
         ],
         [
-            'title'    => __('Produk per halaman', 'wc-bulk-editor'),
+            'title'    => __('Produk per halaman', 'bulk-product-editor-for-woocommerce'),
             'id'       => 'wcbulk_per_page',
             'type'     => 'number',
             'default'  => '50',

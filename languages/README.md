@@ -6,9 +6,9 @@ Folder ini dibaca WordPress karena header plugin menyatakan
 ## Pola nama file
 
 ```
-wc-bulk-editor.pot            template (semua string, tanpa terjemahan)
-wc-bulk-editor-id_ID.po       terjemahan Indonesia (sumber, di-commit)
-wc-bulk-editor-id_ID.mo       hasil kompilasi (di-ignore git)
+bulk-product-editor-for-woocommerce.pot            template (semua string, tanpa terjemahan)
+bulk-product-editor-for-woocommerce-id_ID.po       terjemahan Indonesia (sumber, di-commit)
+bulk-product-editor-for-woocommerce-id_ID.mo       hasil kompilasi (di-ignore git)
 ```
 
 `.mo` adalah yang benar-benar dimuat WordPress. File itu hasil kompilasi dari
@@ -18,14 +18,14 @@ wc-bulk-editor-id_ID.mo       hasil kompilasi (di-ignore git)
 
 Dengan WP-CLI:
 ```bash
-wp i18n make-pot . languages/wc-bulk-editor.pot
+wp i18n make-pot . languages/bulk-product-editor-for-woocommerce.pot
 ```
 
 Tanpa WP-CLI: pakai Poedit (aplikasi desktop), arahkan ke folder plugin.
 
 ## Catatan
 
-Text domain `wc-bulk-editor` dipakai konsisten di seluruh kode dan selalu
+Text domain `bulk-product-editor-for-woocommerce` dipakai konsisten di seluruh kode dan selalu
 sebagai string literal — syarat agar parser bisa menemukannya.
 
 String untuk JavaScript ada di `i18n_strings()`, bukan di `admin.js`.

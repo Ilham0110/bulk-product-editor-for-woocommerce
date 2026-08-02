@@ -23,16 +23,16 @@ public function add_admin_menu(): void
 {
     add_submenu_page(
         'woocommerce',                                       // parent slug
-        __('Bulk Product Editor', 'wc-bulk-editor'),         // <title> halaman
-        __('Bulk Editor', 'wc-bulk-editor'),                 // teks menu
+        __('Bulk Product Editor', 'bulk-product-editor-for-woocommerce'),         // <title> halaman
+        __('Bulk Editor', 'bulk-product-editor-for-woocommerce'),                 // teks menu
         self::CAPABILITY,                                    // manage_woocommerce
-        self::PAGE_SLUG,                                     // wc-bulk-editor
+        self::PAGE_SLUG,                                     // bulk-product-editor-for-woocommerce
         $this->render_admin_page(...),                       // callback render
     );
 }
 ```
 
-Menghasilkan hook suffix `woocommerce_page_wc-bulk-editor`, yang disimpan
+Menghasilkan hook suffix `woocommerce_page_bulk-product-editor-for-woocommerce`, yang disimpan
 sebagai `self::SCREEN_ID` dan dipakai untuk penargetan aset.
 
 ### Prioritas 99 bukan kebetulan
@@ -60,7 +60,7 @@ Parameter capability di `add_submenu_page()` hanya **menyembunyikan item menu**.
 Halamannya tetap bisa diakses lewat URL langsung:
 
 ```
-/wp-admin/admin.php?page=wc-bulk-editor
+/wp-admin/admin.php?page=bulk-product-editor-for-woocommerce
 ```
 
 Callback render wajib mengecek sendiri:
@@ -69,7 +69,7 @@ Callback render wajib mengecek sendiri:
 public function render_admin_page(): void
 {
     if (!current_user_can(self::CAPABILITY)) {
-        wp_die(esc_html__('Akses ditolak.', 'wc-bulk-editor'));
+        wp_die(esc_html__('Akses ditolak.', 'bulk-product-editor-for-woocommerce'));
     }
     // …
 }
@@ -90,10 +90,10 @@ atau konfirmasi:
 ```php
 add_submenu_page(
     '',                          // parent kosong = tidak muncul di sidebar
-    __('Detail', 'wc-bulk-editor'),
+    __('Detail', 'bulk-product-editor-for-woocommerce'),
     '',
     'manage_woocommerce',
-    'wc-bulk-editor-detail',
+    'bulk-product-editor-for-woocommerce-detail',
     'render_detail_page'
 );
 ```
@@ -120,14 +120,14 @@ public function enqueue_assets(string $hook): void
 ```
 
 `$hook` yang diterima `admin_enqueue_scripts` adalah nilai kembalian
-`add_submenu_page()` — untuk plugin ini `woocommerce_page_wc-bulk-editor`.
+`add_submenu_page()` — untuk plugin ini `woocommerce_page_bulk-product-editor-for-woocommerce`.
 
 ### Tiga cara menargetkan, dan kapan memakainya
 
 **a. Perbandingan hook suffix** — paling sederhana, dipakai plugin ini:
 
 ```php
-if ($hook !== 'woocommerce_page_wc-bulk-editor') {
+if ($hook !== 'woocommerce_page_bulk-product-editor-for-woocommerce') {
     return;
 }
 ```
@@ -152,8 +152,8 @@ Properti yang tersedia (`class-wp-screen.php`):
 
 | Properti | Isi | Contoh |
 |---|---|---|
-| `id` | pengenal layar penuh | `woocommerce_page_wc-bulk-editor` |
-| `base` | layar tanpa konteks | `woocommerce_page_wc-bulk-editor` |
+| `id` | pengenal layar penuh | `woocommerce_page_bulk-product-editor-for-woocommerce` |
+| `base` | layar tanpa konteks | `woocommerce_page_bulk-product-editor-for-woocommerce` |
 | `post_type` | tipe post | `product` |
 | `taxonomy` | taksonomi | `product_cat` |
 | `action` | aksi saat ini | `add` |
@@ -204,7 +204,7 @@ WordPress 6.4+ menyediakan fungsi yang menangani markup dan escaping:
 
 ```php
 wp_admin_notice(
-    esc_html__('Bulk Editor: the admin template is missing.', 'wc-bulk-editor'),
+    esc_html__('Bulk Editor: the admin template is missing.', 'bulk-product-editor-for-woocommerce'),
     ['type' => 'error']
 );
 ```
@@ -266,12 +266,12 @@ add_action('admin_notices', 'my_notice');
 add_action('admin_notices', static function (): void {
     $screen = get_current_screen();
 
-    if (!$screen || $screen->id !== 'woocommerce_page_wc-bulk-editor') {
+    if (!$screen || $screen->id !== 'woocommerce_page_bulk-product-editor-for-woocommerce') {
         return;
     }
 
     wp_admin_notice(
-        esc_html__('Pesan khusus halaman ini.', 'wc-bulk-editor'),
+        esc_html__('Pesan khusus halaman ini.', 'bulk-product-editor-for-woocommerce'),
         ['type' => 'info', 'dismissible' => true]
     );
 });
@@ -289,7 +289,7 @@ add_action('admin_notices', static function (): void {
     }
 
     wp_admin_notice(
-        esc_html__('Tekan Ctrl+S untuk menyimpan semua perubahan.', 'wc-bulk-editor'),
+        esc_html__('Tekan Ctrl+S untuk menyimpan semua perubahan.', 'bulk-product-editor-for-woocommerce'),
         [
             'type'               => 'info',
             'dismissible'        => true,
@@ -367,7 +367,7 @@ add_action("load-{$hook}", static function (): void {
 
     // 2. Capability
     if (!current_user_can('manage_woocommerce')) {
-        wp_die(esc_html__('Akses ditolak.', 'wc-bulk-editor'));
+        wp_die(esc_html__('Akses ditolak.', 'bulk-product-editor-for-woocommerce'));
     }
 
     // 3. Proses
@@ -376,7 +376,7 @@ add_action("load-{$hook}", static function (): void {
     // 4. Redirect dengan hasil di query string
     wp_safe_redirect(add_query_arg(
         [
-            'page'     => 'wc-bulk-editor-import',
+            'page'     => 'bulk-product-editor-for-woocommerce-import',
             'imported' => $count,
         ],
         admin_url('admin.php')
@@ -410,7 +410,7 @@ juga memeriksa referer dan menampilkan halaman error standar.
 
     <input type="file" name="csv" />
 
-    <?php submit_button(__('Impor', 'wc-bulk-editor')); ?>
+    <?php submit_button(__('Impor', 'bulk-product-editor-for-woocommerce')); ?>
 </form>
 ```
 
@@ -428,7 +428,7 @@ public function render_import_page(): void
         wp_admin_notice(
             esc_html(sprintf(
                 /* translators: %d: jumlah produk */
-                _n('%d produk diimpor.', '%d produk diimpor.', $imported, 'wc-bulk-editor'),
+                _n('%d produk diimpor.', '%d produk diimpor.', $imported, 'bulk-product-editor-for-woocommerce'),
                 $imported
             )),
             ['type' => 'success', 'dismissible' => true]
@@ -449,11 +449,11 @@ Untuk hapus atau reset, jangan langsung eksekusi dari link:
 printf(
     '<a href="%s" class="button">%s</a>',
     esc_url(wp_nonce_url(
-        add_query_arg(['page' => 'wc-bulk-editor', 'action' => 'reset']),
+        add_query_arg(['page' => 'bulk-product-editor-for-woocommerce', 'action' => 'reset']),
         'wcbulk_reset',
         'wcbulk_nonce'
     )),
-    esc_html__('Reset kolom', 'wc-bulk-editor')
+    esc_html__('Reset kolom', 'bulk-product-editor-for-woocommerce')
 );
 ```
 

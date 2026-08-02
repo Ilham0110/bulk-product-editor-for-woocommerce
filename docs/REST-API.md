@@ -46,7 +46,7 @@ autentikasi, dua bentuk respons, dan dua cara menangani error. Pilih satu.
 ```php
 add_action('rest_api_init', static function (): void {
     register_rest_route(
-        'wc-bulk-editor/v1',              // namespace: nama-plugin/versi
+        'bulk-product-editor-for-woocommerce/v1',              // namespace: nama-plugin/versi
         '/products',                       // route
         [
             'methods'             => WP_REST_Server::READABLE,
@@ -58,15 +58,15 @@ add_action('rest_api_init', static function (): void {
 });
 ```
 
-Menghasilkan: `/wp-json/wc-bulk-editor/v1/products`
+Menghasilkan: `/wp-json/bulk-product-editor-for-woocommerce/v1/products`
 
 ### Aturan namespace
 
 Core memaksa (`rest-api.php:35-75`):
 
 - **Wajib ada namespace.** Route tanpa namespace ditolak.
-- **Tidak boleh diawali atau diakhiri slash.** `'wc-bulk-editor/v1'`, bukan
-  `'/wc-bulk-editor/v1/'`.
+- **Tidak boleh diawali atau diakhiri slash.** `'bulk-product-editor-for-woocommerce/v1'`, bukan
+  `'/bulk-product-editor-for-woocommerce/v1/'`.
 - **Wajib menyertakan versi.** `v1` memungkinkan `v2` berdampingan saat kontrak
   berubah.
 
@@ -115,7 +115,7 @@ function wcbulk_rest_can_edit(WP_REST_Request $request): bool|WP_Error
     if (!current_user_can('manage_woocommerce')) {
         return new WP_Error(
             'wcbulk_forbidden',
-            __('Anda tidak punya izin untuk ini.', 'wc-bulk-editor'),
+            __('Anda tidak punya izin untuk ini.', 'bulk-product-editor-for-woocommerce'),
             ['status' => 403]
         );
     }
@@ -149,7 +149,7 @@ function wcbulk_rest_can_edit_product(WP_REST_Request $request): bool|WP_Error
     if (!current_user_can('edit_post', $id)) {
         return new WP_Error(
             'wcbulk_cannot_edit',
-            __('Anda tidak boleh menyunting produk ini.', 'wc-bulk-editor'),
+            __('Anda tidak boleh menyunting produk ini.', 'bulk-product-editor-for-woocommerce'),
             ['status' => 403]
         );
     }
@@ -196,20 +196,20 @@ function wcbulk_rest_products_args(): array
 {
     return [
         'page' => [
-            'description' => __('Halaman saat ini.', 'wc-bulk-editor'),
+            'description' => __('Halaman saat ini.', 'bulk-product-editor-for-woocommerce'),
             'type'        => 'integer',
             'default'     => 1,
             'minimum'     => 1,
         ],
         'per_page' => [
-            'description' => __('Jumlah produk per halaman.', 'wc-bulk-editor'),
+            'description' => __('Jumlah produk per halaman.', 'bulk-product-editor-for-woocommerce'),
             'type'        => 'integer',
             'default'     => 50,
             'minimum'     => 1,
             'maximum'     => 100,           // sejajar dengan MAX_PER_PAGE
         ],
         'search' => [
-            'description'       => __('Cari nama atau SKU.', 'wc-bulk-editor'),
+            'description'       => __('Cari nama atau SKU.', 'bulk-product-editor-for-woocommerce'),
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
         ],
@@ -252,7 +252,7 @@ Untuk endpoint massal seperti `save_inline`:
 
 ```php
 'changes' => [
-    'description' => __('Perubahan per produk.', 'wc-bulk-editor'),
+    'description' => __('Perubahan per produk.', 'bulk-product-editor-for-woocommerce'),
     'type'        => 'object',
     'required'    => true,
     'additionalProperties' => [
@@ -319,7 +319,7 @@ Kalau schema tidak cukup:
         if (!is_string($value) || $value === '') {
             return new WP_Error(
                 'rest_invalid_param',
-                __('SKU tidak boleh kosong.', 'wc-bulk-editor'),
+                __('SKU tidak boleh kosong.', 'bulk-product-editor-for-woocommerce'),
                 ['status' => 400]
             );
         }
@@ -329,7 +329,7 @@ Kalau schema tidak cukup:
         if ($existing && $existing !== (int) $request['id']) {
             return new WP_Error(
                 'wcbulk_sku_exists',
-                __('SKU sudah dipakai produk lain.', 'wc-bulk-editor'),
+                __('SKU sudah dipakai produk lain.', 'bulk-product-editor-for-woocommerce'),
                 ['status' => 400]
             );
         }
@@ -356,7 +356,7 @@ function wcbulk_rest_update_product(WP_REST_Request $request)
     if ($regular !== null && $sale !== null && (float) $sale > (float) $regular) {
         return new WP_Error(
             'wcbulk_invalid_sale',
-            __('Harga diskon tidak boleh melebihi harga normal.', 'wc-bulk-editor'),
+            __('Harga diskon tidak boleh melebihi harga normal.', 'bulk-product-editor-for-woocommerce'),
             ['status' => 400]
         );
     }
@@ -403,7 +403,7 @@ Metadata paginasi masuk **header**, bukan body. Klien membacanya lewat
 ```php
 return new WP_Error(
     'wcbulk_product_not_found',                            // kode
-    __('Produk tidak ditemukan.', 'wc-bulk-editor'),       // pesan
+    __('Produk tidak ditemukan.', 'bulk-product-editor-for-woocommerce'),       // pesan
     ['status' => 404]                                       // status HTTP
 );
 ```
@@ -500,7 +500,7 @@ REST memakai nonce `wp_rest`, berbeda dari nonce `admin-ajax`.
 
 ```php
 wp_localize_script('my-script', 'MyRest', [
-    'root'  => esc_url_raw(rest_url('wc-bulk-editor/v1/')),
+    'root'  => esc_url_raw(rest_url('bulk-product-editor-for-woocommerce/v1/')),
     'nonce' => wp_create_nonce('wp_rest'),
 ]);
 ```

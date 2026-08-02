@@ -6,16 +6,16 @@ saved views, export CSV.
 - **Versi:** 3.12.0 · **PHP:** 8.3+ · **WooCommerce:** wajib aktif — header
   `Requires Plugins` membuat WordPress menolak aktivasi tanpanya
 - **Terpasang saat ini:** WordPress 7.0.2, WooCommerce 10.9.4 — HPOS default
-- **Text domain:** `wc-bulk-editor`
+- **Text domain:** `bulk-product-editor-for-woocommerce`
 - **Prefix:** fungsi/AJAX `wc_bulk_`, konstanta `WCBULK_`, user meta `_wcbulk_`
-- **Entry point:** `wc-bulk-editor.php` — satu class `WC_Bulk_Product_Editor`
+- **Entry point:** `bulk-product-editor-for-woocommerce.php` — satu class `WC_Bulk_Product_Editor`
   (singleton, tanpa namespace)
 
 ## Peta File
 
 | File | Isi |
 |---|---|
-| `wc-bulk-editor.php` | Semua PHP: bootstrap, menu, enqueue, 14 handler AJAX, CRUD produk |
+| `bulk-product-editor-for-woocommerce.php` | Semua PHP: bootstrap, menu, enqueue, 14 handler AJAX, CRUD produk |
 | `views/admin-page.php` | Markup halaman admin (di-include dari `render_admin_page()`) |
 | `assets/admin.js` | Seluruh UI: render tabel, edit, modal, dirty-tracking |
 | `assets/admin.css` | Styling admin |
@@ -60,7 +60,7 @@ Tidak ada composer, npm, build step, atau autoloader. Edit file langsung.
 
 ### i18n
 - Semua string yang dilihat user dibungkus `__()` dengan text domain literal
-  `'wc-bulk-editor'`.
+  `'bulk-product-editor-for-woocommerce'`.
 - String untuk JS ditaruh di `i18n_strings()`, dipakai lewat
   `WCBulkEditor.i18n.<key>`. Jangan hardcode teks Inggris di `admin.js`.
 

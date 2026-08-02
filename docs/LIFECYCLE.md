@@ -125,7 +125,7 @@ register_activation_hook(__FILE__, static function (): void {
     if (!defined('WC_VERSION') || version_compare(WC_VERSION, '9.0', '<')) {
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die(
-            esc_html__('Plugin ini butuh WooCommerce 9.0 atau lebih baru.', 'wc-bulk-editor'),
+            esc_html__('Plugin ini butuh WooCommerce 9.0 atau lebih baru.', 'bulk-product-editor-for-woocommerce'),
             '',
             ['back_link' => true]
         );

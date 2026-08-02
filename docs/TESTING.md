@@ -154,7 +154,7 @@ test.beforeEach(async ({ page }) => {
     await page.fill('#user_login', process.env.WP_USER);
     await page.fill('#user_pass', process.env.WP_PASS);
     await page.click('#wp-submit');
-    await page.goto('/wp-admin/admin.php?page=wc-bulk-editor');
+    await page.goto('/wp-admin/admin.php?page=bulk-product-editor-for-woocommerce');
 });
 
 test('tabel terisi tanpa AJAX pada render pertama', async ({ page }) => {

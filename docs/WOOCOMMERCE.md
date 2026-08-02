@@ -20,7 +20,7 @@ WooCommerce menampilkan peringatan di admin untuk plugin yang tidak
 mendeklarasikan dukungan fitur. Deklarasi dilakukan di `before_woocommerce_init`
 — sebelum WooCommerce selesai boot.
 
-Yang **sudah ada** di `wc-bulk-editor.php:23-27`:
+Yang **sudah ada** di `bulk-product-editor-for-woocommerce.php:23-27`:
 
 ```php
 add_action('before_woocommerce_init', static function (): void {

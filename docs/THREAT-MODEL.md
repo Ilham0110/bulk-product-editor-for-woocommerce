@@ -267,7 +267,7 @@ boleh menyunting produknya sendiri.
 ```php
 if (!current_user_can('edit_post', $pid)) {
     $errors[] = sprintf(
-        __('#%1$d %2$s: permission denied.', 'wc-bulk-editor'),
+        __('#%1$d %2$s: permission denied.', 'bulk-product-editor-for-woocommerce'),
         $pid,
         $product->get_name(),
     );
@@ -324,13 +324,13 @@ Ini pola yang benar: `guard()` dulu, lalu capability khusus.
 ### 4.6 `render_admin_page()` — sudah dicek
 
 Capability di `add_submenu_page()` hanya menyembunyikan item menu; halaman tetap
-dapat dibuka lewat `?page=wc-bulk-editor`. Dulu itu tidak membocorkan apa pun —
+dapat dibuka lewat `?page=bulk-product-editor-for-woocommerce`. Dulu itu tidak membocorkan apa pun —
 halaman hanya markup kosong dan semua data lewat AJAX yang dijaga — tapi
 lapisan kedua tetap benar:
 
 ```php
 if (!current_user_can(self::CAPABILITY)) {
-    wp_die(esc_html__('You are not allowed to access this page.', 'wc-bulk-editor'));
+    wp_die(esc_html__('You are not allowed to access this page.', 'bulk-product-editor-for-woocommerce'));
 }
 ```
 
@@ -394,7 +394,7 @@ Apa yang terpapar dan siapa yang bisa menyentuhnya:
 | Titik masuk | Akses minimum | Terjaga oleh |
 |---|---|---|
 | 14 endpoint `wp_ajax_wc_bulk_*` | login + `manage_woocommerce` | `guard()` |
-| Halaman `?page=wc-bulk-editor` | login | menu capability (markup kosong) |
+| Halaman `?page=bulk-product-editor-for-woocommerce` | login | menu capability (markup kosong) |
 | Aset `assets/*.js`, `*.css` | publik | statis, tanpa data |
 
 **Tidak ada endpoint `wp_ajax_nopriv_*`.** Tidak ada satu pun jalur yang dapat
@@ -439,22 +439,22 @@ Setelah perubahan besar, jalankan:
 
 ```bash
 # Handler tanpa guard()
-grep -n "public function wc_bulk_" wc-bulk-editor.php
+grep -n "public function wc_bulk_" bulk-product-editor-for-woocommerce.php
 
 # Query mentah
-grep -n '\$wpdb' wc-bulk-editor.php
+grep -n '\$wpdb' bulk-product-editor-for-woocommerce.php
 
 # Upload
-grep -n '\$_FILES\|wp_handle_upload' wc-bulk-editor.php
+grep -n '\$_FILES\|wp_handle_upload' bulk-product-editor-for-woocommerce.php
 
 # Superglobal langsung
-grep -nE '\$_(POST|GET|REQUEST)\[' wc-bulk-editor.php
+grep -nE '\$_(POST|GET|REQUEST)\[' bulk-product-editor-for-woocommerce.php
 
 # Output JS tanpa escape
 grep -nE "\.html\(|\.append\(|innerHTML" assets/admin.js | grep -v "esc("
 
 # Endpoint tanpa login
-grep -n "wp_ajax_nopriv" wc-bulk-editor.php
+grep -n "wp_ajax_nopriv" bulk-product-editor-for-woocommerce.php
 ```
 
 Perintah terakhir harus selalu kosong.

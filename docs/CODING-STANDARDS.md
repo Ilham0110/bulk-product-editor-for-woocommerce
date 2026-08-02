@@ -173,7 +173,7 @@ Gaya yang dipakai konsisten meratakan `=>` dan `=` pada blok yang berdekatan:
 ```php
 private const CAPABILITY   = 'manage_woocommerce';
 private const NONCE        = 'wc_bulk_editor_nonce';
-private const PAGE_SLUG    = 'wc-bulk-editor';
+private const PAGE_SLUG    = 'bulk-product-editor-for-woocommerce';
 
 $page     = max(1, absint($_POST['page'] ?? 1));
 $per_page = min(absint($_POST['per_page'] ?? 50) ?: 50, self::MAX_PER_PAGE);
@@ -359,7 +359,7 @@ aturan baru di akhir.
 `views/admin-page.php` memakai gaya rapat — tag PHP menempel tanpa spasi:
 
 ```php
-<?php esc_html_e('Columns','wc-bulk-editor');?>
+<?php esc_html_e('Columns','bulk-product-editor-for-woocommerce');?>
 ```
 
 Perhatikan: tidak ada spasi setelah koma, tidak ada spasi sebelum `?>`.

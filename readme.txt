@@ -8,112 +8,115 @@ Stable tag: 3.12.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Edit ratusan produk WooCommerce dari satu tabel ala spreadsheet, tanpa membuka halaman edit satu per satu.
+Edit hundreds of WooCommerce products from one spreadsheet-style table, without opening each product page.
 
 == Description ==
 
-Mengubah harga 200 produk lewat admin WooCommerce bawaan berarti 200 kali buka halaman, 200 kali klik Update, 200 kali tunggu reload.
+Changing the price of 200 products through the stock WooCommerce admin means 200 page loads, 200 clicks on Update, and 200 waits for the page to come back.
 
-Plugin ini menampilkan semua produk dalam satu tabel yang bisa diketik langsung, lalu menyimpan seluruh perubahan dalam satu kali request.
+This plugin puts every product in one table you can type straight into, then saves all of your edits in a single request.
 
 **Inline editing**
 
-Klik sel mana pun, ketik, lanjut ke sel berikutnya. Sel yang berubah ditandai warna sampai disimpan. Tekan Ctrl+S (atau Cmd+S) untuk menyimpan semua perubahan sekaligus.
+Click any cell, type, move to the next one. Changed cells are highlighted until they are saved. Press Ctrl+S (or Cmd+S) to commit everything at once, or Discard to put it all back.
 
-**30 kolom yang bisa dipilih, 28 dapat disunting**
+**30 selectable columns, 28 of them editable**
 
-Dari nama produk, harga, stok, dan SKU sampai dimensi, tax class, shipping class, visibility, purchase note, dan menu order. Pilihan kolom disimpan per-user, jadi tiap admin punya layout sendiri.
+From product name, price, stock and SKU through to dimensions, tax class, shipping class, visibility, purchase note and menu order. Your column choice is stored per user, so every administrator gets their own layout.
 
-Kolom Product Name menyertakan tautan ke halaman produk lengkap dan ID-nya, sehingga baris tetap mudah dikenali meski namanya sedang diubah.
+The Product Name column keeps a link to the full product screen and the product ID alongside the input, so a row stays recognisable while you are renaming it.
 
-**Filter dan Saved Views**
+**Filters and saved views**
 
-Saring berdasarkan kata kunci, kategori, tipe, status, status stok, dan featured. Kombinasi filter yang sering dipakai bisa disimpan sebagai View.
+Filter by keyword, category, type, status, stock status and featured flag. A filter combination you use often can be saved as a view and recalled with one click.
 
 **Quick Apply**
 
-Ubah harga banyak produk sekaligus: naikkan 10%, turunkan nominal tetap, atau set ke nilai tertentu.
+Change many prices at once: raise by a percentage, lower by a fixed amount, or set them all to the same value. Nothing is written until you press Save.
 
-**Fitur lain**
+**Other features**
 
-* Bulk action: duplicate, trash, hapus permanen
-* Quick Add produk baru tanpa pindah halaman
-* Buat kategori baru langsung dari editor
-* Export CSV dengan proteksi formula injection
+* Bulk actions: duplicate, move to trash, delete permanently
+* Quick Add for creating a product without leaving the page
+* Create a product category from inside the editor
+* CSV export with formula-injection protection
 
 == Installation ==
 
-1. Unggah folder `wc-bulk-editor` ke `/wp-content/plugins/`
-2. Aktifkan lewat menu **Plugins** di admin WordPress
-3. Buka **WooCommerce > Bulk Editor**
+1. Upload the plugin folder to `/wp-content/plugins/`
+2. Activate it through the **Plugins** menu in WordPress
+3. Open **WooCommerce > Bulk Editor**
 
-WooCommerce wajib aktif. Tidak ada langkah build, tidak ada dependency Composer atau npm.
+WooCommerce must be active. There is no build step and no Composer or npm dependency.
 
 == Frequently Asked Questions ==
 
-= Apakah mendukung produk variable? =
+= Does it support variable products? =
 
-Yang diedit adalah data produk induk. Harga dan stok per-variasi tetap diatur lewat halaman produk masing-masing.
+It edits the parent product. Per-variation prices and stock are still managed on each product's own screen.
 
-= Kenapa kolom Stock Qty tidak bisa diisi? =
+= Why can't I type into the Stock Qty column? =
 
-Produk itu punya "Manage Stock" mati. Mengisi jumlah stok akan otomatis menyalakannya — WooCommerce mengabaikan angka stok kalau manajemen stok tidak aktif.
+That product has "Manage Stock" turned off. Entering a quantity switches it on for you — WooCommerce discards a stock figure when stock management is disabled.
 
-= Apakah kompatibel dengan HPOS? =
+= Is it compatible with HPOS? =
 
-Ya. Plugin mendeklarasikan kompatibilitas dengan High-Performance Order Storage, meski sebenarnya hanya menyentuh produk, bukan order.
+Yes. The plugin declares compatibility with High-Performance Order Storage, although it only ever touches products, never orders.
 
-= Berapa maksimal produk per halaman? =
+= How many products can be shown per page? =
 
-100. Batas ini disengaja — lebih dari itu browser mulai berat merender tabel dengan banyak kolom.
+Up to 100. The limit is deliberate: beyond that the browser struggles to render a table with many columns.
 
-= Siapa yang bisa mengakses? =
+= Who can use the editor? =
 
-Pengguna dengan capability `manage_woocommerce` (Administrator dan Shop Manager). Menghapus produk memerlukan izin `delete_post` per produk, dan menyunting memerlukan `edit_post`.
+Users with the `manage_woocommerce` capability, which covers Administrators and Shop Managers. Deleting a product also requires `delete_post` for that product, and editing requires `edit_post`, so role restrictions from other plugins are respected.
 
-= Apakah data saya ikut terhapus kalau plugin di-uninstall? =
+= Will my data be removed if I uninstall the plugin? =
 
-Hanya preferensi plugin ini (pilihan kolom dan saved views). Produk, kategori, dan data WooCommerce lain tidak disentuh.
+Only this plugin's own preferences — your column choice and saved views. Products, categories and other WooCommerce data are left untouched.
+
+= Does it work on a multisite network? =
+
+Yes. Uninstalling clears the stored preferences on every site in the network.
 
 == Screenshots ==
 
-1. Tabel editor dengan inline editing dan penanda perubahan
-2. Modal pemilihan dan pengurutan kolom
-3. Panel Quick Apply untuk perubahan harga massal
+1. The editor table with inline editing and change markers
+2. The column picker, with drag-to-reorder
+3. The Quick Apply panel for bulk price changes
 
 == Changelog ==
 
 = 3.12.0 =
-* Baru: nama produk kini dapat disunting langsung dari tabel. Kolom Product Name tetap menampilkan tautan ke halaman produk lengkap dan ID-nya agar baris mudah dikenali.
-* Nama produk tidak boleh dikosongkan — ditolak di sisi browser maupun server, sehingga produk tanpa judul tidak pernah tersimpan.
-* Perbaikan: pesan "%d failed:" kini memakai bentuk jamak yang benar.
-* Ditambahkan `languages/wc-bulk-editor.pot` sehingga plugin siap diterjemahkan.
-* Keamanan: menggandakan produk kini memeriksa capability `read_post` per produk, menyamai pemeriksaan pada trash dan delete.
-* Keamanan: halaman editor menolak akses langsung lewat URL bagi pengguna tanpa hak `manage_woocommerce`.
-* Sesi yang kedaluwarsa kini dilaporkan sebagai "sesi kedaluwarsa, muat ulang halaman" alih-alih pesan galat umum.
-* Seluruh label kolom kini dapat diterjemahkan.
-* Lebar kolom kini diukur dari isinya, bukan dari angka tetap: sebuah select disesuaikan dengan pilihannya yang terpanjang, dan kolom yang isinya bergantung data toko (kategori, tax class) menyesuaikan dengan nama yang benar-benar ada.
-* Kolom harga diberi ruang untuk angka besar, sehingga nilai seperti 100.000.000 tidak terpotong saat diketik.
-* Lebar kolom kini sama di semua ukuran layar. Sebelumnya kolom melar hampir dua kali lipat di monitor lebar.
-* Perbaikan: menekan Discard tidak lagi mengubah tinggi baris.
-* Perbaikan: sel nama kini sejajar dengan kolom lainnya.
+* New: product names can now be edited directly in the table. The Product Name column still shows a link to the full product screen and the product ID, so rows stay recognisable while being renamed.
+* A product name cannot be blank — this is rejected in the browser and again on the server, so a product without a title is never saved.
+* Column widths are now measured from their content rather than fixed numbers: a select is sized to its longest option, and columns whose contents depend on your store (categories, tax classes) fit the names you actually use.
+* Price columns keep room for large figures, so a value such as 100,000,000 is not clipped as you type it.
+* Column widths are now identical on every screen size. Previously columns stretched to almost double width on a wide monitor.
+* Fixed: pressing Discard no longer changes the row height.
+* Fixed: the name cell now lines up with the other columns.
+* Fixed: bulk action results use correct plural forms.
+* Security: duplicating a product now checks the `read_post` capability per product, matching the checks already made for trash and delete.
+* Security: the editor screen refuses direct URL access for users without `manage_woocommerce`.
+* An expired session is now reported as such, with a prompt to reload, instead of a generic error.
+* All column labels and interface strings can now be translated, and `languages/` ships with a POT file.
 
 = 3.11.0 =
-* Keamanan: label option tax class dan shipping class kini di-escape. Sebelumnya nama tax class yang mengandung HTML dapat dieksekusi di browser.
-* Keamanan: penyuntingan produk kini memeriksa capability `edit_post` per produk, menyamai pemeriksaan yang sudah ada pada trash dan delete.
-* Perbaikan: option pada dropdown tax class dan shipping class tidak lagi berlipat ganda setiap tabel dirender ulang.
-* Perbaikan: option yang terpilih kini ditandai dengan perbandingan nilai, bukan manipulasi string yang bisa salah target.
-* Ditambahkan `uninstall.php` — preferensi per-user kini dibersihkan saat plugin dihapus.
-* Seluruh teks antarmuka JavaScript kini dapat diterjemahkan.
-* Header plugin dilengkapi: `Requires Plugins`, `Domain Path`, `License`, dan informasi kompatibilitas WooCommerce.
+* Security: tax class and shipping class option labels are now escaped. A tax class name containing HTML could previously be executed in the browser.
+* Security: editing a product now checks the `edit_post` capability per product, matching the checks already made for trash and delete.
+* Fixed: options in the tax class and shipping class dropdowns no longer multiply each time the table is redrawn.
+* Fixed: the selected option is now marked by comparing values rather than by string manipulation, which could target the wrong entry.
+* Added `uninstall.php` — per-user preferences are now cleaned up when the plugin is deleted.
+* All JavaScript interface text can now be translated.
+* Plugin header completed: `Requires Plugins`, `Domain Path`, `License`, and WooCommerce compatibility information.
 
 = 3.10.0 =
-* Data halaman pertama dimuat bersama halaman, sehingga tabel tampil tanpa menunggu AJAX.
+* The first page of products is now sent with the page itself, so the table appears without waiting for an AJAX request.
 
 == Upgrade Notice ==
 
 = 3.12.0 =
-Menambahkan penyuntingan nama produk, plus dua pemeriksaan izin tambahan. Disarankan memperbarui.
+Adds product name editing, fixes column widths on wide screens, and tightens two permission checks. Updating is recommended.
 
 = 3.11.0 =
-Berisi perbaikan keamanan (escaping dan pemeriksaan izin). Disarankan memperbarui.
+Contains security fixes (output escaping and permission checks). Updating is recommended.

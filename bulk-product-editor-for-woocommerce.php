@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Plugin Name:          Bulk Product Editor for WooCommerce
- * Plugin URI:           https://github.com/Ilham0110/wc-bulk-editor
+ * Plugin URI:           https://github.com/Ilham0110/bulk-product-editor-for-woocommerce
  * Description:          Spreadsheet-style inline editing for WooCommerce products.
  * Version:              3.12.0
  * Author:               Ilham Darmawan
@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Requires Plugins:     woocommerce
  * License:              GPL-2.0-or-later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:          wc-bulk-editor
+ * Text Domain:          bulk-product-editor-for-woocommerce
  * Domain Path:          /languages
  * WC requires at least: 9.0
  * WC tested up to:      10.9
@@ -22,9 +22,16 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit();
 
-if (!in_array('woocommerce/woocommerce.php', (array) apply_filters('active_plugins', get_option('active_plugins')), true)) {
-    return;
-}
+// WooCommerce is guaranteed by the "Requires Plugins" header: WordPress 6.5+
+// refuses to activate this plugin without it, and deactivates this one if
+// WooCommerce is later switched off.
+//
+// A belt-and-braces check on active_plugins used to sit here. It was dropped
+// because it duplicated the header, and because filtering active_plugins is
+// unreliable — a must-use plugin or a network activation can hold WooCommerce
+// without it appearing in that option. Nothing replaces it at file scope:
+// plugins load alphabetically, so WooCommerce may not exist yet at this point.
+// The class boots on plugins_loaded instead, by which time it does.
 
 define('WCBULK_VERSION', '3.12.0');
 define('WCBULK_PLUGIN_DIR', plugin_dir_path(__FILE__));
@@ -40,8 +47,11 @@ final class WC_Bulk_Product_Editor
 {
     private const CAPABILITY   = 'manage_woocommerce';
     private const NONCE        = 'wc_bulk_editor_nonce';
-    private const PAGE_SLUG    = 'wc-bulk-editor';
-    private const SCREEN_ID    = 'woocommerce_page_wc-bulk-editor';
+    // The admin page slug matches the directory slug. SCREEN_ID is what
+    // WordPress derives from it and hands to admin_enqueue_scripts, so the two
+    // have to stay in step or the assets stop loading.
+    private const PAGE_SLUG    = 'bulk-product-editor-for-woocommerce';
+    private const SCREEN_ID    = 'woocommerce_page_bulk-product-editor-for-woocommerce';
     private const META_COLUMNS = '_wcbulk_columns';
     private const META_VIEWS   = '_wcbulk_views';
     private const MAX_PER_PAGE = 100;
@@ -170,8 +180,8 @@ final class WC_Bulk_Product_Editor
     {
         add_submenu_page(
             'woocommerce',
-            __('Bulk Product Editor', 'wc-bulk-editor'),
-            __('Bulk Editor', 'wc-bulk-editor'),
+            __('Bulk Product Editor', 'bulk-product-editor-for-woocommerce'),
+            __('Bulk Editor', 'bulk-product-editor-for-woocommerce'),
             self::CAPABILITY,
             self::PAGE_SLUG,
             $this->render_admin_page(...),
@@ -185,7 +195,7 @@ final class WC_Bulk_Product_Editor
         }
 
         wp_enqueue_style(
-            'wc-bulk-editor-css',
+            'bulk-product-editor-for-woocommerce-css',
             WCBULK_PLUGIN_URL . 'assets/admin.css',
             [],
             $this->asset_version('assets/admin.css'),
@@ -193,14 +203,14 @@ final class WC_Bulk_Product_Editor
 
         // jquery-ui-sortable powers the drag-to-reorder list in the Columns modal.
         wp_enqueue_script(
-            'wc-bulk-editor-js',
+            'bulk-product-editor-for-woocommerce-js',
             WCBULK_PLUGIN_URL . 'assets/admin.js',
             ['jquery', 'jquery-ui-sortable', 'wp-util'],
             $this->asset_version('assets/admin.js'),
             true,
         );
 
-        wp_localize_script('wc-bulk-editor-js', 'WCBulkEditor', [
+        wp_localize_script('bulk-product-editor-for-woocommerce-js', 'WCBulkEditor', [
             'ajax_url'    => admin_url('admin-ajax.php'),
             'nonce'       => wp_create_nonce(self::NONCE),
             'currency'    => get_woocommerce_currency_symbol(),
@@ -234,36 +244,36 @@ final class WC_Bulk_Product_Editor
     private function column_labels(): array
     {
         return [
-            'thumb'              => __('Image', 'wc-bulk-editor'),
-            'name'               => __('Product Name', 'wc-bulk-editor'),
-            'sku'                => __('SKU', 'wc-bulk-editor'),
-            'regular_price'      => __('Regular Price', 'wc-bulk-editor'),
-            'sale_price'         => __('Sale Price', 'wc-bulk-editor'),
-            'stock_quantity'     => __('Stock Qty', 'wc-bulk-editor'),
-            'stock_status'       => __('Stock Status', 'wc-bulk-editor'),
-            'post_status'        => __('Status', 'wc-bulk-editor'),
-            'categories'         => __('Categories', 'wc-bulk-editor'),
-            'tags'               => __('Tags', 'wc-bulk-editor'),
-            'type'               => __('Type', 'wc-bulk-editor'),
-            'tax_status'         => __('Tax Status', 'wc-bulk-editor'),
-            'tax_class'          => __('Tax Class', 'wc-bulk-editor'),
-            'shipping_class'     => __('Shipping Class', 'wc-bulk-editor'),
-            'weight'             => __('Weight', 'wc-bulk-editor'),
-            'length'             => __('Length', 'wc-bulk-editor'),
-            'width'              => __('Width', 'wc-bulk-editor'),
-            'height'             => __('Height', 'wc-bulk-editor'),
-            'featured'           => __('Featured', 'wc-bulk-editor'),
-            'catalog_visibility' => __('Visibility', 'wc-bulk-editor'),
-            'description'        => __('Description', 'wc-bulk-editor'),
-            'short_description'  => __('Short Desc', 'wc-bulk-editor'),
-            'virtual'            => __('Virtual', 'wc-bulk-editor'),
-            'downloadable'       => __('Downloadable', 'wc-bulk-editor'),
-            'manage_stock'       => __('Manage Stock', 'wc-bulk-editor'),
-            'backorders'         => __('Backorders', 'wc-bulk-editor'),
-            'sold_individually'  => __('Sold Individually', 'wc-bulk-editor'),
-            'reviews_allowed'    => __('Reviews', 'wc-bulk-editor'),
-            'purchase_note'      => __('Purchase Note', 'wc-bulk-editor'),
-            'menu_order'         => __('Menu Order', 'wc-bulk-editor'),
+            'thumb'              => __('Image', 'bulk-product-editor-for-woocommerce'),
+            'name'               => __('Product Name', 'bulk-product-editor-for-woocommerce'),
+            'sku'                => __('SKU', 'bulk-product-editor-for-woocommerce'),
+            'regular_price'      => __('Regular Price', 'bulk-product-editor-for-woocommerce'),
+            'sale_price'         => __('Sale Price', 'bulk-product-editor-for-woocommerce'),
+            'stock_quantity'     => __('Stock Qty', 'bulk-product-editor-for-woocommerce'),
+            'stock_status'       => __('Stock Status', 'bulk-product-editor-for-woocommerce'),
+            'post_status'        => __('Status', 'bulk-product-editor-for-woocommerce'),
+            'categories'         => __('Categories', 'bulk-product-editor-for-woocommerce'),
+            'tags'               => __('Tags', 'bulk-product-editor-for-woocommerce'),
+            'type'               => __('Type', 'bulk-product-editor-for-woocommerce'),
+            'tax_status'         => __('Tax Status', 'bulk-product-editor-for-woocommerce'),
+            'tax_class'          => __('Tax Class', 'bulk-product-editor-for-woocommerce'),
+            'shipping_class'     => __('Shipping Class', 'bulk-product-editor-for-woocommerce'),
+            'weight'             => __('Weight', 'bulk-product-editor-for-woocommerce'),
+            'length'             => __('Length', 'bulk-product-editor-for-woocommerce'),
+            'width'              => __('Width', 'bulk-product-editor-for-woocommerce'),
+            'height'             => __('Height', 'bulk-product-editor-for-woocommerce'),
+            'featured'           => __('Featured', 'bulk-product-editor-for-woocommerce'),
+            'catalog_visibility' => __('Visibility', 'bulk-product-editor-for-woocommerce'),
+            'description'        => __('Description', 'bulk-product-editor-for-woocommerce'),
+            'short_description'  => __('Short Desc', 'bulk-product-editor-for-woocommerce'),
+            'virtual'            => __('Virtual', 'bulk-product-editor-for-woocommerce'),
+            'downloadable'       => __('Downloadable', 'bulk-product-editor-for-woocommerce'),
+            'manage_stock'       => __('Manage Stock', 'bulk-product-editor-for-woocommerce'),
+            'backorders'         => __('Backorders', 'bulk-product-editor-for-woocommerce'),
+            'sold_individually'  => __('Sold Individually', 'bulk-product-editor-for-woocommerce'),
+            'reviews_allowed'    => __('Reviews', 'bulk-product-editor-for-woocommerce'),
+            'purchase_note'      => __('Purchase Note', 'bulk-product-editor-for-woocommerce'),
+            'menu_order'         => __('Menu Order', 'bulk-product-editor-for-woocommerce'),
         ];
     }
 
@@ -279,38 +289,38 @@ final class WC_Bulk_Product_Editor
     private function column_headers(): array
     {
         return [
-            'name'               => __('Product', 'wc-bulk-editor'),
-            'sku'                => __('SKU', 'wc-bulk-editor'),
-            'regular_price'      => __('Price', 'wc-bulk-editor'),
-            'sale_price'         => __('Sale', 'wc-bulk-editor'),
-            'stock_quantity'     => __('Stock', 'wc-bulk-editor'),
-            'stock_status'       => __('Stock Status', 'wc-bulk-editor'),
-            'post_status'        => __('Status', 'wc-bulk-editor'),
-            'categories'         => __('Categories', 'wc-bulk-editor'),
-            'tags'               => __('Tags', 'wc-bulk-editor'),
-            'type'               => __('Type', 'wc-bulk-editor'),
-            'tax_status'         => __('Tax', 'wc-bulk-editor'),
-            'tax_class'          => __('Tax Class', 'wc-bulk-editor'),
-            'shipping_class'     => __('Shipping', 'wc-bulk-editor'),
-            'weight'             => __('Weight', 'wc-bulk-editor'),
-            'length'             => __('Length', 'wc-bulk-editor'),
-            'width'              => __('Width', 'wc-bulk-editor'),
-            'height'             => __('Height', 'wc-bulk-editor'),
-            'catalog_visibility' => __('Visibility', 'wc-bulk-editor'),
+            'name'               => __('Product', 'bulk-product-editor-for-woocommerce'),
+            'sku'                => __('SKU', 'bulk-product-editor-for-woocommerce'),
+            'regular_price'      => __('Price', 'bulk-product-editor-for-woocommerce'),
+            'sale_price'         => __('Sale', 'bulk-product-editor-for-woocommerce'),
+            'stock_quantity'     => __('Stock', 'bulk-product-editor-for-woocommerce'),
+            'stock_status'       => __('Stock Status', 'bulk-product-editor-for-woocommerce'),
+            'post_status'        => __('Status', 'bulk-product-editor-for-woocommerce'),
+            'categories'         => __('Categories', 'bulk-product-editor-for-woocommerce'),
+            'tags'               => __('Tags', 'bulk-product-editor-for-woocommerce'),
+            'type'               => __('Type', 'bulk-product-editor-for-woocommerce'),
+            'tax_status'         => __('Tax', 'bulk-product-editor-for-woocommerce'),
+            'tax_class'          => __('Tax Class', 'bulk-product-editor-for-woocommerce'),
+            'shipping_class'     => __('Shipping', 'bulk-product-editor-for-woocommerce'),
+            'weight'             => __('Weight', 'bulk-product-editor-for-woocommerce'),
+            'length'             => __('Length', 'bulk-product-editor-for-woocommerce'),
+            'width'              => __('Width', 'bulk-product-editor-for-woocommerce'),
+            'height'             => __('Height', 'bulk-product-editor-for-woocommerce'),
+            'catalog_visibility' => __('Visibility', 'bulk-product-editor-for-woocommerce'),
             /* translators: abbreviated column header for "Virtual". */
-            'virtual'            => __('Virt', 'wc-bulk-editor'),
+            'virtual'            => __('Virt', 'bulk-product-editor-for-woocommerce'),
             /* translators: abbreviated column header for "Downloadable". */
-            'downloadable'       => __('DL', 'wc-bulk-editor'),
+            'downloadable'       => __('DL', 'bulk-product-editor-for-woocommerce'),
             /* translators: abbreviated column header for "Manage Stock". */
-            'manage_stock'       => __('Mgmt', 'wc-bulk-editor'),
+            'manage_stock'       => __('Mgmt', 'bulk-product-editor-for-woocommerce'),
             /* translators: abbreviated column header for "Backorders". */
-            'backorders'         => __('Backord', 'wc-bulk-editor'),
-            'sold_individually'  => __('Sold Ind.', 'wc-bulk-editor'),
-            'reviews_allowed'    => __('Reviews', 'wc-bulk-editor'),
-            'description'        => __('Description', 'wc-bulk-editor'),
-            'short_description'  => __('Short Desc', 'wc-bulk-editor'),
-            'purchase_note'      => __('Purch. Note', 'wc-bulk-editor'),
-            'menu_order'         => __('Order', 'wc-bulk-editor'),
+            'backorders'         => __('Backord', 'bulk-product-editor-for-woocommerce'),
+            'sold_individually'  => __('Sold Ind.', 'bulk-product-editor-for-woocommerce'),
+            'reviews_allowed'    => __('Reviews', 'bulk-product-editor-for-woocommerce'),
+            'description'        => __('Description', 'bulk-product-editor-for-woocommerce'),
+            'short_description'  => __('Short Desc', 'bulk-product-editor-for-woocommerce'),
+            'purchase_note'      => __('Purch. Note', 'bulk-product-editor-for-woocommerce'),
+            'menu_order'         => __('Order', 'bulk-product-editor-for-woocommerce'),
         ];
     }
 
@@ -348,60 +358,60 @@ final class WC_Bulk_Product_Editor
     {
         return [
             /* translators: {count} is replaced with the number of products being saved. */
-            'confirm_save'         => __('Save changes for {count} product(s)?', 'wc-bulk-editor'),
-            'no_changes'          => __('No changes detected.', 'wc-bulk-editor'),
+            'confirm_save'         => __('Save changes for {count} product(s)?', 'bulk-product-editor-for-woocommerce'),
+            'no_changes'          => __('No changes detected.', 'bulk-product-editor-for-woocommerce'),
             // Saving shows a progress bar rather than a status line, and the
             // success message comes back from wc_bulk_save_inline().
-            'error'               => __('An error occurred.', 'wc-bulk-editor'),
-            'loading'             => __('Loading...', 'wc-bulk-editor'),
-            'no_results'          => __('No products found.', 'wc-bulk-editor'),
+            'error'               => __('An error occurred.', 'bulk-product-editor-for-woocommerce'),
+            'loading'             => __('Loading...', 'bulk-product-editor-for-woocommerce'),
+            'no_results'          => __('No products found.', 'bulk-product-editor-for-woocommerce'),
             /* translators: {count} is replaced with the number of products to delete. */
-            'confirm_delete'      => __('Delete {count} product(s)?', 'wc-bulk-editor'),
+            'confirm_delete'      => __('Delete {count} product(s)?', 'bulk-product-editor-for-woocommerce'),
             /* translators: {count} is replaced with the number of products to trash. */
-            'confirm_trash'       => __('Move {count} product(s) to trash?', 'wc-bulk-editor'),
+            'confirm_trash'       => __('Move {count} product(s) to trash?', 'bulk-product-editor-for-woocommerce'),
             /* translators: {count} is replaced with the number of products to duplicate. */
-            'confirm_duplicate'   => __('Duplicate {count} product(s)?', 'wc-bulk-editor'),
+            'confirm_duplicate'   => __('Duplicate {count} product(s)?', 'bulk-product-editor-for-woocommerce'),
             // The result of a bulk action is worded by wc_bulk_bulk_action()
             // and sent back with the response, so no client-side copy is kept
             // here — two versions of the same sentence would drift.
-            'no_products_selected'=> __('Select products first.', 'wc-bulk-editor'),
-            'view_saved'          => __('View saved.', 'wc-bulk-editor'),
-            'no_views'            => __('No saved views yet — set your filters, then click Save View.', 'wc-bulk-editor'),
-            'cat_name_required'   => __('Category name is required.', 'wc-bulk-editor'),
-            'cat_created'         => __('Category created.', 'wc-bulk-editor'),
-            'cat_exists'          => __('That category already exists.', 'wc-bulk-editor'),
-            'no_category'         => __('— None —', 'wc-bulk-editor'),
-            'view_deleted'        => __('View deleted.', 'wc-bulk-editor'),
-            'csv_exported'        => __('CSV exported.', 'wc-bulk-editor'),
-            'product_created'     => __('Product created!', 'wc-bulk-editor'),
-            'columns_saved'       => __('Columns saved.', 'wc-bulk-editor'),
+            'no_products_selected'=> __('Select products first.', 'bulk-product-editor-for-woocommerce'),
+            'view_saved'          => __('View saved.', 'bulk-product-editor-for-woocommerce'),
+            'no_views'            => __('No saved views yet — set your filters, then click Save View.', 'bulk-product-editor-for-woocommerce'),
+            'cat_name_required'   => __('Category name is required.', 'bulk-product-editor-for-woocommerce'),
+            'cat_created'         => __('Category created.', 'bulk-product-editor-for-woocommerce'),
+            'cat_exists'          => __('That category already exists.', 'bulk-product-editor-for-woocommerce'),
+            'no_category'         => __('— None —', 'bulk-product-editor-for-woocommerce'),
+            'view_deleted'        => __('View deleted.', 'bulk-product-editor-for-woocommerce'),
+            'csv_exported'        => __('CSV exported.', 'bulk-product-editor-for-woocommerce'),
+            'product_created'     => __('Product created!', 'bulk-product-editor-for-woocommerce'),
+            'columns_saved'       => __('Columns saved.', 'bulk-product-editor-for-woocommerce'),
 
             // Quick Apply, Advanced Bulk Edit and saved views.
-            'confirm_discard'     => __('Discard all changes?', 'wc-bulk-editor'),
-            'changes_discarded'   => __('Changes discarded.', 'wc-bulk-editor'),
-            'select_field'        => __('Select a field first.', 'wc-bulk-editor'),
-            'quick_applied'       => __('Applied to all loaded products.', 'wc-bulk-editor'),
-            'select_one_field'    => __('Select at least one field to change.', 'wc-bulk-editor'),
+            'confirm_discard'     => __('Discard all changes?', 'bulk-product-editor-for-woocommerce'),
+            'changes_discarded'   => __('Changes discarded.', 'bulk-product-editor-for-woocommerce'),
+            'select_field'        => __('Select a field first.', 'bulk-product-editor-for-woocommerce'),
+            'quick_applied'       => __('Applied to all loaded products.', 'bulk-product-editor-for-woocommerce'),
+            'select_one_field'    => __('Select at least one field to change.', 'bulk-product-editor-for-woocommerce'),
             /* translators: {count} is replaced with the number of selected products. */
-            'confirm_bulk_edit'   => __('Apply changes to {count} product(s)?', 'wc-bulk-editor'),
-            'product_name_req'    => __('Product name is required.', 'wc-bulk-editor'),
-            'no_export'           => __('No products to export.', 'wc-bulk-editor'),
-            'view_name_prompt'    => __('View name:', 'wc-bulk-editor'),
-            'confirm_delete_view' => __('Delete this view?', 'wc-bulk-editor'),
+            'confirm_bulk_edit'   => __('Apply changes to {count} product(s)?', 'bulk-product-editor-for-woocommerce'),
+            'product_name_req'    => __('Product name is required.', 'bulk-product-editor-for-woocommerce'),
+            'no_export'           => __('No products to export.', 'bulk-product-editor-for-woocommerce'),
+            'view_name_prompt'    => __('View name:', 'bulk-product-editor-for-woocommerce'),
+            'confirm_delete_view' => __('Delete this view?', 'bulk-product-editor-for-woocommerce'),
 
             // Bulk edit modal, Quick Add button states and session handling.
             /* translators: {count} is replaced with the number of selected rows. */
-            'selected_count'      => __('{count} selected', 'wc-bulk-editor'),
-            'no_selection'        => __('No selection (applies to all loaded)', 'wc-bulk-editor'),
+            'selected_count'      => __('{count} selected', 'bulk-product-editor-for-woocommerce'),
+            'no_selection'        => __('No selection (applies to all loaded)', 'bulk-product-editor-for-woocommerce'),
             /* translators: {count} is replaced with the number of products the change was staged for. */
-            'changes_staged'      => __('Changes staged for {count} product(s). Click Save All to commit.', 'wc-bulk-editor'),
-            'creating'            => __('Creating...', 'wc-bulk-editor'),
-            'create_product'      => __('Create Product', 'wc-bulk-editor'),
-            'session_expired'     => __('Your session expired. Reload the page and try again.', 'wc-bulk-editor'),
-            'open_product'        => __('Open product editor', 'wc-bulk-editor'),
-            'name_required'       => __('Product name cannot be empty.', 'wc-bulk-editor'),
+            'changes_staged'      => __('Changes staged for {count} product(s). Click Save All to commit.', 'bulk-product-editor-for-woocommerce'),
+            'creating'            => __('Creating...', 'bulk-product-editor-for-woocommerce'),
+            'create_product'      => __('Create Product', 'bulk-product-editor-for-woocommerce'),
+            'session_expired'     => __('Your session expired. Reload the page and try again.', 'bulk-product-editor-for-woocommerce'),
+            'open_product'        => __('Open product editor', 'bulk-product-editor-for-woocommerce'),
+            'name_required'       => __('Product name cannot be empty.', 'bulk-product-editor-for-woocommerce'),
             /* translators: {id} is replaced with the numeric product id. */
-            'product_id_title'    => __('Product ID {id}', 'wc-bulk-editor'),
+            'product_id_title'    => __('Product ID {id}', 'bulk-product-editor-for-woocommerce'),
         ];
     }
 
@@ -479,7 +489,7 @@ final class WC_Bulk_Product_Editor
         check_ajax_referer(self::NONCE, 'nonce');
 
         if (!current_user_can(self::CAPABILITY)) {
-            wp_send_json_error(['message' => __('Permission denied.', 'wc-bulk-editor')], 403);
+            wp_send_json_error(['message' => __('Permission denied.', 'bulk-product-editor-for-woocommerce')], 403);
         }
     }
 
@@ -506,10 +516,12 @@ final class WC_Bulk_Product_Editor
         $this->guard();
 
         // absint() takes the absolute value, so a negative page would silently
-        // become a positive one — cast first, then clamp.
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
+        // become a positive one — cast first, then clamp. The (int) cast is
+        // the sanitisation; once a value is an integer there is nothing left
+        // for wp_unslash() to strip.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- guard() verifies the nonce; (int) sanitises.
         $page     = max(1, (int) ($_POST['page'] ?? 1));
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- guard() verifies the nonce; (int) sanitises.
         $per_page = min(max(1, (int) ($_POST['per_page'] ?? 50) ?: 50), self::MAX_PER_PAGE);
         $status   = $this->post_string('status');
 
@@ -544,7 +556,7 @@ final class WC_Bulk_Product_Editor
         $payload = $this->build_product_payload($args, $page);
 
         if ($payload === null) {
-            wp_send_json_error(['message' => __('Query failed.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('Query failed.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         wp_send_json_success($payload);
@@ -711,7 +723,7 @@ final class WC_Bulk_Product_Editor
         $this->guard();
 
         if (!current_user_can('manage_product_terms')) {
-            wp_send_json_error(['message' => __('Permission denied.', 'wc-bulk-editor')], 403);
+            wp_send_json_error(['message' => __('Permission denied.', 'bulk-product-editor-for-woocommerce')], 403);
         }
 
         $name   = $this->post_string('name');
@@ -719,7 +731,7 @@ final class WC_Bulk_Product_Editor
         $parent = absint($_POST['parent'] ?? 0);
 
         if ($name === '') {
-            wp_send_json_error(['message' => __('Category name is required.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('Category name is required.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         if ($parent > 0 && !term_exists($parent, 'product_cat')) {
@@ -746,7 +758,7 @@ final class WC_Bulk_Product_Editor
         $term = get_term($term_id, 'product_cat');
 
         if (!$term instanceof WP_Term) {
-            wp_send_json_error(['message' => __('Category could not be loaded.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('Category could not be loaded.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         wp_send_json_success([
@@ -759,7 +771,7 @@ final class WC_Bulk_Product_Editor
     /** @return list<array{slug: string, name: string}> */
     private function get_tax_class_list(): array
     {
-        $list = [['slug' => '', 'name' => __('Standard', 'wc-bulk-editor')]];
+        $list = [['slug' => '', 'name' => __('Standard', 'bulk-product-editor-for-woocommerce')]];
 
         foreach (WC_Tax::get_tax_classes() as $class) {
             $list[] = ['slug' => sanitize_title($class), 'name' => $class];
@@ -778,7 +790,7 @@ final class WC_Bulk_Product_Editor
     /** @return list<array{id: int|string, name: string}> */
     private function get_shipping_class_list(): array
     {
-        $list    = [['id' => '', 'name' => __('No shipping class', 'wc-bulk-editor')]];
+        $list    = [['id' => '', 'name' => __('No shipping class', 'bulk-product-editor-for-woocommerce')]];
         $classes = get_terms(['taxonomy' => 'product_shipping_class', 'hide_empty' => false]);
 
         if (is_array($classes)) {
@@ -804,11 +816,15 @@ final class WC_Bulk_Product_Editor
     {
         $this->guard();
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
+        // A nested array of product id => field => value. Each leaf is
+        // sanitised by the setter that handles it — set_scalar() picks the
+        // right function per field type — so there is nothing to sanitise at
+        // this level beyond unslashing.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- guard() verifies the nonce; each leaf is sanitised in apply_fields().
         $changes = (array) wp_unslash($_POST['changes'] ?? []);
 
         if ($changes === []) {
-            wp_send_json_error(['message' => __('No changes.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('No changes.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         $updated = 0;
@@ -829,7 +845,7 @@ final class WC_Bulk_Product_Editor
             if (!current_user_can('edit_post', $pid)) {
                 $errors[] = sprintf(
                     /* translators: 1: product id, 2: product name */
-                    __('#%1$d %2$s: permission denied.', 'wc-bulk-editor'),
+                    __('#%1$d %2$s: permission denied.', 'bulk-product-editor-for-woocommerce'),
                     $pid,
                     $product->get_name(),
                 );
@@ -849,14 +865,14 @@ final class WC_Bulk_Product_Editor
 
         $message = sprintf(
             /* translators: %d: number of products saved successfully. */
-            _n('%d product updated.', '%d products updated.', $updated, 'wc-bulk-editor'),
+            _n('%d product updated.', '%d products updated.', $updated, 'bulk-product-editor-for-woocommerce'),
             $updated,
         );
 
         if ($errors !== []) {
             $failed = sprintf(
                 /* translators: %d: number of products that could not be saved. */
-                _n('%d failed:', '%d failed:', count($errors), 'wc-bulk-editor'),
+                _n('%d failed:', '%d failed:', count($errors), 'bulk-product-editor-for-woocommerce'),
                 count($errors)
             );
 
@@ -938,7 +954,7 @@ final class WC_Bulk_Product_Editor
             // the browser, so it is escaped here rather than at the far end.
             throw new WC_Data_Exception(
                 'wcbulk_empty_name',
-                esc_html__('Product name cannot be empty.', 'wc-bulk-editor')
+                esc_html__('Product name cannot be empty.', 'bulk-product-editor-for-woocommerce')
             );
         }
 
@@ -998,7 +1014,7 @@ final class WC_Bulk_Product_Editor
         $name = $this->post_string('name');
 
         if ($name === '') {
-            wp_send_json_error(['message' => __('Product name required.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('Product name required.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         try {
@@ -1033,7 +1049,7 @@ final class WC_Bulk_Product_Editor
         $ids    = $this->post_ids('product_ids');
 
         if ($ids === [] || !in_array($action, ['duplicate', 'trash', 'delete'], true)) {
-            wp_send_json_error(['message' => __('Nothing to do.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('Nothing to do.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         $count = 0;
@@ -1066,11 +1082,11 @@ final class WC_Bulk_Product_Editor
         // plural forms gets the right one.
         $message = match ($action) {
             /* translators: %d: number of products duplicated. */
-            'duplicate' => sprintf(_n('%d product duplicated.', '%d products duplicated.', $count, 'wc-bulk-editor'), $count),
+            'duplicate' => sprintf(_n('%d product duplicated.', '%d products duplicated.', $count, 'bulk-product-editor-for-woocommerce'), $count),
             /* translators: %d: number of products moved to trash. */
-            'trash'     => sprintf(_n('%d product moved to trash.', '%d products moved to trash.', $count, 'wc-bulk-editor'), $count),
+            'trash'     => sprintf(_n('%d product moved to trash.', '%d products moved to trash.', $count, 'bulk-product-editor-for-woocommerce'), $count),
             /* translators: %d: number of products deleted permanently. */
-            'delete'    => sprintf(_n('%d product deleted.', '%d products deleted.', $count, 'wc-bulk-editor'), $count),
+            'delete'    => sprintf(_n('%d product deleted.', '%d products deleted.', $count, 'bulk-product-editor-for-woocommerce'), $count),
         };
 
         wp_send_json_success([
@@ -1123,7 +1139,7 @@ final class WC_Bulk_Product_Editor
         $name = $this->post_string('name');
 
         if ($name === '') {
-            wp_send_json_error(['message' => __('View name required.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('View name required.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         $uid   = get_current_user_id();
@@ -1189,7 +1205,7 @@ final class WC_Bulk_Product_Editor
         $ids = $this->post_ids('product_ids');
 
         if ($ids === []) {
-            wp_send_json_error(['message' => __('No products selected.', 'wc-bulk-editor')]);
+            wp_send_json_error(['message' => __('No products selected.', 'bulk-product-editor-for-woocommerce')]);
         }
 
         $columns = $this->csv_columns();
@@ -1247,14 +1263,14 @@ final class WC_Bulk_Product_Editor
         // add_submenu_page()'s capability argument only hides the menu item —
         // the page is still reachable by URL, so it has to be checked here too.
         if (!current_user_can(self::CAPABILITY)) {
-            wp_die(esc_html__('You are not allowed to access this page.', 'wc-bulk-editor'));
+            wp_die(esc_html__('You are not allowed to access this page.', 'bulk-product-editor-for-woocommerce'));
         }
 
         $template = WCBULK_PLUGIN_DIR . 'views/admin-page.php';
 
         if (!is_readable($template)) {
             wp_admin_notice(
-                esc_html__('Bulk Editor: the admin template is missing.', 'wc-bulk-editor'),
+                esc_html__('Bulk Editor: the admin template is missing.', 'bulk-product-editor-for-woocommerce'),
                 ['type' => 'error']
             );
 
@@ -1267,5 +1283,13 @@ final class WC_Bulk_Product_Editor
 }
 
 add_action('plugins_loaded', static function (): void {
+    // By plugins_loaded WooCommerce has loaded if it is active at all. The
+    // guard costs nothing and keeps a fatal error off the screen should the
+    // "Requires Plugins" contract ever be bypassed — a manual folder rename,
+    // for instance.
+    if (!class_exists('WooCommerce')) {
+        return;
+    }
+
     WC_Bulk_Product_Editor::instance();
 });

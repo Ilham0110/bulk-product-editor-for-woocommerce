@@ -241,9 +241,9 @@ field yang seharusnya polos.
 ### PHP (`views/admin-page.php`)
 
 ```php
-<?php esc_html_e('Bulk Product Editor', 'wc-bulk-editor'); ?>
+<?php esc_html_e('Bulk Product Editor', 'bulk-product-editor-for-woocommerce'); ?>
 <span>v<?php echo esc_html(WCBULK_VERSION); ?></span>
-placeholder="<?php esc_attr_e('Name or SKU...', 'wc-bulk-editor'); ?>"
+placeholder="<?php esc_attr_e('Name or SKU...', 'bulk-product-editor-for-woocommerce'); ?>"
 ```
 
 Aturannya: **escape saat mencetak, bukan saat menyimpan.** Fungsi dipilih
@@ -314,7 +314,7 @@ Folder plugin dulu berisi 47 file berpola `*.bak-before-*` dan folder
 menyajikannya sebagai **teks biasa**:
 
 ```
-http://situs.test/wp-content/plugins/wc-bulk-editor/wc-bulk-editor.php.bak-before-refactor
+http://situs.test/wp-content/plugins/bulk-product-editor-for-woocommerce/bulk-product-editor-for-woocommerce.php.bak-before-refactor
 ```
 
 Siapa pun tanpa login bisa membaca seluruh source code — termasuk nama nonce,
@@ -394,7 +394,7 @@ Diperbaiki dengan membaca langsung dari data preload
 
 ### 9.4 Header plugin belum lengkap
 
-`wc-bulk-editor.php` belum mencantumkan:
+`bulk-product-editor-for-woocommerce.php` belum mencantumkan:
 ```
 Requires at least: 6.5
 Requires Plugins: woocommerce

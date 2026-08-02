@@ -68,7 +68,7 @@ Kompatibel dengan **HPOS** (High-Performance Order Storage).
 
 ## Instalasi
 
-1. Salin folder `wc-bulk-editor` ke `wp-content/plugins/`.
+1. Salin folder `bulk-product-editor-for-woocommerce` ke `wp-content/plugins/`.
 2. Aktifkan lewat **Plugins** di admin WordPress.
 3. Buka **WooCommerce → Bulk Editor**.
 
@@ -100,13 +100,13 @@ atas tabel — pilih operasi, isi nilai, terapkan ke produk terpilih.
 ## Struktur Kode
 
 ```
-wc-bulk-editor/
-├── wc-bulk-editor.php    1224 baris  — seluruh logika PHP dalam satu class
+bulk-product-editor-for-woocommerce/
+├── bulk-product-editor-for-woocommerce.php    1224 baris  — seluruh logika PHP dalam satu class
 ├── uninstall.php           51 baris  — bersihkan preferensi saat plugin dihapus
 ├── views/admin-page.php   340 baris  — markup halaman admin
 ├── assets/admin.js       2136 baris  — seluruh UI (jQuery)
 ├── assets/admin.css       450 baris  — styling
-├── languages/                        — wc-bulk-editor.pot, 156 string
+├── languages/                        — bulk-product-editor-for-woocommerce.pot, 156 string
 ├── docs/                             — arsitektur, keamanan, i18n, ADR
 ├── readme.txt                        — format WordPress.org
 └── LICENSE                           — GPL v2
