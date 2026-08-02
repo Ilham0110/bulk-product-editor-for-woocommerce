@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-01T15:18:46+00:00\n"
+"POT-Creation-Date: 2026-08-02T05:18:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wc-bulk-editor\n"
@@ -365,7 +365,7 @@ msgid "SKU"
 msgstr ""
 
 #: views/admin-page.php:314
-#: wc-bulk-editor.php:382
+#: wc-bulk-editor.php:399
 msgid "Create Product"
 msgstr ""
 
@@ -382,7 +382,7 @@ msgid "Parent"
 msgstr ""
 
 #: views/admin-page.php:332
-#: wc-bulk-editor.php:359
+#: wc-bulk-editor.php:373
 msgid "— None —"
 msgstr ""
 
@@ -484,186 +484,193 @@ msgstr ""
 msgid "Order"
 msgstr ""
 
-#: wc-bulk-editor.php:340
+#. translators: {count} is replaced with the number of products being saved.
+#: wc-bulk-editor.php:351
 msgid "Save changes for {count} product(s)?"
 msgstr ""
 
-#: wc-bulk-editor.php:341
+#: wc-bulk-editor.php:352
 msgid "No changes detected."
 msgstr ""
 
-#: wc-bulk-editor.php:344
+#: wc-bulk-editor.php:355
 msgid "An error occurred."
 msgstr ""
 
-#: wc-bulk-editor.php:345
+#: wc-bulk-editor.php:356
 msgid "Loading..."
 msgstr ""
 
-#: wc-bulk-editor.php:346
+#: wc-bulk-editor.php:357
 msgid "No products found."
 msgstr ""
 
-#: wc-bulk-editor.php:347
+#. translators: {count} is replaced with the number of products to delete.
+#: wc-bulk-editor.php:359
 msgid "Delete {count} product(s)?"
 msgstr ""
 
-#: wc-bulk-editor.php:348
+#. translators: {count} is replaced with the number of products to trash.
+#: wc-bulk-editor.php:361
 msgid "Move {count} product(s) to trash?"
 msgstr ""
 
-#: wc-bulk-editor.php:349
+#. translators: {count} is replaced with the number of products to duplicate.
+#: wc-bulk-editor.php:363
 msgid "Duplicate {count} product(s)?"
 msgstr ""
 
-#: wc-bulk-editor.php:353
+#: wc-bulk-editor.php:367
 msgid "Select products first."
 msgstr ""
 
-#: wc-bulk-editor.php:354
+#: wc-bulk-editor.php:368
 msgid "View saved."
 msgstr ""
 
-#: wc-bulk-editor.php:355
+#: wc-bulk-editor.php:369
 msgid "No saved views yet — set your filters, then click Save View."
 msgstr ""
 
-#: wc-bulk-editor.php:356
-#: wc-bulk-editor.php:694
+#: wc-bulk-editor.php:370
+#: wc-bulk-editor.php:711
 msgid "Category name is required."
 msgstr ""
 
-#: wc-bulk-editor.php:357
+#: wc-bulk-editor.php:371
 msgid "Category created."
 msgstr ""
 
-#: wc-bulk-editor.php:358
+#: wc-bulk-editor.php:372
 msgid "That category already exists."
 msgstr ""
 
-#: wc-bulk-editor.php:360
+#: wc-bulk-editor.php:374
 msgid "View deleted."
 msgstr ""
 
-#: wc-bulk-editor.php:361
+#: wc-bulk-editor.php:375
 msgid "CSV exported."
 msgstr ""
 
-#: wc-bulk-editor.php:362
+#: wc-bulk-editor.php:376
 msgid "Product created!"
 msgstr ""
 
-#: wc-bulk-editor.php:363
+#: wc-bulk-editor.php:377
 msgid "Columns saved."
 msgstr ""
 
-#: wc-bulk-editor.php:366
+#: wc-bulk-editor.php:380
 msgid "Discard all changes?"
 msgstr ""
 
-#: wc-bulk-editor.php:367
+#: wc-bulk-editor.php:381
 msgid "Changes discarded."
 msgstr ""
 
-#: wc-bulk-editor.php:368
+#: wc-bulk-editor.php:382
 msgid "Select a field first."
 msgstr ""
 
-#: wc-bulk-editor.php:369
+#: wc-bulk-editor.php:383
 msgid "Applied to all loaded products."
 msgstr ""
 
-#: wc-bulk-editor.php:370
+#: wc-bulk-editor.php:384
 msgid "Select at least one field to change."
 msgstr ""
 
-#: wc-bulk-editor.php:371
+#. translators: {count} is replaced with the number of selected products.
+#: wc-bulk-editor.php:386
 msgid "Apply changes to {count} product(s)?"
 msgstr ""
 
-#: wc-bulk-editor.php:372
+#: wc-bulk-editor.php:387
 msgid "Product name is required."
 msgstr ""
 
-#: wc-bulk-editor.php:373
+#: wc-bulk-editor.php:388
 msgid "No products to export."
 msgstr ""
 
-#: wc-bulk-editor.php:374
+#: wc-bulk-editor.php:389
 msgid "View name:"
 msgstr ""
 
-#: wc-bulk-editor.php:375
+#: wc-bulk-editor.php:390
 msgid "Delete this view?"
 msgstr ""
 
-#: wc-bulk-editor.php:378
+#. translators: {count} is replaced with the number of selected rows.
+#: wc-bulk-editor.php:394
 msgid "{count} selected"
 msgstr ""
 
-#: wc-bulk-editor.php:379
+#: wc-bulk-editor.php:395
 msgid "No selection (applies to all loaded)"
 msgstr ""
 
-#: wc-bulk-editor.php:380
+#. translators: {count} is replaced with the number of products the change was staged for.
+#: wc-bulk-editor.php:397
 msgid "Changes staged for {count} product(s). Click Save All to commit."
 msgstr ""
 
-#: wc-bulk-editor.php:381
+#: wc-bulk-editor.php:398
 msgid "Creating..."
 msgstr ""
 
-#: wc-bulk-editor.php:383
+#: wc-bulk-editor.php:400
 msgid "Your session expired. Reload the page and try again."
 msgstr ""
 
-#: wc-bulk-editor.php:384
+#: wc-bulk-editor.php:401
 msgid "Open product editor"
 msgstr ""
 
-#: wc-bulk-editor.php:385
-#: wc-bulk-editor.php:910
+#: wc-bulk-editor.php:402
+#: wc-bulk-editor.php:927
 msgid "Product name cannot be empty."
 msgstr ""
 
 #. translators: {id} is replaced with the numeric product id.
-#: wc-bulk-editor.php:387
+#: wc-bulk-editor.php:404
 msgid "Product ID {id}"
 msgstr ""
 
-#: wc-bulk-editor.php:460
-#: wc-bulk-editor.php:687
+#: wc-bulk-editor.php:477
+#: wc-bulk-editor.php:704
 msgid "Permission denied."
 msgstr ""
 
-#: wc-bulk-editor.php:520
+#: wc-bulk-editor.php:537
 msgid "Query failed."
 msgstr ""
 
-#: wc-bulk-editor.php:721
+#: wc-bulk-editor.php:738
 msgid "Category could not be loaded."
 msgstr ""
 
-#: wc-bulk-editor.php:734
+#: wc-bulk-editor.php:751
 msgid "Standard"
 msgstr ""
 
-#: wc-bulk-editor.php:753
+#: wc-bulk-editor.php:770
 msgid "No shipping class"
 msgstr ""
 
-#: wc-bulk-editor.php:782
+#: wc-bulk-editor.php:799
 msgid "No changes."
 msgstr ""
 
 #. translators: 1: product id, 2: product name
-#: wc-bulk-editor.php:803
+#: wc-bulk-editor.php:820
 #, php-format
 msgid "#%1$d %2$s: permission denied."
 msgstr ""
 
 #. translators: %d: number of products saved successfully.
-#: wc-bulk-editor.php:823
+#: wc-bulk-editor.php:840
 #, php-format
 msgid "%d product updated."
 msgid_plural "%d products updated."
@@ -671,45 +678,57 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of products that could not be saved.
-#: wc-bulk-editor.php:830
+#: wc-bulk-editor.php:847
 #, php-format
 msgid "%d failed:"
 msgid_plural "%d failed:"
 msgstr[0] ""
 msgstr[1] ""
 
-#: wc-bulk-editor.php:970
+#: wc-bulk-editor.php:987
 msgid "Product name required."
 msgstr ""
 
-#: wc-bulk-editor.php:1003
+#: wc-bulk-editor.php:1020
 msgid "Nothing to do."
 msgstr ""
 
-#: wc-bulk-editor.php:1032
-msgid "{count} duplicated."
-msgstr ""
+#. translators: %d: number of products duplicated.
+#: wc-bulk-editor.php:1053
+#, php-format
+msgid "%d product duplicated."
+msgid_plural "%d products duplicated."
+msgstr[0] ""
+msgstr[1] ""
 
-#: wc-bulk-editor.php:1033
-msgid "{count} trashed."
-msgstr ""
+#. translators: %d: number of products moved to trash.
+#: wc-bulk-editor.php:1055
+#, php-format
+msgid "%d product moved to trash."
+msgid_plural "%d products moved to trash."
+msgstr[0] ""
+msgstr[1] ""
 
-#: wc-bulk-editor.php:1034
-msgid "{count} deleted."
-msgstr ""
+#. translators: %d: number of products deleted permanently.
+#: wc-bulk-editor.php:1057
+#, php-format
+msgid "%d product deleted."
+msgid_plural "%d products deleted."
+msgstr[0] ""
+msgstr[1] ""
 
-#: wc-bulk-editor.php:1083
+#: wc-bulk-editor.php:1106
 msgid "View name required."
 msgstr ""
 
-#: wc-bulk-editor.php:1145
+#: wc-bulk-editor.php:1168
 msgid "No products selected."
 msgstr ""
 
-#: wc-bulk-editor.php:1203
+#: wc-bulk-editor.php:1226
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: wc-bulk-editor.php:1210
+#: wc-bulk-editor.php:1233
 msgid "Bulk Editor: the admin template is missing."
 msgstr ""

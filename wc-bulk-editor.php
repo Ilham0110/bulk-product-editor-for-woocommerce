@@ -333,10 +333,21 @@ final class WC_Bulk_Product_Editor
         return $columns;
     }
 
-    /** @return array<string, string> */
+    /**
+     * Strings handed to the browser.
+     *
+     * These are read by JavaScript, which has no sprintf, so the placeholder
+     * is the literal token {count} rather than %d — the client fills it with
+     * .replace(). Every string carrying one needs a translators comment:
+     * make-pot only warns about printf-style placeholders, so {count} would
+     * otherwise reach a translator with no explanation.
+     *
+     * @return array<string, string>
+     */
     private function i18n_strings(): array
     {
         return [
+            /* translators: {count} is replaced with the number of products being saved. */
             'confirm_save'         => __('Save changes for {count} product(s)?', 'wc-bulk-editor'),
             'no_changes'          => __('No changes detected.', 'wc-bulk-editor'),
             // Saving shows a progress bar rather than a status line, and the
@@ -344,8 +355,11 @@ final class WC_Bulk_Product_Editor
             'error'               => __('An error occurred.', 'wc-bulk-editor'),
             'loading'             => __('Loading...', 'wc-bulk-editor'),
             'no_results'          => __('No products found.', 'wc-bulk-editor'),
+            /* translators: {count} is replaced with the number of products to delete. */
             'confirm_delete'      => __('Delete {count} product(s)?', 'wc-bulk-editor'),
+            /* translators: {count} is replaced with the number of products to trash. */
             'confirm_trash'       => __('Move {count} product(s) to trash?', 'wc-bulk-editor'),
+            /* translators: {count} is replaced with the number of products to duplicate. */
             'confirm_duplicate'   => __('Duplicate {count} product(s)?', 'wc-bulk-editor'),
             // The result of a bulk action is worded by wc_bulk_bulk_action()
             // and sent back with the response, so no client-side copy is kept
@@ -368,6 +382,7 @@ final class WC_Bulk_Product_Editor
             'select_field'        => __('Select a field first.', 'wc-bulk-editor'),
             'quick_applied'       => __('Applied to all loaded products.', 'wc-bulk-editor'),
             'select_one_field'    => __('Select at least one field to change.', 'wc-bulk-editor'),
+            /* translators: {count} is replaced with the number of selected products. */
             'confirm_bulk_edit'   => __('Apply changes to {count} product(s)?', 'wc-bulk-editor'),
             'product_name_req'    => __('Product name is required.', 'wc-bulk-editor'),
             'no_export'           => __('No products to export.', 'wc-bulk-editor'),
@@ -375,8 +390,10 @@ final class WC_Bulk_Product_Editor
             'confirm_delete_view' => __('Delete this view?', 'wc-bulk-editor'),
 
             // Bulk edit modal, Quick Add button states and session handling.
+            /* translators: {count} is replaced with the number of selected rows. */
             'selected_count'      => __('{count} selected', 'wc-bulk-editor'),
             'no_selection'        => __('No selection (applies to all loaded)', 'wc-bulk-editor'),
+            /* translators: {count} is replaced with the number of products the change was staged for. */
             'changes_staged'      => __('Changes staged for {count} product(s). Click Save All to commit.', 'wc-bulk-editor'),
             'creating'            => __('Creating...', 'wc-bulk-editor'),
             'create_product'      => __('Create Product', 'wc-bulk-editor'),
@@ -1028,15 +1045,21 @@ final class WC_Bulk_Product_Editor
             }
         }
 
-        $messages = [
-            'duplicate' => __('{count} duplicated.', 'wc-bulk-editor'),
-            'trash'     => __('{count} trashed.', 'wc-bulk-editor'),
-            'delete'    => __('{count} deleted.', 'wc-bulk-editor'),
-        ];
+        // The count is known here, so these use _n() rather than the {count}
+        // token the browser-side strings need: a language with more than two
+        // plural forms gets the right one.
+        $message = match ($action) {
+            /* translators: %d: number of products duplicated. */
+            'duplicate' => sprintf(_n('%d product duplicated.', '%d products duplicated.', $count, 'wc-bulk-editor'), $count),
+            /* translators: %d: number of products moved to trash. */
+            'trash'     => sprintf(_n('%d product moved to trash.', '%d products moved to trash.', $count, 'wc-bulk-editor'), $count),
+            /* translators: %d: number of products deleted permanently. */
+            'delete'    => sprintf(_n('%d product deleted.', '%d products deleted.', $count, 'wc-bulk-editor'), $count),
+        };
 
         wp_send_json_success([
             'count'   => $count,
-            'message' => str_replace('{count}', (string) $count, $messages[$action]),
+            'message' => $message,
         ]);
     }
     // ---------------------------------------------------------------------
