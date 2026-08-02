@@ -468,6 +468,11 @@ final class WC_Bulk_Product_Editor
 
     /**
      * Verify nonce and capability. Every AJAX handler starts with this.
+     *
+     * PHPCS cannot follow the nonce check across a method boundary, so each
+     * $_POST read below carries a phpcs:ignore naming this method. The check
+     * is real: check_ajax_referer() halts the request itself on failure, which
+     * is verified by the role tests.
      */
     private function guard(): void
     {
@@ -480,12 +485,14 @@ final class WC_Bulk_Product_Editor
 
     private function post_string(string $key, string $default = ''): string
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         return sanitize_text_field(wp_unslash((string) ($_POST[$key] ?? $default)));
     }
 
     /** @return list<int> */
     private function post_ids(string $key): array
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         $ids = array_map('absint', (array) ($_POST[$key] ?? []));
 
         return array_values(array_filter($ids));
@@ -500,7 +507,9 @@ final class WC_Bulk_Product_Editor
 
         // absint() takes the absolute value, so a negative page would silently
         // become a positive one — cast first, then clamp.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         $page     = max(1, (int) ($_POST['page'] ?? 1));
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         $per_page = min(max(1, (int) ($_POST['per_page'] ?? 50) ?: 50), self::MAX_PER_PAGE);
         $status   = $this->post_string('status');
 
@@ -516,6 +525,7 @@ final class WC_Bulk_Product_Editor
         if (($search = $this->post_string('search')) !== '') {
             $args['s'] = $search;
         }
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         if (($category = absint($_POST['category'] ?? 0)) > 0) {
             $args['product_category_id'] = [$category];
         }
@@ -705,6 +715,7 @@ final class WC_Bulk_Product_Editor
         }
 
         $name   = $this->post_string('name');
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         $parent = absint($_POST['parent'] ?? 0);
 
         if ($name === '') {
@@ -793,6 +804,7 @@ final class WC_Bulk_Product_Editor
     {
         $this->guard();
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
         $changes = (array) wp_unslash($_POST['changes'] ?? []);
 
         if ($changes === []) {
@@ -922,9 +934,11 @@ final class WC_Bulk_Product_Editor
         $name = sanitize_text_field((string) $value);
 
         if ($name === '') {
+            // The message travels back in the JSON response and is rendered by
+            // the browser, so it is escaped here rather than at the far end.
             throw new WC_Data_Exception(
                 'wcbulk_empty_name',
-                __('Product name cannot be empty.', 'wc-bulk-editor')
+                esc_html__('Product name cannot be empty.', 'wc-bulk-editor')
             );
         }
 
@@ -995,7 +1009,9 @@ final class WC_Bulk_Product_Editor
                 $product->set_sku($sku);
             }
 
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
             if (isset($_POST['regular_price'])) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
                 $product->set_regular_price((string) max(0, (float) $_POST['regular_price']));
             }
 
@@ -1081,8 +1097,12 @@ final class WC_Bulk_Product_Editor
         $this->guard();
 
         // Only keys we actually know about get stored.
-        $requested = array_map('sanitize_text_field', (array) ($_POST['columns'] ?? []));
-        $columns   = array_values(array_intersect($requested, array_keys(self::COLUMNS)));
+        $requested = array_map(
+            'sanitize_text_field',
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
+            (array) wp_unslash($_POST['columns'] ?? [])
+        );
+        $columns = array_values(array_intersect($requested, array_keys(self::COLUMNS)));
 
         update_user_meta(get_current_user_id(), self::META_COLUMNS, $columns);
 
@@ -1112,7 +1132,11 @@ final class WC_Bulk_Product_Editor
         $views[] = [
             'id'      => uniqid('v'),
             'name'    => $name,
-            'filters' => array_map('sanitize_text_field', (array) ($_POST['filters'] ?? [])),
+            'filters' => array_map(
+                'sanitize_text_field',
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- guard() verifies the nonce.
+                (array) wp_unslash($_POST['filters'] ?? [])
+            ),
         ];
 
         update_user_meta($uid, self::META_VIEWS, $views);
