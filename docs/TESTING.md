@@ -3,8 +3,13 @@
 Strategi pengujian untuk plugin ini: apa yang layak diuji, apa yang tidak, dan
 apa yang tidak bisa ditangkap alat apa pun.
 
-**Keadaan sekarang:** nol test otomatis. Tidak ada `tests/`, `phpunit.xml`,
-`composer.json`, maupun `package.json`.
+**Keadaan sekarang:** 21 suite E2E Playwright menutupi seluruh 15 fitur, dengan
+verifikasi ke database. Tidak ada test PHP — tidak ada `tests/`, `phpunit.xml`,
+maupun `composer.json` di dalam repo plugin.
+
+Suite itu **tidak disimpan bersama plugin**. Ia hidup di luar repo dan
+dijalankan manual terhadap instalasi lokal. Bagian 6 menjelaskan kenapa, dan
+apa yang perlu dikerjakan kalau ingin memindahkannya ke dalam.
 
 Dokumen ini bukan ajakan menulis test untuk semuanya. Ia berusaha menjawab satu
 pertanyaan: *dengan usaha terbatas, pengujian apa yang paling mencegah
@@ -322,19 +327,23 @@ Bagian ini yang paling sering dilewatkan dalam perencanaan pengujian.
 
 WordPress test suite berjalan pada **satu** konfigurasi. Yang tidak diuji:
 
-| Variabel | Kenapa penting |
+| Variabel | Status |
 |---|---|
-| HPOS aktif vs nonaktif | plugin mendeklarasikan kompatibilitas — belum pernah diuji dengan HPOS mati |
-| Peran `shop_manager` | semua pengujian manual selama ini sebagai administrator |
-| Multisite | `switch_to_blog()` tidak pernah dilalui |
-| WooCommerce versi lain | dikembangkan pada 10.9.4 saja |
-| PHP 8.4+ | header menyatakan 8.3 |
+| Peran `shop_manager` | ✅ diuji — berfungsi penuh; `subscriber` ditolak di 14 endpoint |
+| Produk variable | ✅ diuji — induk dapat disunting tanpa merusak variasi |
+| HPOS aktif vs nonaktif | ❌ hanya diuji dengan HPOS aktif |
+| Multisite | ❌ `switch_to_blog()` tidak pernah dilalui |
+| WooCommerce versi lain | ❌ dikembangkan pada 10.9.4 saja |
+| PHP 8.4+ | ❌ header menyatakan 8.3 |
 
-**Yang paling mendesak dari daftar ini: peran `shop_manager`.** Plugin memakai
-`manage_woocommerce` yang dimiliki peran itu, tapi tidak ada catatan bahwa
-pengujian pernah dilakukan dengannya. Ini tercantum di
-[CLAUDE.md](../CLAUDE.md) sebagai langkah uji manual — tapi belum tentu
-dijalankan.
+Dua gap terbesar sudah tertutup. Yang tersisa memerlukan lingkungan lain, bukan
+sekadar test tambahan: mematikan HPOS mengubah tempat penyimpanan order,
+multisite mengubah cara `uninstall.php` harus bekerja, dan versi WooCommerce
+lain bisa memindahkan API yang dipakai.
+
+**Untuk rilis publik, HPOS nonaktif yang paling layak diuji.** Plugin
+mendeklarasikan kompatibilitas `custom_order_tables`, dan sebagian toko masih
+memakai penyimpanan lama.
 
 ### b. Data ekstrem
 
@@ -393,14 +402,32 @@ Berurutan menurut nilai per usaha:
 
 **Tahap 2 — E2E Playwright, sudah berjalan**
 
-Seluruh 15 fitur diuji di browser sungguhan dengan verifikasi ke database:
-render, change tracking, save, filter, paginasi, modal Columns, Quick Apply,
-Advanced Bulk Edit, bulk action, Quick Add, New Category, export CSV, saved
-views, peran pengguna, dan produk variable.
+21 suite menutupi seluruh 15 fitur di browser sungguhan, dengan verifikasi ke
+database: render, change tracking, save, 6 filter, paginasi, modal Columns,
+Quick Apply, Advanced Bulk Edit, bulk action, Quick Add, New Category, export
+CSV + proteksi formula, saved views, peran pengguna, produk variable, edit
+nama, perataan sel, lebar kolom, dan Discard.
 
-Empat bug ditemukan lewat cara ini — semuanya jenis yang tidak terlihat dari
-pembacaan kode: angka nol dirender kosong, urutan option select, halaman
-negatif, dan modal Columns kosong karena `ReferenceError` yang ditelan jQuery.
+Delapan bug ditemukan lewat cara ini — semuanya jenis yang tidak terlihat dari
+pembacaan kode:
+
+| Bug | Kenapa tidak terlihat |
+|---|---|
+| Angka nol dirender kosong | `value \|\| ''` tampak wajar |
+| Option "no shipping class" terdorong ke akhir | urutan key objek JS |
+| Halaman negatif jadi positif | `absint(-5)` = 5 |
+| Modal Columns kosong | `ReferenceError` ditelan jQuery, nol pesan konsol |
+| Kolom Status selalu "Published" | `status` vs `post_status` |
+| Categories di modal tidak bisa diklik | select tidak pernah diisi |
+| Panah dropdown hilang | shorthand `background` menghapus gambar |
+| Discard mengubah tinggi baris | efek samping event `input` |
+
+**Suite ini tidak disimpan di dalam repo plugin.** Ia berjalan dari luar
+terhadap instalasi lokal, memakai kredensial dari variabel lingkungan.
+Memindahkannya ke `tests/` akan membuatnya bisa dijalankan siapa pun yang
+mengklon repo — tapi juga menambah `package.json` dan `node_modules/`, yang
+menyentuh [ADR 0002](adr/0002-tanpa-build-step.md). Catat sebagai ADR kalau
+diputuskan.
 
 **Tahap 3 — unit JS** (opsional)
 - [ ] Ekspor bersyarat di akhir `admin.js`

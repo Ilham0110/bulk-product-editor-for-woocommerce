@@ -6,7 +6,7 @@ Audit kelas kerentanan: XSS, SQL injection, CSRF, otorisasi, dan file upload.
 berisi **hasil pemeriksaan menyeluruh** terhadap kode yang ada — apa yang aman,
 kenapa aman, dan apa yang masih terbuka.
 
-Diaudit 2026-07-30 terhadap v3.11.0.
+Diaudit 2026-07-30 terhadap v3.11.0, ditinjau ulang pada v3.12.0.
 
 ---
 
@@ -38,9 +38,9 @@ esc(t)      // createTextNode — untuk isi elemen
 escAttr(t)  // escape & " < > — untuk nilai atribut
 ```
 
-Diperiksa: seluruh renderer di objek `R` (baris 443–689), `renderEditableCell()`,
-`renderTextareaCell()`, `renderSelectCell()`, `renderBoolCell()`, `renderCats()`,
-dan `showNotice()` — **semuanya meng-escape**.
+Diperiksa: seluruh renderer di objek `R`, `renderEditableCell()`,
+`renderTextareaCell()`, `renderSelectCell()`, `renderBoolCell()`, dan
+`showNotice()` — **semuanya meng-escape**.
 
 Tiga bug di renderer `tax_class`/`shipping_class` sudah diperbaiki di v3.11
 (lihat [SECURITY.md §9.2](SECURITY.md#92-xss-pada-dropdown-tax-class--shipping-class--sudah-diperbaiki)).

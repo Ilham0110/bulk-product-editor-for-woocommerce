@@ -1,10 +1,10 @@
-# WooCommerce Bulk Product Editor
+# Bulk Product Editor for WooCommerce
 
 Editor produk WooCommerce ala spreadsheet di admin. Inline edit, bulk action,
 saved views, export CSV.
 
-- **Versi:** 3.11.0 · **PHP:** 8.3+ · **WooCommerce:** wajib aktif (plugin
-  langsung `return` kalau tidak)
+- **Versi:** 3.12.0 · **PHP:** 8.3+ · **WooCommerce:** wajib aktif — header
+  `Requires Plugins` membuat WordPress menolak aktivasi tanpanya
 - **Terpasang saat ini:** WordPress 7.0.2, WooCommerce 10.9.4 — HPOS default
 - **Text domain:** `wc-bulk-editor`
 - **Prefix:** fungsi/AJAX `wc_bulk_`, konstanta `WCBULK_`, user meta `_wcbulk_`
@@ -74,17 +74,23 @@ Tidak ada composer, npm, build step, atau autoloader. Edit file langsung.
 - Jangan mengubah keputusan yang tercatat di `docs/adr/` tanpa membaca ADR-nya
   lebih dulu (monolit satu file, ES5 tanpa build step, preload bukan AJAX).
 
-## Uji Manual (belum ada test otomatis)
+## Uji Setelah Mengubah Kode
 
-Setelah mengubah kode, cek di `http://larisdigital.test/wp-admin/`
-→ WooCommerce → Bulk Editor:
+Ada 21 suite E2E Playwright yang menutupi seluruh 15 fitur, tapi **tidak
+disimpan di dalam repo ini** — dijalankan manual dari luar terhadap instalasi
+lokal. Lihat [docs/TESTING.md](docs/TESTING.md).
+
+Kalau suite itu tidak tersedia, periksa manual di
+`http://larisdigital.test/wp-admin/` → WooCommerce → Bulk Editor:
 
 1. Tabel tampil tanpa AJAX pertama (data di-preload lewat `wp_localize_script`).
 2. Edit satu sel → indikator dirty muncul → Save → nilai persist setelah reload.
-3. Buka Console — nol error JS.
-4. Aktifkan Query Monitor: tidak ada PHP notice/deprecated, tidak ada lonjakan
+3. Tekan Discard → nilai kembali **dan** tinggi baris tidak berubah.
+4. Buka Console — nol error JS.
+5. Aktifkan Query Monitor: tidak ada PHP notice/deprecated, tidak ada lonjakan
    jumlah query saat paginasi.
-5. Bulk action (trash/duplicate) dan Export CSV masih jalan.
+6. Bulk action (trash/duplicate) dan Export CSV masih jalan.
+7. Perkecil jendela ke lebar laptop 14" — tidak ada field yang terpotong.
 
 Kalau menambah field yang bisa diedit, uji juga sebagai user role `shop_manager`,
 bukan hanya administrator.

@@ -269,28 +269,28 @@ Handler baru wajib mengikuti pola yang sama: `guard()` dulu, lalu cek khusus.
 
 ## Peta `admin.js`
 
-1741 baris, satu objek `B`, tanpa modul. Navigasi lewat header seksi:
+2136 baris, satu objek `B`, tanpa modul. Navigasi lewat header seksi:
 
 | Baris | Seksi | Isi |
 |---|---|---|
 | 19 | *(state)* | `page`, `changes`, `originals`, `selectedRows` |
 | 29 | COLUMN STATE | `getActiveColumns()` — cache di `_activeColumns`, selalu menyisipkan `cb` di depan |
 | 53 | BOOTSTRAP & EVENT WIRING | `init()`, semua `.on()`, Ctrl+S |
-| 405 | PRODUCT LOADING | `loadProducts()` — satu-satunya pemanggil `wc_bulk_fetch_products` |
-| 441 | TABLE RENDERING | `renderTable()`, objek `R` = renderer per kolom, `renderTableHead()` |
-| 715 | VIEWPORT WIDTH | penskalaan lebar kolom terhadap lebar tersedia |
-| 773 | VERTICAL FIT | tinggi area scroll dihitung dari tinggi window |
-| 952 | CELL RENDERERS | `renderEditableCell()`, `renderSelectCell()`, `classOptions()` |
-| 1105 | CHANGE TRACKING | `trackChange()`, `origVal()`, `baseVal()`, `isChanged()` |
-| 1164 | BULK OPERATIONS | `quickApply()`, `saveAll()`, `doBulkAction()` |
-| 1349 | COLUMNS MODAL | pemilihan & pengurutan kolom (jquery-ui-sortable) |
-| 1410 | BULK EDIT MODAL | Advanced Bulk Edit |
-| 1514 | QUICK ADD PRODUCT |  |
-| 1517 | NEW CATEGORY |  |
-| 1641 | CSV EXPORT | menerima CSV dari server, memicu unduhan di browser |
-| 1678 | SAVED VIEWS |  |
-| 1781 | PAGINATION & NOTICES |  |
-| 1837 | HELPERS | `esc()`, `escAttr()`, `fmtPrice()`, `failMessage()` |
+| 410 | PRODUCT LOADING | `loadProducts()` — satu-satunya pemanggil `wc_bulk_fetch_products` |
+| 446 | TABLE RENDERING | `renderTable()`, objek `R` = renderer per kolom, `renderTableHead()` |
+| 750 | VIEWPORT WIDTH | `measureColumnWidths()`, `columnWidth()`, `writeColumnWidths()` |
+| 982 | VERTICAL FIT | tinggi area scroll dihitung dari tinggi window |
+| 1169 | CELL RENDERERS | `renderEditableCell()`, `renderSelectCell()`, `classOptions()` |
+| 1320 | CHANGE TRACKING | `trackChange()`, `origVal()`, `baseVal()`, `isChanged()` |
+| 1379 | BULK OPERATIONS | `quickApply()`, `saveAll()`, `discardAll()`, `doBulkAction()` |
+| 1595 | COLUMNS MODAL | pemilihan & pengurutan kolom (jquery-ui-sortable) |
+| 1656 | BULK EDIT MODAL | Advanced Bulk Edit |
+| 1760 | QUICK ADD PRODUCT |  |
+| 1763 | NEW CATEGORY |  |
+| 1891 | CSV EXPORT | menerima CSV dari server, memicu unduhan di browser |
+| 1928 | SAVED VIEWS |  |
+| 2031 | PAGINATION & NOTICES |  |
+| 2087 | HELPERS | `esc()`, `escAttr()`, `fmtPrice()`, `failMessage()` |
 
 **Gaya kode JS:** ES5 — `var`, `function`, jQuery. Tidak ada build step, jadi
 tidak ada transpiling. Jangan campurkan `const`/`let`/arrow function; ikuti

@@ -1,4 +1,4 @@
-# WooCommerce Bulk Product Editor
+# Bulk Product Editor for WooCommerce
 
 Edit ratusan produk WooCommerce langsung dari satu tabel ala spreadsheet —
 tanpa membuka halaman edit produk satu per satu.
@@ -101,10 +101,15 @@ atas tabel — pilih operasi, isi nilai, terapkan ke produk terpilih.
 
 ```
 wc-bulk-editor/
-├── wc-bulk-editor.php     852 baris  — seluruh logika PHP dalam satu class
-├── views/admin-page.php   327 baris  — markup halaman admin
-├── assets/admin.js       1741 baris  — seluruh UI (jQuery)
-└── assets/admin.css       382 baris  — styling
+├── wc-bulk-editor.php    1224 baris  — seluruh logika PHP dalam satu class
+├── uninstall.php           51 baris  — bersihkan preferensi saat plugin dihapus
+├── views/admin-page.php   340 baris  — markup halaman admin
+├── assets/admin.js       2136 baris  — seluruh UI (jQuery)
+├── assets/admin.css       450 baris  — styling
+├── languages/                        — wc-bulk-editor.pot, 156 string
+├── docs/                             — arsitektur, keamanan, i18n, ADR
+├── readme.txt                        — format WordPress.org
+└── LICENSE                           — GPL v2
 ```
 
 Detail arsitektur, alur data, dan aturan kontribusi ada di

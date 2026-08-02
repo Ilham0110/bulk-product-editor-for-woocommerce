@@ -34,16 +34,20 @@ Text domain **tidak** perlu diubah.
 
 ---
 
-## 2. Yang Wajib Ada dan Belum Ada
+## 2. File Wajib
 
 Hasil audit folder plugin:
 
 | File | Status | Wajib? |
 |---|---|---|
-| `readme.txt` | ❌ tidak ada | **ya** — tanpa ini tidak bisa disubmit |
-| `uninstall.php` | ❌ tidak ada | praktis wajib (lihat [LIFECYCLE.md](LIFECYCLE.md#3-uninstall--yang-seharusnya-ada)) |
-| `LICENSE` / `license.txt` | ❌ tidak ada | ya |
-| `assets/screenshot-1.png` | ❌ tidak ada | tidak wajib, tapi sangat dianjurkan |
+| `readme.txt` | ✅ ada | **ya** — tanpa ini tidak bisa disubmit |
+| `uninstall.php` | ✅ ada | praktis wajib (lihat [LIFECYCLE.md](LIFECYCLE.md#3-uninstall--yang-seharusnya-ada)) |
+| `LICENSE` | ✅ ada | ya |
+| `languages/*.pot` | ✅ ada | tidak wajib, tapi membuka terjemahan komunitas |
+| `assets/screenshot-1.png` | ❌ belum | tidak wajib, tapi sangat dianjurkan |
+
+Bagian di bawah menjelaskan format masing-masing, sebagai rujukan saat
+memperbaruinya.
 
 ### `readme.txt` — format wajib
 
@@ -56,7 +60,7 @@ Tags: woocommerce, bulk edit, products, inline edit, spreadsheet
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.3
-Stable tag: 3.11.0
+Stable tag: 3.12.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,34 +135,24 @@ cocok dengan daftar di bagian `== Screenshots ==` pada `readme.txt`.
 
 ---
 
-## 3. Header Plugin yang Kurang
+## 3. Header Plugin
 
-Yang ada sekarang:
-
-```php
- * Plugin Name:  WooCommerce Bulk Product Editor
- * Description:  Spreadsheet-style inline editing for WooCommerce products.
- * Version:      3.11.0
- * Requires PHP: 8.3
- * Text Domain:  wc-bulk-editor
-```
-
-Yang perlu ditambahkan:
+Sudah lengkap — sepuluh field wajib terisi:
 
 ```php
- * Plugin Name:       Bulk Product Editor for WooCommerce
- * Plugin URI:        https://…
- * Description:       Spreadsheet-style inline editing for WooCommerce products.
- * Version:           3.11.0
- * Requires at least: 6.5
- * Requires PHP:      8.3
- * Requires Plugins:  woocommerce
- * Author:            …
- * Author URI:        https://…
- * License:           GPL-2.0-or-later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       wc-bulk-editor
- * Domain Path:       /languages
+ * Plugin Name:          Bulk Product Editor for WooCommerce
+ * Plugin URI:           https://github.com/Ilham0110/wc-bulk-editor
+ * Description:          Spreadsheet-style inline editing for WooCommerce products.
+ * Version:              3.12.0
+ * Author:               Ilham Darmawan
+ * Author URI:           https://github.com/Ilham0110
+ * Requires at least:    6.5
+ * Requires PHP:         8.3
+ * Requires Plugins:     woocommerce
+ * License:              GPL-2.0-or-later
+ * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:          wc-bulk-editor
+ * Domain Path:          /languages
  * WC requires at least: 9.0
  * WC tested up to:      10.9
 ```
@@ -186,7 +180,7 @@ Hasil audit — tidak ada masalah di area ini:
 | Script/style lewat `wp_enqueue_*` | ✅ ya |
 | Escaping output | ✅ konsisten (setelah perbaikan v3.11) |
 | Nonce + capability di semua endpoint | ✅ `guard()` |
-| Text domain literal | ✅ 136 string, nol pelanggaran |
+| Text domain literal | ✅ 211 pemanggilan, nol pelanggaran |
 | Prefix konsisten (`wcbulk_`, `wc_bulk_`, `_wcbulk_`) | ✅ |
 | Ukuran plugin | ✅ 340 KB |
 | Slug cocok dengan text domain | ✅ `wc-bulk-editor` |
@@ -204,7 +198,7 @@ Pasang dari direktori dan jalankan sebelum submit.
 Yang hampir pasti muncul:
 
 **a. Indentasi spasi, bukan tab.** WPCS mewajibkan tab. Ini akan ditandai di
-seluruh 852 baris PHP. Lihat
+seluruh 1224 baris PHP. Lihat
 [ADR 0005](adr/0005-menyimpang-dari-wpcs.md) — keputusan ini disengaja, dan
 inilah biayanya.
 
@@ -213,9 +207,8 @@ inilah biayanya.
 sebagai tersanitasi. Kemungkinan perlu komentar
 `// phpcs:ignore WordPress.Security.ValidatedSanitizedInput`.
 
-**c. Tidak ada `uninstall.php`** → orphaned data.
-
-**d. `readme.txt` tidak ada.**
+Keduanya soal gaya, bukan korektnes. `uninstall.php` dan `readme.txt` — dua
+temuan yang dulu pasti muncul — kini sudah ada.
 
 Yang **tidak** akan ditandai: penggunaan PHP 8.3 modern (`match`, `??=`,
 first-class callable) — PCP tidak melarangnya, hanya WPCS style sniff yang
@@ -225,26 +218,31 @@ berkomentar.
 
 ## 6. Daftar Kerja Kalau Memutuskan Submit
 
-Berurutan, dari yang tidak bisa dilewati:
+Sudah selesai:
 
-1. [ ] **Ganti nama plugin** → `Bulk Product Editor for WooCommerce`
-       (header, `readme.txt`, judul halaman admin)
-2. [ ] **Buat `readme.txt`** dengan format WordPress.org, validasi dulu
-3. [ ] **Buat `uninstall.php`** — hapus `_wcbulk_columns` & `_wcbulk_views`
-4. [ ] **Tambah `LICENSE`** (GPL v2 lengkap)
-5. [ ] **Lengkapi header plugin** — `Requires at least`, `Requires Plugins`,
-       `License`, `Domain Path`, `Author`, `WC tested up to`
-6. [ ] **Buat folder `languages/` + `.pot`**
-7. [ ] **Pindahkan 9 string hardcoded** dari `admin.js` ke `i18n_strings()`
-8. [ ] **Terjemahkan 29 label kolom** lewat `column_labels()`
-9. [ ] **Siapkan screenshot** minimal 2
+1. [x] **Nama plugin** → `Bulk Product Editor for WooCommerce`
+2. [x] **`readme.txt`** format WordPress.org, 8 field + 6 bagian
+3. [x] **`uninstall.php`** — menghapus `_wcbulk_columns` & `_wcbulk_views`,
+       termasuk penanganan multisite
+4. [x] **`LICENSE`** — GPL v2 lengkap
+5. [x] **Header plugin** — 10 field wajib lengkap
+6. [x] **`languages/wc-bulk-editor.pot`** — 156 string
+7. [x] **Nol string hardcoded** di `admin.js`
+8. [x] **30 label kolom** diterjemahkan lewat `column_labels()` dan
+       `column_headers()`
+
+Tersisa:
+
+9. [ ] **Siapkan screenshot** minimal 2, ditaruh di folder `assets/` repo SVN
+       (bukan di dalam folder plugin)
 10. [ ] **Jalankan Plugin Check**, selesaikan temuan
 11. [ ] **Putuskan soal WPCS** — konversi penuh, atau siapkan alasan untuk
         reviewer
-12. [ ] Kecualikan `.git/`, `.gitignore`, dan `docs/` dari paket rilis
+12. [ ] Kecualikan `.git/`, `.gitignore`, `docs/`, dan `CLAUDE.md` dari paket
+        rilis
 
-Nomor 11 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 852 baris PHP
-dan 1741 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
+Nomor 11 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1224 baris PHP
+dan 2136 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
 penyimpangan gaya kalau kodenya jelas aman, tapi tidak ada jaminan.
 
 ---
