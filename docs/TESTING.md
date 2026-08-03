@@ -3,7 +3,7 @@
 Strategi pengujian untuk plugin ini: apa yang layak diuji, apa yang tidak, dan
 apa yang tidak bisa ditangkap alat apa pun.
 
-**Keadaan sekarang:** 24 suite E2E Playwright menutupi seluruh 15 fitur, dengan
+**Keadaan sekarang:** 25 suite E2E Playwright menutupi seluruh 15 fitur, dengan
 verifikasi ke database. Tidak ada test PHP — tidak ada `tests/`, `phpunit.xml`,
 maupun `composer.json` di dalam repo plugin.
 
@@ -420,7 +420,7 @@ Berurutan menurut nilai per usaha:
 
 **Tahap 2 — E2E Playwright, sudah berjalan**
 
-24 suite menutupi seluruh 15 fitur di browser sungguhan, dengan verifikasi ke
+25 suite menutupi seluruh 15 fitur di browser sungguhan, dengan verifikasi ke
 database: render, change tracking, save, 6 filter, paginasi, modal Columns,
 Quick Apply, Advanced Bulk Edit, bulk action, Quick Add, New Category, export
 CSV + proteksi formula, saved views, peran pengguna, produk variable, edit

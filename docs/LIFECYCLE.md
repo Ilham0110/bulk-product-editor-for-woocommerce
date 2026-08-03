@@ -240,6 +240,40 @@ Untuk dua meta key, itu cukup. Kalau nanti ada ribuan baris yang harus dibuang,
 uninstall perlu dipecah bertahap — proses uninstall punya batas waktu eksekusi
 seperti request biasa.
 
+### Diuji, bukan diasumsikan
+
+Uninstall berjalan sekali, tanpa undo, dan tidak ada yang melihatnya. Suite
+`t25-uninstall` menjalankannya dengan data tetangga ditanam lebih dulu:
+
+| Yang diperiksa | Hasil |
+|---|---|
+| `_wcbulk_columns` & `_wcbulk_views` terhapus | ✅ |
+| `nickname` pengguna tidak tersentuh | ✅ |
+| `_woocommerce_persistent_cart_1` tidak tersentuh | ✅ |
+| Option milik plugin lain tidak tersentuh | ✅ |
+| 15 produk & 11 kategori tetap utuh | ✅ |
+| Permintaan langsung ke `uninstall.php` tidak menghapus apa pun | ✅ |
+| Dijalankan dua kali tetap aman | ✅ |
+
+Yang terakhir bukan sekadar formalitas: WordPress bisa mengulang uninstall
+kalau yang pertama gagal di tengah jalan.
+
+### `wp plugin delete` tidak menjalankan uninstall
+
+Perbedaan yang mudah menyesatkan saat menguji:
+
+| Perintah | Menjalankan `uninstall.php`? |
+|---|---|
+| `wp plugin uninstall <slug> --deactivate` | ya |
+| `wp plugin delete <slug>` | **tidak** — hanya menghapus berkas |
+| Tombol Delete di layar Plugins | ya |
+| `delete_plugins()` di kode | ya |
+
+Selama pengujian ini sempat terlihat seperti bug — preferensi tertinggal
+setelah `wp plugin delete`. Yang membuktikan sebaliknya adalah membandingkan
+dengan `delete_plugins()` milik core pada instalasi yang sama: lewat jalur itu
+meta terhapus dengan benar. Jadi ini perilaku WP-CLI, bukan kekurangan plugin.
+
 ---
 
 ## 4. Rutin Upgrade

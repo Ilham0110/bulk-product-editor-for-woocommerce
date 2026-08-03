@@ -297,8 +297,53 @@
             // computed, and reading it forces nothing. The expensive probe only
             // runs when that height differs from the last one we recorded —
             // that is, on a real drag, one element at a time.
+            //
+            // The probe itself runs on the next frame rather than inside the
+            // callback. Writing to style.height while the observer is still
+            // delivering makes the browser schedule another observation pass,
+            // and both Chromium and WebKit report that as "ResizeObserver loop
+            // completed with undelivered notifications". Harmless, but it is
+            // noise in the console of a page users keep open all day. Nothing
+            // here needs to happen synchronously, so it doesn't.
             if (window.ResizeObserver) {
+                // Probing writes to the element, which would re-enter the
+                // observer. This flag makes the callback ignore the resize it
+                // caused itself, the same way the typing path already does.
+                var probing = false;
+
+                var probeDrag = function (el) {
+                    // The box model matters here. contentRect (read in the
+                    // callback) excludes padding and border; scrollHeight
+                    // includes padding. Comparing those two directly makes a
+                    // dragged box look shorter than its own content, and the
+                    // drag is never recorded — so this uses offsetHeight, which
+                    // is measured the same way scrollHeight is.
+                    var current = el.offsetHeight,
+                        saved = el.style.height;
+
+                    // scrollHeight follows the box once it has been dragged, so
+                    // the content height is measured with the box momentarily
+                    // collapsed.
+                    probing = true;
+                    el.style.height = 'auto';
+                    var content = el.scrollHeight;
+                    el.style.height = saved;
+                    probing = false;
+
+                    el.dataset.wcbHeight = String(Math.round(el.clientHeight));
+
+                    if (current > content + 2) {
+                        $(el).data('userHeight', current);
+                    }
+                };
+
                 var textareaObserver = new ResizeObserver(function (entries) {
+                    if (probing) {
+                        return;
+                    }
+
+                    var dragged = [];
+
                     entries.forEach(function (entry) {
                         var el = entry.target,
                             height = Math.round(
@@ -325,28 +370,14 @@
                         }
 
                         el.dataset.wcbHeight = String(height);
-
-                        // From here the layout-forcing probe is worth it, and
-                        // the box model matters. contentRect above excludes
-                        // padding and border; scrollHeight below includes
-                        // padding. Comparing the two directly makes a dragged
-                        // box look shorter than its own content and the drag is
-                        // never recorded — so the comparison uses offsetHeight,
-                        // which is measured the same way scrollHeight is.
-                        var current = el.offsetHeight,
-                            saved = el.style.height;
-
-                        // scrollHeight follows the box once it has been dragged,
-                        // so the content height is measured with the box
-                        // momentarily collapsed.
-                        el.style.height = 'auto';
-                        var content = el.scrollHeight;
-                        el.style.height = saved;
-
-                        if (current > content + 2) {
-                            $(el).data('userHeight', current);
-                        }
+                        dragged.push(el);
                     });
+
+                    if (dragged.length) {
+                        requestAnimationFrame(function () {
+                            dragged.forEach(probeDrag);
+                        });
+                    }
                 });
 
                 s.observeTextareas = function () {

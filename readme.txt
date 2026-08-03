@@ -90,6 +90,8 @@ Yes. Uninstalling clears the stored preferences on every site in the network.
 = 3.12.1 =
 * Fixed: a backslash in a product name, description or short description was silently dropped when saving, so "C:\Users\Public" became "C:UsersPublic". These three fields live in the posts table, which strips one level of escaping as it writes.
 * Fixed: a page of 100 products froze the interface for about twelve seconds after the rows appeared. Two faults in the textarea auto-sizing: every field forced a full page re-layout as it was set up, and fields from previous pages were never released.
+* Fixed: an intermittent "ResizeObserver loop" warning in the browser console, most visible in Safari. Resizing a description box now happens on the next frame instead of during the measurement itself.
+* Tested in Chrome, Firefox and Safari.
 
 = 3.12.0 =
 * New: product names can now be edited directly in the table. The Product Name column still shows a link to the full product screen and the product ID, so rows stay recognisable while being renamed.

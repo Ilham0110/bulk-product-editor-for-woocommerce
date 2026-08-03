@@ -1,0 +1,70 @@
+# =============================================================================
+# Berkas yang TIDAK ikut ke dalam paket rilis
+#
+# Format ini dikenali `wp dist-archive` (WP-CLI). build.sh juga membacanya,
+# sehingga hanya ada satu daftar yang perlu dijaga.
+#
+# Aturannya: kalau sebuah berkas tidak dibutuhkan agar plugin BERJALAN, ia
+# tidak ikut. Dokumentasi, konfigurasi repo, dan alat bantu pengembangan
+# hanya menambah ukuran unduhan dan memperbesar permukaan serangan — dua di
+# antaranya bahkan ditandai Plugin Check (`hidden_files` untuk .gitignore,
+# `unexpected_markdown_file` untuk CLAUDE.md).
+# =============================================================================
+
+# Metadata repo
+.git
+.gitignore
+.gitattributes
+.distignore
+.github
+
+# Dokumentasi pengembang.
+#
+# readme.txt TETAP ikut — itu yang dibaca WordPress.org dan layar "Detail"
+# di dashboard. README.md, CLAUDE.md, dan docs/ hanya untuk yang membaca
+# source code, dan sudah tersedia di repo GitHub.
+README.md
+CLAUDE.md
+docs
+languages/README.md
+
+# Alat bantu & artefak build
+build
+dist
+release
+node_modules
+vendor
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml
+phpcs.xml.dist
+phpunit.xml
+phpunit.xml.dist
+tests
+*.zip
+
+# Berkas salinan manual — pola yang dulu membocorkan source code lewat URL
+# karena web server menyajikan .bak sebagai teks biasa.
+*.bak
+*.bak-*
+*.backup
+*.old
+*.orig
+*.save
+*~
+
+# Editor, OS, dan log
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+debug.log
+
+# Skrip build ini sendiri
+build.php

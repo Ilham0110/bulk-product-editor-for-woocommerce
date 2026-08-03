@@ -104,16 +104,35 @@ bulk-product-editor-for-woocommerce/
 ├── bulk-product-editor-for-woocommerce.php    1323 baris  — seluruh logika PHP dalam satu class
 ├── uninstall.php           51 baris  — bersihkan preferensi saat plugin dihapus
 ├── views/admin-page.php   340 baris  — markup halaman admin
-├── assets/admin.js       2182 baris  — seluruh UI (jQuery)
+├── assets/admin.js       2213 baris  — seluruh UI (jQuery)
 ├── assets/admin.css       450 baris  — styling
 ├── languages/                        — bulk-product-editor-for-woocommerce.pot, 156 string
-├── docs/                             — arsitektur, keamanan, i18n, ADR
 ├── readme.txt                        — format WordPress.org
-└── LICENSE                           — GPL v2
+├── LICENSE                           — GPL v2
+│
+├── docs/                             — arsitektur, keamanan, i18n, ADR
+├── build.php                         — membuat ZIP rilis (CLI saja)
+└── .distignore                       — apa yang tidak ikut ke paket rilis
 ```
+
+Delapan berkas pertama adalah plugin. Sisanya untuk pengembangan dan tidak
+ikut ke paket rilis.
 
 Detail arsitektur, alur data, dan aturan kontribusi ada di
 [`CLAUDE.md`](CLAUDE.md).
+
+## Membuat Paket Rilis
+
+```bash
+php -d extension=zip build.php
+```
+
+Menghasilkan `../bulk-product-editor-for-woocommerce-build/<slug>.<versi>.zip` berisi 8
+berkas (253 KB) — hanya yang dibutuhkan agar plugin berjalan. Skrip menolak
+melanjutkan bila versi di header plugin tidak sama dengan `Stable tag` di
+`readme.txt`, bila ada berkas wajib yang hilang, atau bila ada berkas
+pengembangan yang ikut terbawa. Rinciannya di
+[`docs/WORDPRESS-ORG.md`](docs/WORDPRESS-ORG.md#6b-membuat-paket-rilis).
 
 ## Keamanan
 

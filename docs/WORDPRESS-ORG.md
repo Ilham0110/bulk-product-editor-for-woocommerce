@@ -270,18 +270,149 @@ Sudah selesai:
 10. [x] **`readme.txt` bahasa Inggris** — syarat WordPress.org sejak Juli 2025
 11. [x] **Jalankan Plugin Check** — nol temuan di kode
 
+12. [x] **Paket rilis** — `build.php` + `.distignore`, lihat bagian 6b
+
 Tersisa:
 
-12. [ ] **Siapkan screenshot** minimal 2, ditaruh di folder `assets/` repo SVN
+13. [ ] **Siapkan screenshot** minimal 2, ditaruh di folder `assets/` repo SVN
         (bukan di dalam folder plugin)
-13. [ ] **Putuskan soal WPCS** — konversi penuh, atau siapkan alasan untuk
+14. [ ] **Putuskan soal WPCS** — konversi penuh, atau siapkan alasan untuk
         reviewer
-14. [ ] Kecualikan `.git/`, `.gitignore`, `docs/`, dan `CLAUDE.md` dari paket
-        rilis
 
-Nomor 13 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1323 baris PHP
-dan 2182 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
+Nomor 14 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1323 baris PHP
+dan 2213 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
 penyimpangan gaya kalau kodenya jelas aman, tapi tidak ada jaminan.
+
+---
+
+## 6b. Membuat Paket Rilis
+
+```bash
+php -d extension=zip build.php
+```
+
+Hasilnya ditaruh di `../bulk-product-editor-for-woocommerce-build/`, **di luar
+folder plugin**. Bukan soal kerapian: Plugin Check memindai filesystem, bukan
+indeks git, dan sebuah `.zip` di dalam folder plugin adalah ERROR baginya
+(`compressed_files`) meski `.gitignore` sudah mengabaikannya.
+
+Daftar pengecualian ada di `.distignore` — satu berkas, dibaca oleh skrip
+build, supaya tidak ada dua daftar yang bisa berbeda diam-diam.
+
+**Isi paket: 8 berkas, 253 KB.** Repo punya 34 berkas; sisanya dokumentasi dan
+konfigurasi yang tidak dibutuhkan agar plugin berjalan.
+
+| Ikut | Tidak ikut |
+|---|---|
+| berkas utama, `uninstall.php` | `docs/` (16 berkas) |
+| `readme.txt`, `LICENSE` | `README.md`, `CLAUDE.md` |
+| `assets/admin.js`, `assets/admin.css` | `.git/`, `.gitignore`, `.distignore` |
+| `views/admin-page.php` | `build.php` |
+| `languages/*.pot` | `languages/README.md` |
+
+`readme.txt` **ikut** — itu yang dibaca WordPress.org dan layar Detail di
+dashboard. `README.md` tidak. Dua berkas berbeda dengan pembaca berbeda.
+
+### Tiga hal yang diperiksa skrip, dan alasannya
+
+**1. Versi header harus sama dengan Stable tag.** Kalau berbeda,
+WordPress.org menyajikan versi yang salah kepada pengguna. Build gagal, bukan
+sekadar memperingatkan.
+
+**2. Isi paket diperiksa dua arah.** Ada daftar yang wajib ada dan daftar yang
+wajib tidak ada. Paket tanpa `admin.js` sama rusaknya dengan paket yang
+membawa `docs/`, jadi keduanya menghentikan build.
+
+**3. Pemisah path di dalam ZIP harus `/`.** Ini yang paling mudah terlewat.
+Spesifikasi ZIP mewajibkan garis miring, tapi `Compress-Archive` bawaan
+PowerShell menulis backslash. Arsipnya terbuka normal di Windows — dan di
+server Linux seluruh path terbaca sebagai satu nama berkas, sehingga plugin
+"terpasang" sebagai berkas tunggal bernama `plugin\assets\admin.js`. Versi
+pertama skrip ini memakai `Compress-Archive` dan menghasilkan arsip persis
+seperti itu; sekarang skrip membaca ulang arsip yang baru dibuat dan menolak
+entri apa pun yang mengandung `\`.
+
+Karena itu `ZipArchive` dijadikan syarat, bukan salah satu dari beberapa
+pilihan. Ekstensi zip sering nonaktif pada PHP bawaan Laragon/XAMPP, jadi
+skrip memuatnya sendiri saat berjalan; kalau tetap gagal, ia berhenti dan
+menampilkan perintah persis yang harus dijalankan.
+
+### Cara menguji paketnya
+
+Jangan hanya membuat ZIP-nya — pasang.
+
+```bash
+wp plugin install ../bulk-product-editor-for-woocommerce-build/bulk-product-editor-for-woocommerce.3.12.1.zip --activate
+```
+
+Paket 3.12.1 dipasang dengan cara ini dan **15 suite E2E dijalankan
+terhadapnya**, bukan terhadap folder pengembangan. Semuanya lulus.
+
+### Menjalankan Plugin Check dengan benar
+
+Folder pengembangan berisi berkas yang bukan bagian plugin, dan PCP tidak tahu
+itu. Kecualikan secara eksplisit:
+
+```bash
+wp plugin check <slug> --exclude-files=build.php --exclude-directories=docs
+```
+
+Yang menentukan tetap hasil terhadap **paket rilis**, bukan folder
+pengembangan. Untuk 3.12.1: `Success: Checks complete. No errors found` —
+tanpa satu pun peringatan, karena berkas yang memicunya memang tidak ikut.
+
+### `build.php` bisa diakses lewat URL — dan itu diperbaiki
+
+Ditemukan justru oleh Plugin Check saat memeriksa folder pengembangan:
+
+```
+ERROR  missing_direct_file_access_protection  build.php
+```
+
+Diverifikasi dengan curl, dan benar:
+
+```
+$ curl -o /dev/null -w "%{http_code}" \
+    http://larisdigital.test/wp-content/plugins/<slug>/build.php
+200
+```
+
+Berkas ini ada di dalam webroot, jadi web server menyajikannya seperti PHP
+biasa. Siapa pun bisa memicu build lewat URL — menghapus lalu menulis ulang
+sebuah folder, berulang kali, tanpa login. Jenis masalah yang sama dengan 47
+berkas `.bak` yang dulu ditemukan di folder ini.
+
+Penjaganya sekarang:
+
+```php
+if (PHP_SAPI !== 'cli' || defined('ABSPATH')) {
+    http_response_code(403);
+    exit('Berkas ini hanya bisa dijalankan dari baris perintah.');
+}
+```
+
+`PHP_SAPI` adalah penjaga sesungguhnya. `defined('ABSPATH')` selalu false di
+sini — berkas ini tidak pernah dimuat WordPress — dan ditulis eksplisit hanya
+supaya PCP mengenali pola yang dicarinya. Diuji dua arah: HTTP mengembalikan
+403, CLI tetap berjalan normal.
+
+Pelajarannya: **setiap `.php` di dalam folder plugin bisa dipanggil lewat
+URL**, termasuk yang "hanya untuk pengembangan".
+
+### Catatan soal `wp plugin delete`
+
+Saat menguji uninstall, perhatikan perbedaan ini:
+
+| Perintah | Menjalankan `uninstall.php`? |
+|---|---|
+| `wp plugin uninstall <slug> --deactivate` | ya |
+| `wp plugin delete <slug>` | **tidak** |
+| Tombol Delete di layar Plugins | ya |
+
+`wp plugin delete` hanya menghapus berkasnya. Ini perilaku WP-CLI, bukan
+kekurangan plugin — sempat terlihat seperti bug saat pengujian, sampai
+dibandingkan dengan `delete_plugins()` milik core, yang menjalankan uninstall
+dengan benar.
 
 ---
 

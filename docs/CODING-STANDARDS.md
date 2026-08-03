@@ -244,7 +244,7 @@ var total = 0;
 ```
 
 Ini bukan soal browser lama — semua browser modern mendukung ES6. Ini soal
-konsistensi: 2182 baris memakai satu gaya, dan campuran dua gaya membuat file
+konsistensi: 2213 baris memakai satu gaya, dan campuran dua gaya membuat file
 lebih sulit dibaca daripada gaya lama yang konsisten.
 
 ### Idiom `var s = this`

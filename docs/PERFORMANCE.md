@@ -101,6 +101,31 @@ sama seperti `scrollHeight`. Suite `t21-textarea-drag` menjaga perilaku ini.
 adalah bug. Kalau sebuah jalur kode dipangkas, jalur itu butuh tesnya sendiri
 sebelum dipangkas — bukan sesudahnya.
 
+**Satu lagi, ditemukan di WebKit.** Uji lintas-browser sesekali memunculkan:
+
+```
+ResizeObserver loop completed with undelivered notifications.
+```
+
+Intermiten — 1 dari 3 kali jalan — dan tidak ada assertion yang gagal
+karenanya. Tapi penyebabnya jelas: probe drag menulis `style.height` **di
+dalam** callback observer, sehingga browser menjadwalkan putaran observasi
+lagi. Ini pre-existing, bukan akibat perbaikan di atas; keduanya kebetulan
+menyentuh kode yang sama.
+
+Perbaikannya: probe dipindah ke `requestAnimationFrame`, dan sebuah flag
+`probing` membuat callback mengabaikan resize yang ia sebabkan sendiri —
+persis seperti yang sudah dilakukan jalur mengetik. Tidak ada yang perlu
+sinkron di sini, jadi tidak dibuat sinkron.
+
+Setelah itu: empat kali jalan berturut-turut, nol peringatan. Biaya callback
+tetap 2 ms dan waktu paint tetap +180 ms, jadi perbaikan performa di atas
+tidak ikut mundur.
+
+Peringatan ini memang tidak berbahaya. Tapi halaman ini dibuka seharian oleh
+penggunanya, dan konsol yang berisik membuat masalah sungguhan lebih sulit
+terlihat.
+
 ---
 
 ## 2. Biaya Sebenarnya: Bootstrap, Bukan Query
