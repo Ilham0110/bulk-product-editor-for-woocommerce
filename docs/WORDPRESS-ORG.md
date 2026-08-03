@@ -279,7 +279,7 @@ Tersisa:
 14. [ ] **Putuskan soal WPCS** — konversi penuh, atau siapkan alasan untuk
         reviewer
 
-Nomor 14 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1323 baris PHP
+Nomor 14 adalah yang terbesar. Konversi ke WPCS berarti menyentuh 1349 baris PHP
 dan 2213 baris JS tanpa memperbaiki satu pun bug. Reviewer kadang menerima
 penyimpangan gaya kalau kodenya jelas aman, tapi tidak ada jaminan.
 

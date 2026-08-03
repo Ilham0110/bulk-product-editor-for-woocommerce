@@ -449,12 +449,38 @@ final class WC_Bulk_Product_Editor
         return array_keys(array_filter(self::COLUMNS, static fn(array $c): bool => $c['default']));
     }
 
-    /** @return list<array<string, mixed>> */
+    /**
+     * Saved views for one user, with anything malformed dropped.
+     *
+     * Checking is_array() on the container is not enough — the entries have to
+     * be arrays too. A single stray scalar in this meta value used to take the
+     * whole Views feature down with a fatal:
+     *
+     *     Uncaught Error: {closure}(): Argument #1 ($v) must be of type
+     *     array, string given
+     *
+     * delete_view() types its filter callback as `array $v`, so PHP throws
+     * before the callback can defend itself, and every request to that
+     * endpoint returns HTTP 500. The user cannot delete the bad entry through
+     * the UI either, because deleting is exactly what breaks.
+     *
+     * Nothing in this plugin writes a scalar here. But user meta outlives the
+     * code that wrote it: a half-finished migration, an importer, or another
+     * plugin touching the same key can all leave one behind. Filtering on read
+     * means one bad row costs the user that row, not the feature — and the
+     * next save quietly writes the cleaned list back.
+     *
+     * @return list<array<string, mixed>>
+     */
     private function get_saved_views(int $uid): array
     {
         $views = get_user_meta($uid, self::META_VIEWS, true);
 
-        return is_array($views) ? $views : [];
+        if (!is_array($views)) {
+            return [];
+        }
+
+        return array_values(array_filter($views, 'is_array'));
     }
 
     /** All product_cat terms, used to build the inline Categories multi-select. */

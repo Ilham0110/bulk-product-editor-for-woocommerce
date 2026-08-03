@@ -441,10 +441,24 @@ pembacaan kode:
 | Discard mengubah tinggi baris | efek samping event `input` |
 | UI membeku 12 detik pada 100 baris | butuh 200 produk untuk muncul; profil CPU yang menunjuknya |
 | Backslash hilang dari nama/deskripsi | `wp_insert_post()` meng-unslash; REST API WC pun begitu |
+| `build.php` bisa dipanggil lewat URL | "cuma skrip pengembangan" — tapi tetap `.php` di webroot |
+| Satu entri rusak mematikan fitur Views | `array $v` di callback → TypeError sebelum kode bisa membela diri |
 
-Dua yang terakhir layak dicatat khusus: keduanya baru muncul setelah **data
-ujinya diperluas**, bukan setelah kodenya dibaca ulang. Yang satu butuh 200
-produk, yang lain butuh satu karakter yang sebelumnya tidak pernah dicoba.
+Empat yang terakhir layak dicatat khusus, karena tak satu pun ditemukan
+dengan membaca kode:
+
+- Dua muncul setelah **data ujinya diperluas** — yang satu butuh 200 produk,
+  yang lain butuh satu karakter yang belum pernah dicoba.
+- Satu ditemukan **Plugin Check**, lalu dikonfirmasi dengan `curl`.
+- Satu muncul dari **sisa data uji sendiri**: sebuah entri kosong tertinggal
+  di `_wcbulk_views`, dan menyelidiki dari mana asalnya justru membuka bahwa
+  `wc_bulk_delete_view()` mengembalikan HTTP 500 untuk meta yang rusak — dan
+  menghapus adalah satu-satunya cara membuang entri itu lewat UI.
+
+Untuk yang terakhir, tesnya diverifikasi dengan cara yang benar: perbaikannya
+dinonaktifkan sementara, tes dijalankan, dan ia **gagal dengan HTTP 500**
+seperti seharusnya. Tes yang belum pernah dilihat gagal belum tentu menguji
+apa pun.
 
 **Suite ini tidak disimpan di dalam repo plugin.** Ia berjalan dari luar
 terhadap instalasi lokal, memakai kredensial dari variabel lingkungan.

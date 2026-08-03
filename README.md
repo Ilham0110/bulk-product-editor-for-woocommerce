@@ -101,7 +101,7 @@ atas tabel — pilih operasi, isi nilai, terapkan ke produk terpilih.
 
 ```
 bulk-product-editor-for-woocommerce/
-├── bulk-product-editor-for-woocommerce.php    1323 baris  — seluruh logika PHP dalam satu class
+├── bulk-product-editor-for-woocommerce.php    1349 baris  — seluruh logika PHP dalam satu class
 ├── uninstall.php           51 baris  — bersihkan preferensi saat plugin dihapus
 ├── views/admin-page.php   340 baris  — markup halaman admin
 ├── assets/admin.js       2213 baris  — seluruh UI (jQuery)
