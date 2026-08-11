@@ -111,7 +111,6 @@ bulk-product-editor-for-woocommerce/
 ├── readme.txt                        — WordPress.org format
 ├── LICENSE                           — GPL v2
 │
-├── docs/                             — architecture, security, i18n, ADRs
 ├── build.php                         — creates the release ZIP (CLI only)
 └── .distignore                       — what is excluded from the release package
 ```
