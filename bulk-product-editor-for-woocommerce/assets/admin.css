@@ -1,0 +1,450 @@
+/*!
+ * WooCommerce Bulk Product Editor — admin styles
+ *
+ * Version: 3.12.0
+ *
+ * Consolidated from admin.css / admin-v2 / v3 / v4 / v5, which were five
+ * copies of only two distinct stylesheets. Rules are unchanged — only the
+ * grouping and section headers are new.
+ *
+ * Sections:
+ *   1. Design tokens
+ *   2. Base & WordPress overrides
+ *   3. Layout
+ *   4. Table
+ *   5. Inline editing
+ *   6. Feedback & states
+ *   7. Modals
+ *   8. Responsive & polish
+ */
+
+/* ==========================================================================
+   DESIGN TOKENS
+   ========================================================================== */
+
+/* Custom properties */
+:root{--wcb-primary:#7F54B3;--wcb-primary-hover:#6B3FA0;--wcb-primary-light:#F7F1FB;--wcb-success:#007017;--wcb-success-bg:#EDFAEF;--wcb-danger:#B32D2E;--wcb-danger-bg:#FBEAEA;--wcb-warning:#996800;--wcb-warning-bg:#FEF8EE;--wcb-changed-bg:#FFF9E6;--wcb-changed-border:#F0C33C;--wcb-modified-bg:#FFFBF0;--wcb-modified-border:#E5C452;--wcb-gray-50:#F9F9F9;--wcb-gray-100:#F0F0F1;--wcb-gray-200:#DCDCDE;--wcb-gray-300:#C3C4C7;--wcb-gray-500:#8C8F94;--wcb-gray-700:#50575E;--wcb-gray-900:#1D2327;--wcb-radius:6px;--wcb-shadow:0 1px 3px rgba(0,0,0,.06);--wcb-trans:150ms ease;
+/* Dropdown chevron. Drawn by this stylesheet rather than the browser because
+   several selects need a background-colour of their own, and the `background`
+   shorthand silently drops the native arrow along with it. Any rule that sets
+   a select's colour must use background-color, never the shorthand. */
+--wcb-select-arrow:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2350575E'%3E%3Cpath d='M5 6l5 5 5-5 2 1-7 7-7-7 2-1z'/%3E%3C/svg%3E");}
+
+/* Every select the plugin renders, in one place. Individual rules below adjust
+   size and colour only.
+   Both roots are listed because the modals sit outside .wc-bulk-editor-wrap —
+   they are appended at the end of the template, not inside the page wrapper. */
+.wc-bulk-editor-wrap select,.wc-bulk-modal select{background-image:var(--wcb-select-arrow);background-repeat:no-repeat;background-position:right 6px center;background-size:14px 14px;-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:24px;}
+.wc-bulk-editor-wrap select::-ms-expand,.wc-bulk-modal select::-ms-expand{display:none;}
+
+/* ==========================================================================
+   BASE & WORDPRESS OVERRIDES
+   ========================================================================== */
+
+/* Global icon fix */
+.wc-bulk-editor-wrap .button .dashicons,.wc-bulk-editor-wrap .button-primary .dashicons,.wc-bulk-editor-wrap .button-secondary .dashicons,.wc-bulk-editor-wrap .button-small .dashicons{vertical-align:text-bottom!important;line-height:1!important;width:auto!important;height:auto!important;font-size:16px!important;flex-shrink:0;display:inline-block;}
+.wc-bulk-editor-wrap .button,.wc-bulk-editor-wrap .button-primary,.wc-bulk-editor-wrap .button-secondary,.wc-bulk-editor-wrap .button-small{display:inline-flex!important;align-items:center!important;gap:5px!important;line-height:normal!important;}
+.wc-bulk-editor-wrap .button-primary .dashicons{color:#fff!important;}
+.wc-bulk-editor-wrap .button:not(.button-primary) .dashicons,.wc-bulk-editor-wrap .button-secondary .dashicons{color:inherit!important;}
+.wc-bulk-editor-wrap{margin:20px 20px 0 0;font-size:14px;color:var(--wcb-gray-900);}
+
+/* ==========================================================================
+   LAYOUT
+   ========================================================================== */
+
+/* Header */
+.wc-bulk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:20px 24px;background:#fff;border-radius:var(--wcb-radius);box-shadow:var(--wcb-shadow);border:1px solid var(--wcb-gray-200);flex-wrap:wrap;gap:12px;}
+/* The title block is shorter than the button row; centring both halves on
+   the same axis keeps the heading level with the toolbar. */
+.wc-bulk-header-left{display:flex;align-items:center;}
+.wrap .wc-bulk-header h1.wp-heading-inline{font-size:22px;font-weight:500;margin:0;padding:0;display:flex;align-items:baseline;gap:8px;line-height:1;}
+/* The title, icon and version badge are flex siblings. Each is given the
+   same line-height so their boxes centre on one another; leaving the text
+   as a bare node let its box track line-height and sit a few pixels off. */
+.wc-bulk-title{line-height:1;display:inline-flex;align-items:center;}
+.wc-bulk-header .wp-heading-inline .dashicons{font-size:24px;width:24px;height:1em;line-height:1;color:var(--wcb-primary);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;align-self:baseline;position:relative;top:3px;}
+.wc-bulk-version{padding:4px 10px;background:var(--wcb-gray-100);border-radius:12px;font-size:12px;line-height:1;color:var(--wcb-gray-700);font-weight:500;display:inline-flex;align-items:center;flex-shrink:0;position:relative;top:1px;}
+.wc-bulk-header-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+/* Cards */
+.wc-bulk-card{background:#fff;border-radius:var(--wcb-radius);box-shadow:var(--wcb-shadow);border:1px solid var(--wcb-gray-200);margin-bottom:16px;overflow:hidden;}
+.wc-bulk-card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--wcb-gray-200);background:var(--wcb-gray-50);gap:10px;flex-wrap:wrap;}
+.wc-bulk-card-header h2{font-size:15px;font-weight:600;margin:0;}
+.wc-bulk-card-body{padding:20px;}
+.wc-bulk-card-footer{padding:12px 20px;border-top:1px solid var(--wcb-gray-200);background:var(--wcb-gray-50);}
+
+/* Filter Grid */
+.wc-bulk-filter-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
+.wc-bulk-filter-item{display:flex;flex-direction:column;gap:4px;}
+.wc-bulk-filter-item label{font-size:11px;font-weight:600;color:var(--wcb-gray-700);text-transform:uppercase;letter-spacing:.3px;}
+.wc-bulk-filter-item select,.wc-bulk-filter-item input[type="text"]{width:100%;height:36px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 8px;font-size:13px;color:var(--wcb-gray-900);background-color:#fff;transition:border-color var(--wcb-trans),box-shadow var(--wcb-trans);}
+/* Restore the room the shared select rule reserves for the chevron; the
+   shorthand padding above resets it. */
+.wc-bulk-filter-item select{padding-right:24px;}
+.wc-bulk-filter-item select:focus,.wc-bulk-filter-item input[type="text"]:focus{border-color:var(--wcb-primary);box-shadow:0 0 0 1.5px var(--wcb-primary-light);outline:none;}
+.wc-bulk-input-icon{position:relative;}
+.wc-bulk-input-icon .dashicons{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--wcb-gray-500);font-size:18px;width:18px;height:18px;}
+.wc-bulk-input-icon input{padding-left:34px!important;}
+.wc-bulk-btn-load{height:36px!important;padding:0 18px!important;font-weight:500!important;background:var(--wcb-primary)!important;border-color:var(--wcb-primary)!important;color:#fff!important;}
+.wc-bulk-btn-load:hover{background:var(--wcb-primary-hover)!important;border-color:var(--wcb-primary-hover)!important;}
+
+/* Views/Quick/Save bars (compact) */
+/* Compact modal for the New Category dialog */
+.wc-bulk-modal-content.wc-bulk-modal-small{max-width:420px;}
+.wc-bulk-cat-hint{margin:4px 0 0;font-size:11px;color:var(--wcb-gray-500);}
+
+/* Views toggle button — pressed state */
+.wc-bulk-editor-wrap #wc-bulk-btn-views.active{background:var(--wcb-primary-light);border-color:var(--wcb-primary);color:var(--wcb-primary);box-shadow:none;}
+.wc-bulk-editor-wrap #wc-bulk-btn-views.active .dashicons{color:var(--wcb-primary);}
+
+.wc-bulk-views-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--wcb-primary-light);border-radius:var(--wcb-radius);margin-bottom:12px;flex-wrap:wrap;}
+.wc-bulk-views-label{font-size:12px;font-weight:600;color:var(--wcb-primary);white-space:nowrap;}
+.wc-bulk-views-list{display:flex;gap:6px;flex-wrap:wrap;}
+.wc-bulk-view-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#fff;border:1px solid var(--wcb-gray-200);border-radius:16px;font-size:12px;cursor:pointer;transition:all var(--wcb-trans);}
+.wc-bulk-view-chip:hover{border-color:var(--wcb-primary);background:var(--wcb-primary-light);}
+.wc-bulk-view-chip .dashicons{font-size:14px;width:14px;height:14px;cursor:pointer;color:var(--wcb-gray-500);vertical-align:middle;}
+.wc-bulk-view-chip .dashicons:hover{color:var(--wcb-danger);}
+.wc-bulk-quick-card .wc-bulk-card-header{background:var(--wcb-primary-light);}
+.wc-bulk-quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;}
+.wc-bulk-quick-item{display:flex;flex-direction:column;gap:4px;}
+.wc-bulk-quick-item>label{font-size:11px;font-weight:600;color:var(--wcb-gray-700);text-transform:uppercase;}
+.wc-bulk-quick-input-group{display:flex;gap:4px;}
+.wc-bulk-quick-item select{height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 22px 0 6px;font-size:12px;min-width:60px;}
+.wc-bulk-quick-item input[type="number"]{width:80px;height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 6px;font-size:13px;}
+.wc-bulk-quick-item select:focus,.wc-bulk-quick-item input:focus{border-color:var(--wcb-primary);box-shadow:0 0 0 1.5px var(--wcb-primary-light);outline:none;}
+.wc-bulk-quick-item input:disabled{background:var(--wcb-gray-50);cursor:not-allowed;opacity:.6;}
+
+/* Save bar */
+.wc-bulk-save-bar{position:sticky;bottom:20px;z-index:100;margin-bottom:16px;border-radius:var(--wcb-radius);box-shadow:0 -2px 20px rgba(0,0,0,.12);border:1px solid var(--wcb-modified-border);overflow:hidden;animation:wcbSlideUp .3s ease;}
+@keyframes wcbSlideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.wc-bulk-save-bar-inner{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--wcb-modified-bg);flex-wrap:wrap;gap:10px;}
+.wc-bulk-save-bar-left{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;}
+.wc-bulk-save-bar-left .dashicons{color:var(--wcb-warning);font-size:18px;vertical-align:middle;}
+.wc-bulk-save-bar-right{display:flex;gap:8px;}
+.wc-bulk-save-bar-right .button-primary{background:#007017!important;border-color:#007017!important;color:#fff!important;font-weight:600;}
+.wc-bulk-save-progress{height:4px;background:var(--wcb-gray-200);}
+.wc-bulk-save-progress-fill{height:100%;width:0;background:#007017;transition:width .4s ease;}
+
+/* Bulk actions bar */
+.wc-bulk-actions-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--wcb-gray-50);border:1px solid var(--wcb-gray-200);border-radius:var(--wcb-radius);margin-bottom:12px;}
+.wc-bulk-actions-bar select{height:34px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 24px 0 8px;font-size:13px;}
+.wc-bulk-selected-count{font-size:13px;color:var(--wcb-gray-700);font-weight:500;margin-left:auto;}
+
+/* Table header bar */
+.wc-bulk-table-header-left{display:flex;align-items:center;gap:10px;}
+.wc-bulk-results-count{font-size:13px;color:var(--wcb-gray-700);}
+.wc-bulk-results-count:before{content:'(';}.wc-bulk-results-count:after{content:')';}
+.wc-bulk-table-header-right{display:flex;align-items:center;gap:8px;}
+.wc-bulk-per-page{height:30px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 22px 0 6px;font-size:13px;}
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+/* Scroll overrides */
+.wc-bulk-table-card{overflow:visible!important;}
+.wc-bulk-table-body-wrap{padding:0!important;overflow:visible!important;}
+
+/* Scroll container */
+.wc-bulk-table-scroll{overflow-x:auto!important;overflow-y:auto!important;max-height:58vh;width:100%;max-width:100%;display:block;border:1px solid var(--wcb-gray-200);border-radius:4px;-webkit-overflow-scrolling:touch;}
+
+/* Table */
+.wc-bulk-table{width:max-content!important;min-width:100%!important;table-layout:fixed!important;border-collapse:collapse;}
+.wc-bulk-table thead{position:sticky;top:0;z-index:20;}
+
+/* Column widths */
+.wc-bulk-table .check-column{width:42px!important;min-width:42px!important;}
+.wc-bulk-table .column-thumb{width:60px!important;min-width:60px!important;max-width:60px!important;}
+.wc-bulk-table .column-name{width:200px!important;min-width:200px!important;}
+.wc-bulk-table thead th:not(.check-column):not(.column-thumb):not(.column-name),
+.wc-bulk-table thead td:not(.check-column):not(.column-thumb):not(.column-name){width:120px!important;min-width:120px!important;}
+
+/* Per-column widths are measured at runtime by measureColumnWidths() in
+   admin.js and injected as #wc-bulk-col-widths: a select is sized to its
+   longest option, an input to its header. Hardcoding them here would fight
+   that, and could not account for category or tax-class names that differ
+   per store.
+
+   The generic rule below is only a floor for columns rendered before the
+   measurement runs. */
+
+/* Expandable text columns get wider */
+.wc-bulk-table thead th.column-tags,
+.wc-bulk-table thead th.column-description,
+.wc-bulk-table thead th.column-short_description,
+.wc-bulk-table thead th.column-purchase_note{width:200px!important;min-width:200px!important;}
+
+/* Header cells */
+.wc-bulk-table thead th,
+.wc-bulk-table thead td.manage-column{background:var(--wcb-gray-50);border-bottom:2px solid var(--wcb-gray-300);padding:10px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--wcb-gray-700);text-align:left;white-space:nowrap!important;vertical-align:middle!important;line-height:1.2;overflow:hidden;text-overflow:ellipsis;}
+
+/* Checkbox cells */
+.wc-bulk-table thead td.manage-column.check-column{padding:0!important;text-align:center!important;vertical-align:middle!important;}
+.wc-bulk-table thead .check-column input[type="checkbox"]{display:inline-block!important;margin:0!important;vertical-align:middle!important;width:1rem!important;height:1rem!important;position:static!important;}
+.wc-bulk-table tbody th.check-column{padding:0!important;text-align:center!important;vertical-align:middle!important;}
+.wc-bulk-table tbody .check-column input[type="checkbox"]{display:inline-block!important;margin:0!important;vertical-align:middle!important;width:1rem!important;height:1rem!important;position:static!important;}
+
+/* Column-thumb header — center */
+.wc-bulk-table thead .column-thumb{text-align:center!important;}
+.wc-bulk-table .column-thumb{text-align:center;}
+
+/* Data cells */
+.wc-bulk-table tbody td{padding:8px 8px;vertical-align:middle;border-bottom:1px solid var(--wcb-gray-100);font-size:13px;line-height:1.4;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;}
+
+/* Cells with expandable textarea — allow vertical growth */
+.wc-bulk-table tbody td:has(.wc-bulk-inline-textarea){vertical-align:middle!important;white-space:normal!important;overflow:visible!important;}
+
+/* Row states */
+.wc-bulk-table tbody tr{transition:background var(--wcb-trans);}
+.wc-bulk-table tbody tr:hover{background:var(--wcb-gray-50);}
+.wc-bulk-table tbody tr.row-modified{background:var(--wcb-modified-bg)!important;box-shadow:inset 4px 0 0 var(--wcb-modified-border);}
+.wc-bulk-table tbody tr.row-modified:hover{background:#fff8e0!important;}
+.wc-bulk-table tbody tr.row-selected{background:#e8f0fe!important;}
+
+/* Thumb */
+.wc-bulk-thumb{width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--wcb-gray-200);display:block;margin:0 auto;}
+
+/* Product name — the input, the id and the link to the full product screen sit
+   on one line. Stacking the meta underneath would make this cell taller than
+   every other one and the row would stop lining up. */
+.wc-bulk-name-cell{display:flex;align-items:center;gap:3px;min-width:0;height:40px;}
+.wc-bulk-name-cell .wcbx-name{flex:1 1 auto;min-width:0;font-weight:600;font-size:13px;}
+.wc-bulk-name-meta{display:flex;align-items:center;gap:3px;flex:0 0 auto;line-height:1;white-space:nowrap;}
+.wc-bulk-name-link{display:inline-flex;align-items:center;color:var(--wcb-gray-500);text-decoration:none;}
+.wc-bulk-name-link:hover{color:var(--wcb-primary);}
+.wc-bulk-name-link .dashicons{font-size:15px;width:15px;height:15px;}
+/* Variable, grouped and external products carry an icon instead of a word —
+   the tooltip names the type. */
+.wc-bulk-type-badge{display:inline-flex;align-items:center;color:var(--wcb-gray-500);cursor:help;}
+.wc-bulk-type-badge .dashicons{font-size:14px;width:14px;height:14px;}
+.wc-bulk-product-id{color:var(--wcb-gray-500);font-size:11px;font-weight:400;}
+.wc-bulk-ro{color:var(--wcb-gray-700);}
+.wc-bulk-ro.muted{color:var(--wcb-gray-500);}
+
+/* ==========================================================================
+   INLINE EDITING
+   ========================================================================== */
+
+/* Inline inputs */
+.wc-bulk-inline-input{display:inline-block;width:100%;height:34px;padding:0 7px;border:1px solid transparent;border-radius:4px;font-size:13px;font-variant-numeric:tabular-nums;background:transparent;color:var(--wcb-gray-900);transition:all var(--wcb-trans);margin:0;vertical-align:middle;box-sizing:border-box;line-height:normal;overflow:hidden;text-overflow:ellipsis;}
+.wc-bulk-inline-input[type="number"]{text-align:right;}
+.wc-bulk-inline-input[type="text"]{text-align:left;}
+.wc-bulk-inline-input:hover{border-color:var(--wcb-gray-300);background:#fff;}
+.wc-bulk-inline-input:focus{border-color:var(--wcb-primary);background:#fff;box-shadow:0 0 0 2px var(--wcb-primary-light);outline:none;z-index:5;position:relative;}
+.wc-bulk-inline-input.changed{border-color:var(--wcb-changed-border)!important;background:var(--wcb-changed-bg)!important;}
+.wc-bulk-inline-input.changed:focus{border-color:var(--wcb-primary)!important;background:#fff!important;box-shadow:0 0 0 2px var(--wcb-primary-light)!important;}
+/* ============================================================
+   EXPANDABLE TEXTAREA — grows on focus, resizable vertical
+   ============================================================ */
+.wc-bulk-inline-textarea{
+    display:block;
+    width:100%;
+    min-height:34px;
+    height:34px;
+    padding:6px 7px;
+    border:1px solid transparent;
+    border-radius:4px;
+    font-size:13px;
+    line-height:1.5;
+    background:transparent;
+    color:var(--wcb-gray-900);
+    transition:all var(--wcb-trans);
+    margin:0;
+    box-sizing:border-box;
+    resize:vertical;
+    overflow:hidden;
+    font-family:inherit;
+    cursor:text;
+}
+.wc-bulk-inline-textarea:hover{
+    border-color:var(--wcb-gray-300);
+    background:#fff;
+}
+.wc-bulk-inline-textarea:focus{
+    border-color:var(--wcb-primary);
+    background:#fff;
+    box-shadow:0 0 0 2px var(--wcb-primary-light);
+    outline:none;
+    z-index:5;
+    position:relative;
+    height:auto;
+    min-height:80px;
+    resize:vertical;
+    overflow:auto;
+}
+.wc-bulk-inline-textarea.changed{
+    border-color:var(--wcb-changed-border)!important;
+    background:var(--wcb-changed-bg)!important;
+}
+.wc-bulk-inline-textarea.changed:focus{
+    border-color:var(--wcb-primary)!important;
+    background:#fff!important;
+    box-shadow:0 0 0 2px var(--wcb-primary-light)!important;
+}
+
+/* Inline selects. The chevron comes from the shared select rule above; only
+   the transparent resting background is specific to these. */
+.wc-bulk-inline-select{display:inline-block;width:100%;height:34px;padding:0 22px 0 4px;border:1px solid transparent;border-radius:4px;font-size:12px;color:var(--wcb-gray-900);background-color:transparent;background-position:right 4px center;cursor:pointer;transition:border-color var(--wcb-trans),background-color var(--wcb-trans),box-shadow var(--wcb-trans);margin:0;vertical-align:middle;box-sizing:border-box;line-height:34px;overflow:hidden;text-overflow:ellipsis;}
+.wc-bulk-inline-select:hover{border-color:var(--wcb-gray-300);background-color:#fff;}
+.wc-bulk-inline-select:focus{border-color:var(--wcb-primary);background-color:#fff;box-shadow:0 0 0 2px var(--wcb-primary-light);outline:none;}
+.wc-bulk-inline-select.changed{border-color:var(--wcb-changed-border)!important;background-color:var(--wcb-changed-bg)!important;}
+/* Disabled stock inputs already read as inert; the arrow should match. */
+.wc-bulk-inline-select:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ==========================================================================
+   FEEDBACK & STATES
+   ========================================================================== */
+
+/* Empty/Loading */
+.wc-bulk-empty-state{text-align:center;padding:60px 20px!important;white-space:normal!important;}
+.wc-bulk-empty-icon{margin-bottom:12px;}
+.wc-bulk-empty-icon .dashicons{font-size:48px;width:48px;height:48px;color:var(--wcb-gray-300);}
+.wc-bulk-empty-state p{color:var(--wcb-gray-500);font-size:14px;margin:0;}
+.wc-bulk-loading{text-align:center!important;padding:60px 20px!important;white-space:normal!important;}
+.wc-bulk-loading .spinner{float:none;margin:0 8px 0 0;visibility:visible;}
+
+/* Notice */
+.wc-bulk-notice-wrapper{margin-bottom:16px;}
+.wc-bulk-notice{padding:10px 16px;border-radius:4px;font-size:13px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:8px;animation:wcbSlideDown .3s ease;}
+@keyframes wcbSlideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.wc-bulk-notice.success{background:var(--wcb-success-bg);border:1px solid #b8e6bf;color:var(--wcb-success);}
+.wc-bulk-notice.error{background:var(--wcb-danger-bg);border:1px solid #f4cccc;color:var(--wcb-danger);}
+.wc-bulk-notice .dashicons{flex-shrink:0;font-size:18px;vertical-align:middle;}
+
+/* Pagination */
+.wc-bulk-pagination{display:flex;justify-content:center;align-items:center;gap:4px;}
+.wc-bulk-pagination button{min-width:34px;height:34px;padding:0 10px;border:1px solid var(--wcb-gray-300);border-radius:4px;background:#fff;cursor:pointer;font-size:13px;color:var(--wcb-gray-700);transition:all var(--wcb-trans);}
+.wc-bulk-pagination button:hover:not(:disabled){border-color:var(--wcb-primary);color:var(--wcb-primary);background:var(--wcb-primary-light);}
+.wc-bulk-pagination button:disabled{opacity:.4;cursor:not-allowed;}
+.wc-bulk-pagination button.active{background:var(--wcb-primary);color:#fff;border-color:var(--wcb-primary);font-weight:600;}
+.wc-bulk-pagination-dots{padding:0 4px;color:var(--wcb-gray-500);}
+
+/* ==========================================================================
+   MODALS
+   ========================================================================== */
+
+/* Modals */
+.wc-bulk-modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;display:flex;align-items:center;justify-content:center;}
+.wc-bulk-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);}
+.wc-bulk-modal-content{position:relative;background:#fff;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:85vh;overflow-y:auto;width:90%;}
+.wc-bulk-modal-sm{max-width:480px;}.wc-bulk-modal-md{max-width:600px;}.wc-bulk-modal-lg{max-width:800px;}
+.wc-bulk-modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--wcb-gray-200);position:sticky;top:0;background:#fff;z-index:1;}
+.wc-bulk-modal-header h3{margin:0;font-size:18px;font-weight:600;}
+.wc-bulk-modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--wcb-gray-500);padding:0;line-height:1;}
+.wc-bulk-modal-close:hover{color:var(--wcb-danger);}
+.wc-bulk-modal-body{padding:20px 24px;}
+.wc-bulk-modal-footer{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-top:1px solid var(--wcb-gray-200);position:sticky;bottom:0;background:#fff;gap:12px;}
+.wc-bulk-modal-selected{font-size:13px;color:var(--wcb-gray-700);font-weight:500;}
+.wc-bulk-modal-tabs{display:flex;gap:2px;border-bottom:2px solid var(--wcb-gray-200);margin-bottom:20px;flex-wrap:wrap;}
+.wc-bulk-tab{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--wcb-gray-700);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all var(--wcb-trans);}
+.wc-bulk-tab:hover{color:var(--wcb-primary);}.wc-bulk-tab.active{color:var(--wcb-primary);border-bottom-color:var(--wcb-primary);}
+.wc-bulk-tab-content{display:none;}.wc-bulk-tab-content.active{display:block;}
+.wc-bulk-field-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.wc-bulk-field-row>label{width:160px;font-size:13px;font-weight:600;color:var(--wcb-gray-700);flex-shrink:0;}
+.wc-bulk-field-row select,.wc-bulk-field-row input[type="text"],.wc-bulk-field-row input[type="number"],.wc-bulk-field-row textarea{flex:1;min-width:200px;height:36px;border:1px solid var(--wcb-gray-300);border-radius:4px;padding:0 10px;font-size:13px;}
+.wc-bulk-field-row select{padding-right:26px;}
+/* The Categories picker is a multi-select: it scrolls its options rather than
+   opening a dropdown, so a chevron would be misleading. */
+.wc-bulk-field-row select[multiple]{background-image:none;padding-right:10px;height:auto;}
+.wc-bulk-field-row textarea{height:auto;padding:8px 10px;}
+
+/* Column manager */
+.wc-bulk-columns-list{display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto;}
+.wc-bulk-column-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--wcb-gray-50);border:1px solid var(--wcb-gray-200);border-radius:4px;cursor:move;transition:all var(--wcb-trans);}
+.wc-bulk-column-item:hover{border-color:var(--wcb-primary);}
+.wc-bulk-column-item .dashicons{flex-shrink:0;vertical-align:middle;}
+.wc-bulk-column-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--wcb-primary);margin:0;flex-shrink:0;}
+.wc-bulk-column-item .dashicons-edit{color:var(--wcb-primary);font-size:14px;margin-left:auto;}
+.wc-bulk-column-item .dashicons-menu{color:var(--wcb-gray-500);cursor:grab;}
+
+/* ==========================================================================
+   RESPONSIVE & POLISH
+   ========================================================================== */
+
+/* ==========================================================================
+   VERTICAL DENSITY — fit more rows on short screens (13"–14" laptops)
+   ========================================================================== */
+
+/* Collapsible card sections */
+.wc-bulk-collapse-toggle{display:inline-flex;align-items:center;gap:4px;background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;}
+.wc-bulk-collapse-toggle .dashicons{transition:transform var(--wcb-trans);font-size:18px;width:18px;height:18px;}
+.wc-bulk-card:not(.is-collapsed) .wc-bulk-collapse-toggle .dashicons{transform:rotate(90deg);}
+.wc-bulk-card.is-collapsed>.wc-bulk-card-body{display:none;}
+
+/* Tighter filter + quick-apply panels */
+.wc-bulk-filters-card .wc-bulk-card-body,.wc-bulk-quick-card .wc-bulk-card-body{padding:10px 12px;}
+.wc-bulk-filter-grid,.wc-bulk-quick-grid{gap:8px;}
+.wc-bulk-filter-item label,.wc-bulk-quick-item label{margin-bottom:2px;font-size:11px;}
+.wc-bulk-card-header{padding:8px 12px;}
+
+/* Denser table rows: the 40px thumbnail set the old 60px row height. */
+#wc-bulk-table tbody td,#wc-bulk-table tbody th{padding:30px 8px!important;}
+/* A clearer divider so adjacent products read as separate rows. */
+#wc-bulk-table tbody td,#wc-bulk-table tbody th{border-bottom:1px solid var(--wcb-gray-200)!important;}
+/* Zebra striping: the strongest cue that one row has ended and the next begun. */
+#wc-bulk-table tbody tr:nth-child(even):not(.row-modified):not(.row-selected){background:var(--wcb-gray-50);}
+/* wp-admin forms.css sizes every admin input/select; these have to win. */
+#wc-bulk-table .wc-bulk-inline-input,#wc-bulk-table .wc-bulk-inline-select,
+#wc-bulk-table input[type="text"],#wc-bulk-table input[type="number"],#wc-bulk-table select{
+  height:40px!important;min-height:40px!important;line-height:40px!important;padding-top:0!important;padding-bottom:0!important;font-size:13px!important;}
+#wc-bulk-table .wc-bulk-thumb{width:40px!important;height:40px!important;box-sizing:border-box!important;display:block;margin:0 auto;}
+/* Inline-block controls sit on the text baseline, which adds a few stray
+   pixels to every row; vertical-align:middle removes that. */
+#wc-bulk-table .wc-bulk-inline-input,#wc-bulk-table .wc-bulk-inline-select{vertical-align:middle;}
+/* 40px is the resting height, not a cap — the field still grows with its
+   content and can be dragged taller. */
+/* 40px is the resting height, not a cap. The cell cannot stretch under
+   table-layout:fixed, so the row height is driven by this field's own
+   box and the surrounding td is allowed to follow it. */
+#wc-bulk-table .wc-bulk-inline-textarea{min-height:40px;height:40px;line-height:1.4!important;padding:9px 7px!important;font-size:13px!important;resize:vertical!important;overflow:auto;max-height:none!important;}
+#wc-bulk-table tbody td:has(.wc-bulk-inline-textarea){height:auto!important;vertical-align:middle!important;white-space:normal!important;overflow:visible!important;}
+#wc-bulk-table tbody tr:has(.wc-bulk-inline-textarea){height:auto!important;}
+
+/* Short screens: trim fixed chrome so the product table gets the room.
+   Everything here is cosmetic — no control is removed. */
+@media (max-height: 900px){
+  .wc-bulk-editor-wrap{margin:10px 12px 0 0;}
+  /* Trim the header evenly — zeroing padding-bottom left the buttons
+     sitting flush against the bottom edge of the card. */
+  .wc-bulk-header{padding:12px 16px;margin-bottom:8px;}
+  .wrap .wc-bulk-header h1.wp-heading-inline{font-size:18px;margin:0;padding:0;gap:6px;line-height:1;}
+  .wc-bulk-header .wp-heading-inline .dashicons{font-size:20px;width:20px;height:20px;}
+  .wc-bulk-version{padding:3px 8px;font-size:11px;}
+  .wc-bulk-views-bar{padding:6px 12px;margin-bottom:8px;}
+  .wc-bulk-card{margin-bottom:8px;}
+  .wc-bulk-card-header{padding:6px 12px;min-height:0;}
+  .wc-bulk-card-header h2{font-size:13px;margin:0;padding:0;}
+  .wc-bulk-table-card .wc-bulk-card-header{padding:5px 12px;}
+  .wc-bulk-filters-card .wc-bulk-card-body{padding:8px 12px;}
+  .wc-bulk-filter-grid{gap:6px;}
+  .wc-bulk-filter-item{gap:2px;}
+  .wc-bulk-filter-item select,.wc-bulk-filter-item input[type="text"]{height:30px;}
+  .wc-bulk-actions-bar{padding:6px 12px;margin-bottom:8px;}
+}
+
+/* Responsive */
+@media(min-width:1100px){.wc-bulk-filter-grid{grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 1fr auto;}}
+@media(max-width:1099px) and (min-width:783px){.wc-bulk-filter-grid{grid-template-columns:2fr 1fr 1fr auto;}}
+@media(max-width:782px){.wc-bulk-filter-grid,.wc-bulk-quick-grid{grid-template-columns:1fr;}.wc-bulk-header{flex-direction:column;}.wc-bulk-header-right{width:100%;}.wc-bulk-save-bar-inner{flex-direction:column;}.wc-bulk-save-bar-right{width:100%;}.wc-bulk-save-bar-right button{flex:1;}.wc-bulk-modal-content{width:95%;max-height:90vh;}.wc-bulk-field-row{flex-direction:column;align-items:stretch;}.wc-bulk-field-row>label{width:auto;}}
+
+/* Scrollbar */
+.wc-bulk-table-scroll::-webkit-scrollbar{width:10px;height:10px;}
+.wc-bulk-table-scroll::-webkit-scrollbar-track{background:var(--wcb-gray-50);border-radius:4px;}
+.wc-bulk-table-scroll::-webkit-scrollbar-thumb{background:var(--wcb-gray-300);border-radius:4px;border:2px solid var(--wcb-gray-50);}
+.wc-bulk-table-scroll::-webkit-scrollbar-thumb:hover{background:var(--wcb-gray-500);}
+.wc-bulk-table-scroll::-webkit-scrollbar-corner{background:var(--wcb-gray-50);}
+
+/* Hide spinners */
+.wc-bulk-inline-input[type="number"]::-webkit-inner-spin-button,.wc-bulk-inline-input[type="number"]::-webkit-outer-spin-button{opacity:0;transition:opacity var(--wcb-trans);}
+.wc-bulk-inline-input[type="number"]:hover::-webkit-inner-spin-button,.wc-bulk-inline-input[type="number"]:focus::-webkit-inner-spin-button{opacity:1;}
+
+/* Spacer column: absorbs the width left over when few columns are shown, so
+   min-width:100% on the table cannot inflate the real ones. Purely visual —
+   carries no content and is hidden from assistive tech. */
+#wc-bulk-table .wc-bulk-col-filler{width:auto!important;min-width:0!important;max-width:none!important;padding:0!important;border-left:0!important;background:transparent;}
+
+/* Inside the table the chevron sits closer in and the left padding is tighter
+   than on a standalone select: 30 columns compete for width, and every pixel
+   of chrome is a pixel the value cannot use. */
+#wc-bulk-table .wc-bulk-inline-select{padding-left:6px!important;padding-right:20px!important;background-position:right 3px center!important;}
+#wc-bulk-table .wc-bulk-inline-input{padding-left:6px!important;padding-right:6px!important;}
