@@ -115,25 +115,6 @@ bulk-product-editor-for-woocommerce/
 └── .distignore                       — what is excluded from the release package
 ```
 
-The first eight files are the plugin. The rest are for development and are
-not included in the release package.
-
-Architecture, data flow, and contribution rules are documented in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/adr/`](docs/adr/).
-
-## Building a Release Package
-
-```bash
-php -d extension=zip build.php
-```
-
-This produces `../bulk-product-editor-for-woocommerce-build/<slug>.<version>.zip`
-containing the 8 files (253 KB) the plugin needs to run. The script refuses to
-continue if the plugin header version does not match the `Stable tag` in
-`readme.txt`, if any required file is missing, or if any development file
-slips in. Details in
-[`docs/WORDPRESS-ORG.md`](docs/WORDPRESS-ORG.md#6b-membuat-paket-rilis).
-
 ## Security
 
 Every AJAX endpoint verifies a nonce and the `manage_woocommerce` capability
