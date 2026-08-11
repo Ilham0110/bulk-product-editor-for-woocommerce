@@ -1,158 +1,148 @@
 # Bulk Product Editor for WooCommerce
 
-Edit ratusan produk WooCommerce langsung dari satu tabel ala spreadsheet —
-tanpa membuka halaman edit produk satu per satu.
+Edit hundreds of WooCommerce products from a single spreadsheet-like table —
+without opening each product's edit page one by one.
 
-**Versi 3.12.0**
+**Version 3.12.0**
 
 ---
 
-## Kenapa Plugin Ini Ada
+## Why This Plugin Exists
 
-Mengubah harga 200 produk lewat admin WooCommerce bawaan berarti 200 kali buka
-halaman, 200 kali klik Update, 200 kali tunggu reload. Plugin ini menampilkan
-semuanya dalam satu tabel yang bisa diketik langsung, lalu menyimpan seluruh
-perubahan dalam satu kali request.
+Changing the price of 200 products in the default WooCommerce admin means 200
+page loads, 200 Update clicks, and 200 waits for reload. This plugin puts
+everything in one directly-editable table, then saves all changes in a single
+request.
 
-## Fitur
+## Features
 
 **Inline editing**
-Klik sel mana pun, ketik, lanjut ke sel berikutnya. Sel yang berubah ditandai
-warna sampai disimpan. Tekan **Ctrl+S** (atau ⌘+S) untuk menyimpan semua
-perubahan sekaligus. Tombol *Discard* mengembalikan semuanya ke nilai server.
+Click any cell, type, move on. Changed cells stay highlighted until saved.
+Press **Ctrl+S** (or ⌘+S) to save every change at once. The *Discard* button
+restores everything back to the server values.
 
-**30 kolom yang bisa dipilih, 28 dapat disunting**
-Dari nama produk, harga, stok, dan SKU sampai dimensi, tax class, shipping
-class, visibility, purchase note, dan menu order. Pilih kolom yang kamu
-butuhkan lewat tombol **Columns** — bisa di-drag untuk mengatur urutan.
-Pilihan kolom disimpan per-user, jadi tiap admin punya layout sendiri.
+**30 selectable columns, 28 editable**
+From product name, price, stock, and SKU to dimensions, tax class, shipping
+class, visibility, purchase note, and menu order. Pick the columns you need
+via the **Columns** button — drag to reorder. Column choices are stored
+per-user, so each admin gets their own layout.
 
-Kolom **Product Name** menyertakan tautan ke halaman produk lengkap dan ID-nya,
-sehingga baris tetap mudah dikenali meski namanya sedang diubah. Nama tidak
-boleh dikosongkan.
+The **Product Name** column includes a link to the full product page and its
+ID, so rows stay recognizable even while the name is being edited. The name
+cannot be left empty.
 
-**Filter & Saved Views**
-Saring produk berdasarkan kata kunci (nama/SKU), kategori, tipe, status, status
-stok, dan featured. Kombinasi filter yang sering dipakai bisa disimpan sebagai
-**View** dan dipanggil lagi dengan satu klik.
+**Filters & Saved Views**
+Filter products by keyword (name/SKU), category, type, status, stock status,
+and featured. Frequently-used filter combinations can be saved as **Views**
+and recalled with one click.
 
 **Quick Apply**
-Ubah harga banyak produk sekaligus dengan operasi relatif: naikkan 10%, turunkan
-Rp 5.000, atau set ke nilai tetap. Untuk perubahan yang lebih kompleks, tersedia
-**Advanced Bulk Edit**.
+Change prices across many products at once with relative operations: raise by
+10%, lower by a fixed amount, or set to a fixed value. For more complex
+changes, **Advanced Bulk Edit** is available.
 
-**Bulk action**
-Duplicate, pindahkan ke trash, atau hapus permanen produk terpilih.
+**Bulk actions**
+Duplicate, move to trash, or permanently delete selected products.
 
 **Quick Add**
-Tambah produk baru langsung dari halaman ini tanpa pindah halaman.
+Add a new product directly from this page without navigating away.
 
 **New Category**
-Buat kategori produk baru dari dalam editor — tidak perlu buka halaman taxonomy.
+Create a new product category from inside the editor — no need to open the
+taxonomy page.
 
-**Export CSV**
-Ekspor produk terpilih ke CSV (12 kolom: ID, nama, SKU, harga, stok, status,
-tipe, kategori, tag, berat). Nilai yang diawali `=`, `+`, `-`, atau `@` diberi
-prefix kutip otomatis supaya tidak dieksekusi sebagai formula saat file dibuka
-di Excel atau Google Sheets.
+**CSV Export**
+Export selected products to CSV (12 columns: ID, name, SKU, price, stock,
+status, type, categories, tags, weight). Values starting with `=`, `+`, `-`,
+or `@` are automatically prefixed with a quote so they are not executed as
+formulas when opened in Excel or Google Sheets.
 
-## Kebutuhan Sistem
+## Requirements
 
-| Komponen | Minimum |
+| Component | Minimum |
 |---|---|
 | PHP | 8.3 |
-| WooCommerce | Wajib aktif — plugin tidak berjalan tanpanya |
-| Hak akses | `manage_woocommerce` (Administrator & Shop Manager) |
+| WooCommerce | Must be active — the plugin will not run without it |
+| Capability | `manage_woocommerce` (Administrator & Shop Manager) |
 
-Kompatibel dengan **HPOS** (High-Performance Order Storage).
+Compatible with **HPOS** (High-Performance Order Storage).
 
-## Instalasi
+## Installation
 
-1. Salin folder `bulk-product-editor-for-woocommerce` ke `wp-content/plugins/`.
-2. Aktifkan lewat **Plugins** di admin WordPress.
-3. Buka **WooCommerce → Bulk Editor**.
+1. Copy the `bulk-product-editor-for-woocommerce` folder into `wp-content/plugins/`.
+2. Activate via **Plugins** in the WordPress admin.
+3. Open **WooCommerce → Bulk Editor**.
 
-Tidak ada langkah build. Tidak ada dependency Composer atau npm — plugin
-berjalan apa adanya.
+There is no build step. No Composer or npm dependencies — the plugin runs as-is.
 
-## Cara Pakai
+## Usage
 
-1. Buka **WooCommerce → Bulk Editor**. Tabel langsung tampil berisi 50 produk
-   terbaru.
-2. Atur filter bila perlu, klik **Apply Filters**.
-3. Klik sel untuk mengedit. Sel yang berubah akan ditandai.
-4. Klik **Save All** atau tekan **Ctrl+S**.
+1. Open **WooCommerce → Bulk Editor**. The table loads immediately with the
+   50 most recent products.
+2. Set filters if needed, then click **Apply Filters**.
+3. Click a cell to edit. Changed cells are highlighted.
+4. Click **Save All** or press **Ctrl+S**.
 
-Untuk perubahan massal seperti diskon serentak, pakai panel **Quick Apply** di
-atas tabel — pilih operasi, isi nilai, terapkan ke produk terpilih.
+For bulk changes such as a store-wide discount, use the **Quick Apply** panel
+above the table — pick an operation, enter a value, apply to the selected
+products.
 
-### Catatan penting
+### Important notes
 
-- **Mengisi Stock Qty otomatis mengaktifkan "Manage Stock"** pada produk
-  tersebut. WooCommerce mengabaikan angka stok kalau manajemen stok mati, jadi
-  plugin menyalakannya untuk kamu.
-- **Sale price** divalidasi terhadap regular price.
-- **Produk variable**: yang diedit di tabel ini adalah data produk induk.
-  Harga dan stok per-variasi tetap diatur lewat halaman produk.
-- Maksimal **100 produk per halaman**. Batas ini disengaja — lebih dari itu,
-  browser mulai berat saat merender tabel dengan banyak kolom.
+- **Entering a Stock Qty automatically enables "Manage Stock"** on that
+  product. WooCommerce ignores the stock number when stock management is off,
+  so the plugin turns it on for you.
+- **Sale price** is validated against the regular price.
+- **Variable products**: the table edits the parent product's data.
+  Per-variation price and stock are still managed from the product page.
+- Maximum **100 products per page**. This limit is deliberate — beyond it the
+  browser starts struggling to render a table with many columns.
 
-## Struktur Kode
+## Code Structure
 
 ```
 bulk-product-editor-for-woocommerce/
-├── bulk-product-editor-for-woocommerce.php    1349 baris  — seluruh logika PHP dalam satu class
-├── uninstall.php           51 baris  — bersihkan preferensi saat plugin dihapus
-├── views/admin-page.php   340 baris  — markup halaman admin
-├── assets/admin.js       2213 baris  — seluruh UI (jQuery)
-├── assets/admin.css       450 baris  — styling
-├── languages/                        — bulk-product-editor-for-woocommerce.pot, 156 string
-├── readme.txt                        — format WordPress.org
+├── bulk-product-editor-for-woocommerce.php    1349 lines — all PHP logic in one class
+├── uninstall.php           51 lines  — cleans up preferences when the plugin is deleted
+├── views/admin-page.php   340 lines  — admin page markup
+├── assets/admin.js       2213 lines  — the entire UI (jQuery)
+├── assets/admin.css       450 lines  — styling
+├── languages/                        — bulk-product-editor-for-woocommerce.pot, 156 strings
+├── readme.txt                        — WordPress.org format
 ├── LICENSE                           — GPL v2
 │
-├── docs/                             — arsitektur, keamanan, i18n, ADR
-├── build.php                         — membuat ZIP rilis (CLI saja)
-└── .distignore                       — apa yang tidak ikut ke paket rilis
+├── docs/                             — architecture, security, i18n, ADRs
+├── build.php                         — creates the release ZIP (CLI only)
+└── .distignore                       — what is excluded from the release package
 ```
 
-Delapan berkas pertama adalah plugin. Sisanya untuk pengembangan dan tidak
-ikut ke paket rilis.
+The first eight files are the plugin. The rest are for development and are
+not included in the release package.
 
-Detail arsitektur, alur data, dan aturan kontribusi ada di
-[`CLAUDE.md`](CLAUDE.md).
+Architecture, data flow, and contribution rules are documented in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/adr/`](docs/adr/).
 
-## Membuat Paket Rilis
+## Building a Release Package
 
 ```bash
 php -d extension=zip build.php
 ```
 
-Menghasilkan `../bulk-product-editor-for-woocommerce-build/<slug>.<versi>.zip` berisi 8
-berkas (253 KB) — hanya yang dibutuhkan agar plugin berjalan. Skrip menolak
-melanjutkan bila versi di header plugin tidak sama dengan `Stable tag` di
-`readme.txt`, bila ada berkas wajib yang hilang, atau bila ada berkas
-pengembangan yang ikut terbawa. Rinciannya di
+This produces `../bulk-product-editor-for-woocommerce-build/<slug>.<version>.zip`
+containing the 8 files (253 KB) the plugin needs to run. The script refuses to
+continue if the plugin header version does not match the `Stable tag` in
+`readme.txt`, if any required file is missing, or if any development file
+slips in. Details in
 [`docs/WORDPRESS-ORG.md`](docs/WORDPRESS-ORG.md#6b-membuat-paket-rilis).
 
-## Keamanan
+## Security
 
-Setiap endpoint AJAX memverifikasi nonce dan capability `manage_woocommerce`
-sebelum melakukan apa pun. Hapus dan trash memerlukan cek `delete_post`
-per-produk; pembuatan kategori memerlukan `manage_product_terms`. Semua
-perubahan produk ditulis lewat WooCommerce CRUD API, bukan `update_post_meta()`
-langsung, sehingga hook dan cache WooCommerce tetap konsisten.
+Every AJAX endpoint verifies a nonce and the `manage_woocommerce` capability
+before doing anything. Trash and delete require a per-product `delete_post`
+check; category creation requires `manage_product_terms`. All product changes
+are written through the WooCommerce CRUD API rather than direct
+`update_post_meta()` calls, so WooCommerce hooks and caches stay consistent.
 
-## Riwayat Pembersihan
+## License
 
-Folder ini dulu menyimpan 47 file backup manual berpola `*.bak-before-*` dan
-`assets/_css-backup/`. Karena tidak berekstensi `.php`, web server menyajikannya
-sebagai teks biasa — siapa pun yang menebak URL-nya bisa membaca seluruh source
-code.
-
-Pada 2026-07-30 file-file itu dipindahkan ke `C:\laragon\backup-wcbulk\` (di
-luar webroot) dan plugin ini mulai memakai git. `.gitignore` kini memblokir pola
-tersebut agar tidak terulang.
-
-## Lisensi
-
-GPL-2.0-or-later, mengikuti WordPress dan WooCommerce.
+GPL-2.0-or-later, following WordPress and WooCommerce.
